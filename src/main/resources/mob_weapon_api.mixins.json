@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "priority": 1000,
+  "package": "dev.xkmc.mob_weapon_api.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "mob_weapon_api.refmap.json",
+  "mixins": [
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "minVersion": "0.8"
+}
