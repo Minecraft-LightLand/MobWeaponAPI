@@ -11,6 +11,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.FireworkRocketEntity;
 import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -38,7 +39,7 @@ public class GeneralCrossbowBehavior extends SimpleCrossbowBehavior {
 				aim = shootProjectile(user, aim, hand, stack, ammo, rand[i], creative, velocity, inaccuracy, angle);
 			}
 		}
-		clearChargedProjectiles(stack);
+		CrossbowItem.clearChargedProjectiles(stack);
 	}
 
 	private static ProjectileWeaponUseContext.AimResult shootProjectile(
@@ -89,16 +90,6 @@ public class GeneralCrossbowBehavior extends SimpleCrossbowBehavior {
 	private static float getRandomShotPitch(boolean p_220026_, RandomSource p_220027_) {
 		float f = p_220026_ ? 0.63F : 0.43F;
 		return 1.0F / (p_220027_.nextFloat() * 0.5F + 1.8F) + f;
-	}
-
-	private static void clearChargedProjectiles(ItemStack stack) {
-		CompoundTag compoundtag = stack.getTag();
-		if (compoundtag != null) {
-			ListTag listtag = compoundtag.getList("ChargedProjectiles", 9);
-			listtag.clear();
-			compoundtag.put("ChargedProjectiles", listtag);
-		}
-
 	}
 
 }
