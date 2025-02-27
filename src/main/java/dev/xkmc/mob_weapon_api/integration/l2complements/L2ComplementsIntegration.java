@@ -9,17 +9,17 @@ public class L2ComplementsIntegration {
 	public static void init() {
 		WeaponRegistry.HOLD.register(LCItems.SONIC_SHOOTER.getId(),
 				e -> WeaponStatus.RANGED.of(e.is(LCItems.SONIC_SHOOTER.get())),
-				(golem, stack) -> new SonicShooterBehavior()
+				(golem, stack) -> new SonicShooterBehavior(), 10
 		);
 
 		WeaponRegistry.HOLD.register(LCItems.HELLFIRE_WAND.getId(),
 				e -> WeaponStatus.RANGED.of(e.is(LCItems.HELLFIRE_WAND.get())),
-				(golem, stack) -> new HellfireWandBehavior()
+				(golem, stack) -> new HellfireWandBehavior(), 10
 		);
 
 		WeaponRegistry.HOLD.register(LCItems.WINTERSTORM_WAND.getId(),
 				e -> WeaponStatus.RANGED.of(e.is(LCItems.WINTERSTORM_WAND.get())),
-				(golem, stack) -> new WinterstormWandBehavior()
+				(golem, stack) -> new WinterstormWandBehavior(), 10
 		);
 
 	}

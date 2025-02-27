@@ -2,8 +2,6 @@ package dev.xkmc.mob_weapon_api.example;
 
 import dev.xkmc.mob_weapon_api.api.projectile.CrossbowUseContext;
 import dev.xkmc.mob_weapon_api.api.projectile.ProjectileWeaponUseContext;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
@@ -14,7 +12,6 @@ import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,12 +20,13 @@ import java.util.List;
 public class GeneralCrossbowBehavior extends SimpleCrossbowBehavior {
 
 	@Override
-	public void performRangedAttack(CrossbowUseContext user, ItemStack stack, InteractionHand hand) {
-		performShooting(user, hand, stack, user.getCrossbowVelocity(getLoadedProjectile(stack)), user.getInitialInaccuracy());
+	public int performRangedAttack(CrossbowUseContext user, ItemStack stack, InteractionHand hand) {
+		performShooting(user, hand, stack, user.getCrossbowVelocity(getLoadedProjectile(user.user(), stack)), user.getInitialInaccuracy());
+		return 0;
 	}
 
 	protected void performShooting(CrossbowUseContext user, InteractionHand hand, ItemStack stack, float velocity, float inaccuracy) {
-		List<ItemStack> list = getLoadedProjectile(stack);
+		List<ItemStack> list = getLoadedProjectile(user.user(), stack);
 		float[] rand = getShotPitches(user.user().getRandom());
 		ProjectileWeaponUseContext.AimResult aim = null;
 		for (int i = 0; i < list.size(); ++i) {
@@ -75,7 +73,7 @@ public class GeneralCrossbowBehavior extends SimpleCrossbowBehavior {
 		ans.setCritArrow(true);
 		ans.setSoundEvent(SoundEvents.CROSSBOW_HIT);
 		ans.setShotFromCrossbow(true);
-		int i = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.PIERCING, bow);
+		int i = bow.getEnchantmentLevel(Enchantments.PIERCING);
 		if (i > 0) {
 			ans.setPierceLevel((byte) i);
 		}

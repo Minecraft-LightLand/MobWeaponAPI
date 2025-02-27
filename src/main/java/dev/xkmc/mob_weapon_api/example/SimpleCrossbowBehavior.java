@@ -24,7 +24,7 @@ public class SimpleCrossbowBehavior implements ICrossbowBehavior {
 	}
 
 	@Override
-	public List<ItemStack> getLoadedProjectile(ItemStack stack) {
+	public List<ItemStack> getLoadedProjectile(LivingEntity user, ItemStack stack) {
 		return CrossbowItem.getChargedProjectiles(stack);
 	}
 
@@ -34,8 +34,8 @@ public class SimpleCrossbowBehavior implements ICrossbowBehavior {
 	}
 
 	@Override
-	public boolean tryCharge(LivingEntity user, ItemStack stack) {
-		if (CrossbowItem.tryLoadProjectiles(user, stack)) {
+	public boolean tryCharge(ProjectileWeaponUser user, ItemStack stack) {
+		if (CrossbowItem.tryLoadProjectiles(user.user(), stack)) {
 			CrossbowItem.setCharged(stack, true);
 			return true;
 		}
@@ -43,9 +43,10 @@ public class SimpleCrossbowBehavior implements ICrossbowBehavior {
 	}
 
 	@Override
-	public void performRangedAttack(CrossbowUseContext user, ItemStack stack, InteractionHand hand) {
+	public int performRangedAttack(CrossbowUseContext user, ItemStack stack, InteractionHand hand) {
 		if (user.user() instanceof CrossbowAttackMob mob)
-			mob.performCrossbowAttack(user.user(), user.getCrossbowVelocity(getLoadedProjectile(stack)));
+			mob.performCrossbowAttack(user.user(), user.getCrossbowVelocity(getLoadedProjectile(user.user(), stack)));
+		return 0;
 	}
 
 }

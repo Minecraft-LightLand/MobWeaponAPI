@@ -10,7 +10,7 @@ public class TFIntegration {
 	public static void init() {
 		WeaponRegistry.BOW.register(TFItems.TRIPLE_BOW.getId(),
 				e -> WeaponStatus.RANGED.of(e.getItem() instanceof TripleBowItem),
-				(golem, stack) -> new TripleBowBehavior()
+				(golem, stack) -> new TripleBowBehavior(), 0
 		);
 	}
 

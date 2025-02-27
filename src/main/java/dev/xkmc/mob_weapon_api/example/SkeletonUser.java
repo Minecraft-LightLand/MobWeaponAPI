@@ -43,6 +43,11 @@ public record SkeletonUser(AbstractSkeleton mob, LivingEntity target) implements
 	}
 
 	@Override
+	public Vec3 viewVector() {
+		return target().getEyePosition().subtract(mob.getEyePosition()).normalize();
+	}
+
+	@Override
 	public AimResult aim(Vec3 arrowOrigin, float velocity, float gravity, float inaccuracy) {
 		double dx = target.getX() - mob.getX();
 		double dz = target.getZ() - mob.getZ();

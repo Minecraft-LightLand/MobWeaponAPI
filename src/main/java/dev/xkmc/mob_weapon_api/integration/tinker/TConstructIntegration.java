@@ -13,11 +13,11 @@ public class TConstructIntegration {
 	public static void init() {
 		WeaponRegistry.BOW.register(new ResourceLocation(TConstruct.MOD_ID, "bow"),
 				stack -> WeaponStatus.OFFENSIVE.of(stack.getItem() instanceof ModifiableBowItem && !ToolStack.from(stack).isBroken()),
-				(golem, stack) -> new TinkerBowBehavior()
+				(golem, stack) -> new TinkerBowBehavior(), 10
 		);
 		WeaponRegistry.CROSSBOW.register(new ResourceLocation(TConstruct.MOD_ID, "crossbow"),
 				stack -> WeaponStatus.OFFENSIVE.of(stack.getItem() instanceof ModifiableCrossbowItem && !ToolStack.from(stack).isBroken()),
-				(golem, stack) -> new TinkerCrossbowBehavior()
+				(golem, stack) -> new TinkerCrossbowBehavior(), 10
 		);
 	}
 

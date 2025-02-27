@@ -12,16 +12,16 @@ public interface ICrossbowBehavior {
 
 	void release(ItemStack stack);
 
-	boolean tryCharge(LivingEntity user, ItemStack stack);
+	boolean tryCharge(ProjectileWeaponUser user, ItemStack stack);
 
-	void performRangedAttack(CrossbowUseContext user, ItemStack stack, InteractionHand hand);
+	int performRangedAttack(CrossbowUseContext user, ItemStack stack, InteractionHand hand);
 
 	boolean hasProjectile(ProjectileWeaponUser user, ItemStack stack);
 
-	default boolean hasLoadedProjectile(ItemStack stack) {
-		return !getLoadedProjectile(stack).isEmpty();
+	default boolean hasLoadedProjectile(LivingEntity user, ItemStack stack) {
+		return !getLoadedProjectile(user, stack).isEmpty();
 	}
 
-	List<ItemStack> getLoadedProjectile(ItemStack stack);
+	List<ItemStack> getLoadedProjectile(LivingEntity user, ItemStack stack);
 
 }

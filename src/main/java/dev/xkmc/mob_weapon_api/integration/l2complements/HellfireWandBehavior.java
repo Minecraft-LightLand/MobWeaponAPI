@@ -1,6 +1,7 @@
 package dev.xkmc.mob_weapon_api.integration.l2complements;
 
 import dev.xkmc.l2complements.content.item.wand.HellfireWand;
+import dev.xkmc.mob_weapon_api.api.projectile.ProjectileWeaponUser;
 import dev.xkmc.mob_weapon_api.api.simple.IHoldWeaponBehavior;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
@@ -20,18 +21,23 @@ public class HellfireWandBehavior implements IHoldWeaponBehavior {
 	}
 
 	@Override
-	public int trigger(LivingEntity user, ItemStack stack, LivingEntity target, int time) {
-		if (user.level() instanceof ServerLevel sl) {
-			HellfireWand.trigger(user, sl, target.position(), time);
+	public int trigger(ProjectileWeaponUser user, ItemStack stack, LivingEntity target, int time) {
+		if (user.user().level() instanceof ServerLevel sl) {
+			int dmg = stack.getDamageValue();
+			if (user.bypassAllConsumption())
+				stack.setDamageValue(0);
+			HellfireWand.trigger(user.user(), sl, target.position(), time);
+			if (user.bypassAllConsumption())
+				stack.setDamageValue(dmg);
 		}
 		return 10;
 	}
 
 	@Override
-	public void tickUsing(LivingEntity user, ItemStack stack, int time) {
-		var target = user instanceof Mob mob ? mob.getTarget() : null;
+	public void tickUsing(ProjectileWeaponUser user, ItemStack stack, int time) {
+		var target = user.user() instanceof Mob mob ? mob.getTarget() : null;
 		if (target == null) return;
-		HellfireWand.renderRegionServer(user, target.position(), time);
+		HellfireWand.renderRegionServer(user.user(), target.position(), time);
 	}
 
 }

@@ -33,8 +33,8 @@ import java.util.List;
 public class TinkerCrossbowBehavior implements ICrossbowBehavior {
 
 	@Override
-	public int chargeTime(LivingEntity golem, ItemStack stack) {
-		return (int) Math.ceil(20 / ConditionalStatModifierHook.getModifiedStat(ToolStack.from(stack), golem, ToolStats.DRAW_SPEED));
+	public int chargeTime(LivingEntity user, ItemStack stack) {
+		return (int) Math.ceil(20 / ConditionalStatModifierHook.getModifiedStat(ToolStack.from(stack), user, ToolStats.DRAW_SPEED));
 	}
 
 	@Override
@@ -44,15 +44,16 @@ public class TinkerCrossbowBehavior implements ICrossbowBehavior {
 
 	// from ModifiableCrossbowItem.releaseUsing
 	@Override
-	public boolean tryCharge(LivingEntity golem, ItemStack stack) {
+	public boolean tryCharge(ProjectileWeaponUser user, ItemStack stack) {
 		if (!(stack.getItem() instanceof ModifiableCrossbowItem bow)) return false;
 		ToolStack tool = ToolStack.from(stack);
 		if (tool.isBroken()) return false;
 		ToolDataNBT data = tool.getPersistentData();
-		ItemStack ammo = GolemTinkerAmmoHook.findAmmo(tool, stack, golem, bow.getSupportedHeldProjectiles());
+		var e = user.user();
+		ItemStack ammo = GolemTinkerAmmoHook.findAmmo(tool, stack, e, bow.getSupportedHeldProjectiles());
 		if (!ammo.isEmpty()) {
-			golem.level().playSound(null, golem.getX(), golem.getY(), golem.getZ(), SoundEvents.CROSSBOW_LOADING_END, SoundSource.PLAYERS,
-					1.0F, 1.0F / (golem.level().getRandom().nextFloat() * 0.5F + 1.0F) + 0.2F);
+			e.level().playSound(null, e.getX(), e.getY(), e.getZ(), SoundEvents.CROSSBOW_LOADING_END, SoundSource.PLAYERS,
+					1.0F, 1.0F / (e.level().getRandom().nextFloat() * 0.5F + 1.0F) + 0.2F);
 			CompoundTag ammoNBT = ammo.save(new CompoundTag());
 			data.put(ModifiableCrossbowItem.KEY_CROSSBOW_AMMO, ammoNBT);
 			return true;
@@ -62,11 +63,11 @@ public class TinkerCrossbowBehavior implements ICrossbowBehavior {
 
 	// from ModifiableCrossbowItem.fireCrossbow
 	@Override
-	public void performRangedAttack(CrossbowUseContext strategy, ItemStack stack, InteractionHand hand) {
-		if (!(stack.getItem() instanceof ModifiableCrossbowItem)) return;
+	public int performRangedAttack(CrossbowUseContext strategy, ItemStack stack, InteractionHand hand) {
+		if (!(stack.getItem() instanceof ModifiableCrossbowItem)) return 0;
 		LivingEntity golem = strategy.user();
 		ToolStack tool = ToolStack.from(stack);
-		if (tool.isBroken()) return;
+		if (tool.isBroken()) return 0;
 		ToolDataNBT data = tool.getPersistentData();
 		int damage = 0;
 		ItemStack ammo = ItemStack.of(data.getCompound(ModifiableCrossbowItem.KEY_CROSSBOW_AMMO));
@@ -111,6 +112,7 @@ public class TinkerCrossbowBehavior implements ICrossbowBehavior {
 		tool.getPersistentData().remove(ModifiableCrossbowItem.KEY_CROSSBOW_AMMO);
 		if (!strategy.bypassAllConsumption())
 			ToolDamageUtil.damageAnimated(tool, damage, golem, hand);
+		return 0;
 	}
 
 	@Override
@@ -122,7 +124,7 @@ public class TinkerCrossbowBehavior implements ICrossbowBehavior {
 	}
 
 	@Override
-	public boolean hasLoadedProjectile(ItemStack stack) {
+	public boolean hasLoadedProjectile(LivingEntity user, ItemStack stack) {
 		if (!(stack.getItem() instanceof ModifiableCrossbowItem)) return false;
 		ToolStack tool = ToolStack.from(stack);
 		if (tool.isBroken()) return false;
@@ -131,7 +133,7 @@ public class TinkerCrossbowBehavior implements ICrossbowBehavior {
 	}
 
 	@Override
-	public List<ItemStack> getLoadedProjectile(ItemStack stack) {
+	public List<ItemStack> getLoadedProjectile(LivingEntity user, ItemStack stack) {
 		if (!(stack.getItem() instanceof ModifiableCrossbowItem)) return List.of();
 		ToolStack tool = ToolStack.from(stack);
 		if (tool.isBroken()) return List.of();

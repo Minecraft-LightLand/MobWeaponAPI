@@ -2,6 +2,7 @@ package dev.xkmc.mob_weapon_api.init;
 
 import com.github.L_Ender.cataclysm.Cataclysm;
 import com.mojang.logging.LogUtils;
+import com.tterrag.registrate.Registrate;
 import dev.xkmc.l2archery.init.L2Archery;
 import dev.xkmc.l2complements.init.L2Complements;
 import dev.xkmc.mob_weapon_api.integration.cataclysm.CataclysmIntegration;
@@ -26,8 +27,10 @@ public class MobWeaponAPI {
 
 	public static final String MODID = "mob_weapon_api";
 	public static final Logger LOGGER = LogUtils.getLogger();
+	public static final Registrate REGISTRATE = Registrate.create(MODID);
 
 	public MobWeaponAPI() {
+		if (ModList.get().isLoaded(Cataclysm.MODID)) CataclysmIntegration.register();
 	}
 
 	@SubscribeEvent

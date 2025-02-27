@@ -43,6 +43,11 @@ public record CompanionUser(Mob user, LivingEntity target) implements BowUseCont
 	}
 
 	@Override
+	public Vec3 viewVector() {
+		return target().getEyePosition().subtract(user.getEyePosition()).normalize();
+	}
+
+	@Override
 	public AimResult aim(Vec3 arrowOrigin, float velocity, float gravity, float inaccuracy) {
 		return ShootUtils.getShootVector(target, arrowOrigin, velocity, gravity, inaccuracy);
 	}

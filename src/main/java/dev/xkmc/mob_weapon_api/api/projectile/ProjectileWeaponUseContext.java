@@ -18,6 +18,11 @@ public interface ProjectileWeaponUseContext extends ProjectileWeaponUser {
 	}
 
 	/**
+	 * get view vector for no-gravity attack
+	 */
+	Vec3 viewVector();
+
+	/**
 	 * @return aiming result based on input parameters.
 	 */
 	AimResult aim(Vec3 arrowOrigin, float velocity, float gravity, float inaccuracy);

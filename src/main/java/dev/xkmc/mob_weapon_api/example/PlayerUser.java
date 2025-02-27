@@ -44,6 +44,11 @@ public record PlayerUser(Player player) implements BowUseContext {
 	}
 
 	@Override
+	public Vec3 viewVector() {
+		return player.getViewVector(0);
+	}
+
+	@Override
 	public AimResult aim(Vec3 arrowOrigin, float velocity, float gravity, float inaccuracy) {
 		return (e, a) -> e.shootFromRotation(player, player.getXRot(), player.getYRot() + a, 0, velocity, inaccuracy);
 	}

@@ -22,11 +22,11 @@ public class RangedBehaviorRegistry<T> {
 
 	public RangedBehaviorRegistry(ResourceLocation id, RangedStatusPredicate item, RangedBehaviorFactory<T> factory) {
 		this.id = id;
-		this.fallback = new RangedBehaviorEntry<>(item, factory);
+		this.fallback = new RangedBehaviorEntry<>(item, factory, 0);
 	}
 
-	public void register(ResourceLocation id, RangedStatusPredicate item, RangedBehaviorFactory<T> factory) {
-		MAP.put(id, new RangedBehaviorEntry<>(item, factory));
+	public void register(ResourceLocation id, RangedStatusPredicate item, RangedBehaviorFactory<T> factory, int priority) {
+		MAP.put(id, new RangedBehaviorEntry<>(item, factory, priority));
 	}
 
 	public boolean isValidItem(ItemStack stack) {
@@ -37,7 +37,7 @@ public class RangedBehaviorRegistry<T> {
 		for (var e : MAP.values()) {
 			var status = e.item().getProperties(stack);
 			if (status.isPresent())
-				return status;
+				return Optional.of(status.get().withPriority(e.priority));
 		}
 		return fallback == null ? Optional.empty() : fallback.item().getProperties(stack);
 	}
@@ -55,7 +55,8 @@ public class RangedBehaviorRegistry<T> {
 
 	private record RangedBehaviorEntry<T>(
 			RangedStatusPredicate item,
-			RangedBehaviorFactory<T> factory
+			RangedBehaviorFactory<T> factory,
+			int priority
 	) {
 
 	}

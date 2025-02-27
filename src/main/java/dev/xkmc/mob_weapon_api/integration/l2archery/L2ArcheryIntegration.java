@@ -11,7 +11,7 @@ public class L2ArcheryIntegration {
 	public static void init() {
 		WeaponRegistry.BOW.register(new ResourceLocation(L2Archery.MODID, "bow"),
 				e -> WeaponStatus.RANGED.of(e.getItem() instanceof GenericBowItem),
-				(golem, stack) -> new L2BowBehavior()
+				(golem, stack) -> new L2BowBehavior(), 10
 		);
 	}
 
