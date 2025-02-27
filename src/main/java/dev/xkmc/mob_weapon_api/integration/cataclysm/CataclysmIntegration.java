@@ -33,11 +33,11 @@ public class CataclysmIntegration {
 				(golem, stack) -> new WitherMissileBehavior(), 20
 		);
 		WeaponRegistry.INSTANT.register(ModItems.LASER_GATLING.getId(),
-				e -> WeaponStatus.MELEE.of(e.is(ModItems.LASER_GATLING.get())),
+				e -> WeaponStatus.RANGED.of(e.is(ModItems.LASER_GATLING.get())),
 				(golem, stack) -> new LaserGatlingBehavior(10), 10
 		);
 		WeaponRegistry.HOLD.register(ModItems.MEAT_SHREDDER.getId(),
-				e -> WeaponStatus.OFFENSIVE.of(e.is(ModItems.MEAT_SHREDDER.get())),
+				e -> WeaponStatus.MELEE.of(e.is(ModItems.MEAT_SHREDDER.get())),
 				(golem, stack) -> new MeatShredderBehavior(), 50
 		);
 	}
