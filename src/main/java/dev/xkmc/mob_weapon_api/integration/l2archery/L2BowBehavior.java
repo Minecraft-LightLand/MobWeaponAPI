@@ -7,7 +7,7 @@ import dev.xkmc.l2archery.content.item.GenericBowItem;
 import dev.xkmc.l2library.util.code.GenericItemStack;
 import dev.xkmc.mob_weapon_api.api.projectile.BowUseContext;
 import dev.xkmc.mob_weapon_api.api.projectile.ProjectileWeaponUser;
-import dev.xkmc.mob_weapon_api.example.SimpleBowBehavior;
+import dev.xkmc.mob_weapon_api.example.behavior.SimpleBowBehavior;
 import dev.xkmc.mob_weapon_api.util.ShootUtils;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;

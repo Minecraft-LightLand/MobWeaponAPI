@@ -1,4 +1,4 @@
-package dev.xkmc.mob_weapon_api.example;
+package dev.xkmc.mob_weapon_api.example.behavior;
 
 import dev.xkmc.mob_weapon_api.api.projectile.CrossbowUseContext;
 import dev.xkmc.mob_weapon_api.api.projectile.ProjectileWeaponUseContext;

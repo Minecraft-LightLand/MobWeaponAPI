@@ -1,56 +1,58 @@
-package dev.xkmc.mob_weapon_api.example;
+package dev.xkmc.mob_weapon_api.example.user;
 
 import dev.xkmc.mob_weapon_api.api.projectile.BowUseContext;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ArrowItem;
+import net.minecraft.world.entity.monster.AbstractSkeleton;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.function.Predicate;
 
-public record PlayerUser(Player player) implements BowUseContext {
+public record SkeletonUser(AbstractSkeleton mob, LivingEntity target) implements BowUseContext {
 
 	@Override
 	public LivingEntity user() {
-		return player;
+		return mob;
 	}
 
 	@Override
 	public ItemStack getPreferredProjectile(ItemStack weapon, Predicate<ItemStack> special, Predicate<ItemStack> general) {
-		ItemStack ans = player.getProjectile(weapon);
+		ItemStack ans = mob.getProjectile(weapon);
 		if (!special.test(ans)) return ItemStack.EMPTY;
 		return ans;
 	}
 
 	@Override
 	public boolean bypassAllConsumption() {
-		return player.getAbilities().instabuild;
+		return true;
 	}
 
 	@Override
 	public boolean hasInfiniteArrow(ItemStack weapon, ItemStack ammo) {
-		return ammo.getItem() instanceof ArrowItem arrow && arrow.isInfinite(ammo, weapon, player);
+		return true;
 	}
 
 	@Override
 	public float getInitialVelocityFactor() {
-		return 3;
+		return 1.6f;
 	}
 
 	@Override
 	public float getInitialInaccuracy() {
-		return 1;
+		return 14 - mob.level().getDifficulty().getId() * 4;
 	}
 
 	@Override
 	public Vec3 viewVector() {
-		return player.getViewVector(0);
+		return target().getEyePosition().subtract(mob.getEyePosition()).normalize();
 	}
 
 	@Override
 	public AimResult aim(Vec3 arrowOrigin, float velocity, float gravity, float inaccuracy) {
-		return (e, a) -> e.shootFromRotation(player, player.getXRot(), player.getYRot() + a, 0, velocity, inaccuracy);
+		double dx = target.getX() - mob.getX();
+		double dz = target.getZ() - mob.getZ();
+		double dy = target.getY(1 / 3d) - arrowOrigin.y() + Math.sqrt(dx * dx + dz * dz) * 0.2;
+		return (e, a) -> e.shoot(dx, dy, dz, velocity, inaccuracy);
 	}
 
 }

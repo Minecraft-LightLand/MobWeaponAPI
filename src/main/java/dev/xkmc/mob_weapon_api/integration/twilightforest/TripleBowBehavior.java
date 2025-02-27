@@ -1,7 +1,7 @@
 package dev.xkmc.mob_weapon_api.integration.twilightforest;
 
 import dev.xkmc.mob_weapon_api.api.projectile.BowUseContext;
-import dev.xkmc.mob_weapon_api.example.SimpleBowBehavior;
+import dev.xkmc.mob_weapon_api.example.behavior.SimpleBowBehavior;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;

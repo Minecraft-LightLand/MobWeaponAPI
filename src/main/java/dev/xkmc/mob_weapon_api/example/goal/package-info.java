@@ -1,7 +1,7 @@
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 
-package dev.xkmc.mob_weapon_api.example;
+package dev.xkmc.mob_weapon_api.example.goal;
 
 import net.minecraft.MethodsReturnNonnullByDefault;
 
