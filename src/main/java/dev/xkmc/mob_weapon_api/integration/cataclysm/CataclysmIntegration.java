@@ -40,6 +40,22 @@ public class CataclysmIntegration {
 				e -> WeaponStatus.MELEE.of(e.is(ModItems.MEAT_SHREDDER.get())),
 				(golem, stack) -> new MeatShredderBehavior(), 50
 		);
+		WeaponRegistry.INSTANT.register(ModItems.SOUL_RENDER.getId(),
+				e -> WeaponStatus.MELEE.of(e.is(ModItems.SOUL_RENDER.get())),
+				(golem, stack) -> new SoulRenderBehavior(), 50
+		);
+		WeaponRegistry.INSTANT.register(ModItems.ANCIENT_SPEAR.getId(),
+				e -> WeaponStatus.OFFENSIVE.of(e.is(ModItems.ANCIENT_SPEAR.get())),
+				(golem, stack) -> new AncientSpearBehavior(), 10
+		);
+		WeaponRegistry.HOLD.register(ModItems.GAUNTLET_OF_MAELSTROM.getId(),
+				e -> WeaponStatus.OFFENSIVE.of(e.is(ModItems.GAUNTLET_OF_MAELSTROM.get())),
+				(golem, stack) -> new GauntletOfMaelstromBehavior(), 100
+		);
+		WeaponRegistry.INSTANT.register(ModItems.VOID_FORGE.getId(),
+				e -> WeaponStatus.MELEE.of(e.is(ModItems.VOID_FORGE.get())),
+				(golem, stack) -> new VoidForgeBehavior(), 70
+		);
 	}
 
 }

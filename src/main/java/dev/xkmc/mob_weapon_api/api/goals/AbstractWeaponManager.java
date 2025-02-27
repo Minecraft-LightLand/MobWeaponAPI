@@ -89,10 +89,11 @@ public class AbstractWeaponManager<T extends Mob & IWeaponHolder> {
 				return false;
 			}
 			if (!mainGoal.mayActivate()) {
-				return true;
+				if (!mainGoal.isMelee())
+					return true;
 			}
 			if (offGoal != null) {
-				if (offGoal.priority() > mainGoal.priority() && offGoal.mayActivate()) {
+				if (offGoal.priority() > mainGoal.priority()) {
 					if (offGoal.isWithinRange(target, 0))
 						return true;
 				}
@@ -109,7 +110,7 @@ public class AbstractWeaponManager<T extends Mob & IWeaponHolder> {
 				if (!mainGoal.isWithinRange(target, 4)) {
 					return true;
 				}
-				if (offGoal.priority() < mainGoal.priority() && mainGoal.mayActivate()) {
+				if (offGoal.priority() < mainGoal.priority()) {
 					return false;
 				}
 			}
@@ -130,7 +131,7 @@ public class AbstractWeaponManager<T extends Mob & IWeaponHolder> {
 		}
 
 		public int priority() {
-			return status().priority();
+			return mayActivate() ? status().priority() : -100;
 		}
 
 		public boolean isMelee() {
