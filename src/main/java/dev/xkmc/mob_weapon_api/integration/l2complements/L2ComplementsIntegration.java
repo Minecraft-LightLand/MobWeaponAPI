@@ -18,8 +18,8 @@ public class L2ComplementsIntegration {
 		);
 
 		WeaponRegistry.HOLD.register(LCItems.WINTERSTORM_WAND.getId(),
-				e -> WeaponStatus.RANGED.of(e.is(LCItems.WINTERSTORM_WAND.get())),
-				(golem, stack) -> new WinterstormWandBehavior(), 10
+				e -> WeaponStatus.MELEE.of(e.is(LCItems.WINTERSTORM_WAND.get())),
+				(golem, stack) -> new WinterstormWandBehavior(), 50
 		);
 
 	}

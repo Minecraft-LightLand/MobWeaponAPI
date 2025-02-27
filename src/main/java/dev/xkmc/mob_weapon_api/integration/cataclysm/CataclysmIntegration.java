@@ -38,7 +38,7 @@ public class CataclysmIntegration {
 		);
 		WeaponRegistry.HOLD.register(ModItems.MEAT_SHREDDER.getId(),
 				e -> WeaponStatus.OFFENSIVE.of(e.is(ModItems.MEAT_SHREDDER.get())),
-				(golem, stack) -> new MeatShredderBehavior(), 20
+				(golem, stack) -> new MeatShredderBehavior(), 50
 		);
 	}
 
