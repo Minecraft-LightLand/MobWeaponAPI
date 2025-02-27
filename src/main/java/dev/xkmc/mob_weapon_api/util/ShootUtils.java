@@ -16,7 +16,6 @@ import java.util.HashSet;
 public class ShootUtils {
 
 
-
 	private static final HashSet<Class<?>> BLACKLIST = new HashSet<>();
 
 	@SuppressWarnings("ConstantConditions")
