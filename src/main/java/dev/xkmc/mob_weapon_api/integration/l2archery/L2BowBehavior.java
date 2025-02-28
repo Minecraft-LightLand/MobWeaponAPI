@@ -43,10 +43,10 @@ public class L2BowBehavior extends SimpleBowBehavior {
 		BowFeatureController.startUsing(user.user(), new GenericItemStack<>(bow, stack));
 	}
 
-	public void shootArrow(BowUseContext ctx, float power, ItemStack stack, InteractionHand hand) {
-		if (!(stack.getItem() instanceof GenericBowItem bow)) return;
+	public int shootArrow(BowUseContext ctx, float power, ItemStack stack, InteractionHand hand) {
+		if (!(stack.getItem() instanceof GenericBowItem bow)) return 20;
 		ItemStack arrowStack = ctx.getPreferredProjectile(stack, bow.getSupportedHeldProjectiles(), bow.getAllSupportedProjectiles());
-		if (arrowStack.isEmpty()) return;
+		if (arrowStack.isEmpty()) return 20;
 		AbstractArrow proj = bow.customArrow(ctx.createArrow(arrowStack, power));
 		boolean infinite = ShootUtils.arrowIsInfinite(arrowStack, stack);
 		float speed = ctx.getInitialVelocityFactor();
@@ -68,6 +68,7 @@ public class L2BowBehavior extends SimpleBowBehavior {
 		ctx.user().playSound(SoundEvents.ARROW_SHOOT, 1.0F, 1.0F / (ctx.user().getRandom().nextFloat() * 0.4F + 0.8F));
 		ctx.user().level().addFreshEntity(proj);
 		stack.hurtAndBreak(1, ctx.user(), e -> e.broadcastBreakEvent(hand));
+		return 10;
 	}
 
 }

@@ -9,6 +9,8 @@ import com.github.L_Ender.cataclysm.init.ModParticle;
 import com.github.L_Ender.cataclysm.init.ModSounds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -16,6 +18,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.Level;
@@ -26,6 +29,8 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 public class CataclysmProxy {
 
@@ -166,6 +171,16 @@ public class CataclysmProxy {
 	}
 
 
+	public static int infernalForge(LivingEntity user, LivingEntity target) {
+		try {
+			return Helper.infernal(user, target, 4);
+		} catch (Throwable e) {
+			LOGGER.throwing(e);
+		}
+		return 20;
+	}
+
+
 	public record ProjectileData(Projectile proj, float speed, float gravity, int cooldown) {
 
 	}
@@ -187,12 +202,9 @@ public class CataclysmProxy {
 					double spawnY = player.getY() + 0.3;
 					double spawnZ = player.getZ() + zOffset;
 					int d3 = delay * (i + 1);
-					double deltaX = level.getRandom().nextGaussian() * 0.007;
-					double deltaY = level.getRandom().nextGaussian() * 0.007;
-					double deltaZ = level.getRandom().nextGaussian() * 0.007;
 
 					level.sendParticles(ModParticle.PHANTOM_WING_FLAME.get(), spawnX, spawnY, spawnZ,
-							1, deltaX, deltaY, deltaZ, new Vec3(deltaX, deltaY, deltaZ).length());
+							1, 0, 0, 0, 0.007);
 
 					spawnHalberd(spawnX, spawnZ, player.getY() - 5.0, player.getY() + 3.0, currentAngle, d3, level, player);
 				}
@@ -291,6 +303,34 @@ public class CataclysmProxy {
 				return true;
 			} else {
 				return false;
+			}
+		}
+
+		private static int infernal(LivingEntity user, LivingEntity target, double radius) {
+			Level level = user.level();
+			ScreenShake_Entity.ScreenShake(level, target.position(), 30.0F, 0.1F, 0, 30);
+			level.playSound(null, user.getX(), user.getY(), user.getZ(), SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS,
+					1.5F, 1.0F / (user.getRandom().nextFloat() * 0.4F + 0.8F));
+			List<Entity> list = level.getEntities(user, target.getBoundingBox().inflate(radius, radius, radius));
+			for (Entity entity : list) {
+				if (entity instanceof LivingEntity le && !le.isAlliedTo(user) && !user.isAlliedTo(le)) {
+					entity.hurt(level.damageSources().mobAttack(user), (float) user.getAttributeValue(Attributes.ATTACK_DAMAGE));
+					entity.setDeltaMovement(entity.getDeltaMovement().multiply(0.0, 2.0, 0.0));
+				}
+			}
+			infernalForgeParticles((ServerLevel) level, user, radius);
+			return CMConfig.InfernalForgeCooldown;
+		}
+
+		private static void infernalForgeParticles(ServerLevel level, LivingEntity entity, double radius) {
+			BlockState block = level.getBlockState(entity.blockPosition().below());
+			double n = radius * 4.0;
+			for (double i = 0.0; i < 80.0; ++i) {
+				double d0 = entity.getX() + radius * (double) Mth.sin((float) (i / n * 360.0));
+				double d1 = entity.getY() + 0.15;
+				double d2 = entity.getZ() + radius * (double) Mth.cos((float) (i / n * 360.0));
+				level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, block), d0, d1, d2, 1,
+						0, 0, 0, 0.2);
 			}
 		}
 

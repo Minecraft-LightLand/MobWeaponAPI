@@ -22,8 +22,4 @@ public class MeatShredderBehavior implements IHoldWeaponBehavior {
 		return 1;
 	}
 
-	@Override
-	public void tickUsing(ProjectileWeaponUser user, ItemStack stack, int time) {
-	}
-
 }

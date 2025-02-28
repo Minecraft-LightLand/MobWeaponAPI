@@ -15,7 +15,7 @@ public interface IBowBehavior {
 
 	boolean hasProjectile(ProjectileWeaponUser user, ItemStack stack);
 
-	void shootArrow(BowUseContext user, float power, ItemStack stack, InteractionHand hand);
+	int shootArrow(BowUseContext user, float power, ItemStack stack, InteractionHand hand);
 
 	default int getPreferredPullTime(BowUseContext user, ItemStack stack, double distToTarget) {
 		return getStandardPullTime(user, stack);

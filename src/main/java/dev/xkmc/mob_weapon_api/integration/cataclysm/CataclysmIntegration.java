@@ -9,7 +9,8 @@ import net.minecraft.world.item.Items;
 
 public class CataclysmIntegration {
 
-	public static final ItemEntry<DummyProjectileWeapon> LASER_GATLING = DummyProjectileWeapon.create(e -> e.is(Items.REDSTONE));
+	public static final ItemEntry<DummyProjectileWeapon> LASER_GATLING =
+			DummyProjectileWeapon.create("laser_gatling", e -> e.is(Items.REDSTONE));
 
 	public static void register() {
 
@@ -34,7 +35,7 @@ public class CataclysmIntegration {
 		);
 		WeaponRegistry.INSTANT.register(ModItems.LASER_GATLING.getId(),
 				e -> WeaponStatus.RANGED.of(e.is(ModItems.LASER_GATLING.get())),
-				(golem, stack) -> new LaserGatlingBehavior(10), 10
+				(golem, stack) -> new LaserGatlingBehavior(), 10
 		);
 		WeaponRegistry.HOLD.register(ModItems.MEAT_SHREDDER.getId(),
 				e -> WeaponStatus.MELEE.of(e.is(ModItems.MEAT_SHREDDER.get())),
@@ -55,6 +56,10 @@ public class CataclysmIntegration {
 		WeaponRegistry.INSTANT.register(ModItems.VOID_FORGE.getId(),
 				e -> WeaponStatus.MELEE.of(e.is(ModItems.VOID_FORGE.get())),
 				(golem, stack) -> new VoidForgeBehavior(), 70
+		);
+		WeaponRegistry.INSTANT.register(ModItems.INFERNAL_FORGE.getId(),
+				e -> WeaponStatus.MELEE.of(e.is(ModItems.INFERNAL_FORGE.get())),
+				(golem, stack) -> new InfernalForgeBehavior(), 70
 		);
 	}
 

@@ -33,31 +33,35 @@ public class SmartBowAttackGoal<E extends Mob & IWeaponHolder & RangedAttackMob>
 		doMelee();
 		strafing();
 		LivingEntity target = mob.getTarget();
+		ItemStack stack = mob.getItemInHand(mob.getWeaponHand());
+		var weapon = WeaponRegistry.BOW.get(mob, stack);
+		if (weapon.isEmpty()) return;
 		if (mob.isUsingItem() && target != null) {
 			var user = mob.toUser();
 			double dist = mob.distanceTo(target);
 			if (seeTime < -60) {
 				mob.stopUsingItem();
 			} else if (seeTime > 0) {
-				ItemStack stack = mob.getUseItem();
-				var weapon = WeaponRegistry.BOW.get(mob, stack);
 				int i = mob.getTicksUsingItem();
-				if (weapon.isPresent()) {
-					int pullTime = weapon.get().getPreferredPullTime(user, stack, dist);
-					if (i >= pullTime) {
-						mob.performRangedAttack(target, weapon.get().getPowerForTime(user, stack, i));
-						mob.stopUsingItem();
-						attackTime = 10;
-					} else {
-						weapon.get().tickUsingBow(user, stack);
-					}
+				int pullTime = weapon.get().getPreferredPullTime(user, stack, dist);
+				if (i >= pullTime) {
+					mob.performRangedAttack(target, weapon.get().getPowerForTime(user, stack, i));
+					mob.stopUsingItem();
+				} else {
+					weapon.get().tickUsingBow(user, stack);
 				}
 			}
 		} else if (--attackTime <= 0 && seeTime >= -60) {
-			mob.startUsingItem(mob.getWeaponHand());
-			ItemStack stack = mob.getUseItem();
-			var weapon = WeaponRegistry.BOW.get(mob, stack);
 			var user = mob.toUser();
+			if (target != null) {
+				double dist = mob.distanceTo(target);
+				int pullTime = weapon.get().getPreferredPullTime(user, stack, dist);
+				if (pullTime <= 0) {
+					mob.performRangedAttack(target, 0);
+					return;
+				}
+			}
+			mob.startUsingItem(mob.getWeaponHand());
 			weapon.ifPresent(e -> e.startUsingBow(user, stack));
 
 		}
@@ -65,7 +69,9 @@ public class SmartBowAttackGoal<E extends Mob & IWeaponHolder & RangedAttackMob>
 
 	@Override
 	public void performRangedAttack(LivingEntity target, float power, ItemStack stack, InteractionHand hand) {
-		WeaponRegistry.BOW.get(mob, stack).ifPresent(e -> e.shootArrow(mob.toUser(), power, stack, hand));
+		var opt = WeaponRegistry.BOW.get(mob, stack);
+		if (opt.isEmpty()) return;
+		attackTime = opt.get().shootArrow(mob.toUser(), power, stack, hand);
 	}
 
 }

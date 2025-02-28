@@ -11,11 +11,11 @@ import net.minecraft.world.item.ItemStack;
 public class TripleBowBehavior extends SimpleBowBehavior {
 
 	@Override
-	public void shootArrow(BowUseContext ctx, float power, ItemStack stack, InteractionHand hand) {
+	public int shootArrow(BowUseContext ctx, float power, ItemStack stack, InteractionHand hand) {
 		var user = ctx.user();
 		ItemStack ammo = ctx.getPreferredProjectile(stack);
 		boolean infinite = ctx.hasInfiniteArrow(stack, ammo);
-		if (!infinite && ammo.isEmpty()) return;
+		if (!infinite && ammo.isEmpty()) return 20;
 		float vel = power * ctx.getInitialVelocityFactor();
 		var pos = user.getEyePosition().add(0, -0.1, 0);
 		var aim = ctx.aim(pos, vel, 0.05f, ctx.getInitialInaccuracy());
@@ -40,6 +40,7 @@ public class TripleBowBehavior extends SimpleBowBehavior {
 		if (!infinite) {
 			ammo.shrink(1);
 		}
+		return 10;
 	}
 
 }

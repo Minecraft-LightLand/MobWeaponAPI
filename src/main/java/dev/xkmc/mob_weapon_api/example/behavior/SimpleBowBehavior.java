@@ -27,10 +27,10 @@ public class SimpleBowBehavior implements IBowBehavior {
 		return !user.getPreferredProjectile(stack).isEmpty();
 	}
 
-	public void shootArrow(BowUseContext user, float power, ItemStack stack, InteractionHand hand) {
-		if (!(stack.getItem() instanceof BowItem bow)) return;
+	public int shootArrow(BowUseContext user, float power, ItemStack stack, InteractionHand hand) {
+		if (!(stack.getItem() instanceof BowItem bow)) return 20;
 		ItemStack arrowStack = user.getPreferredProjectile(stack);
-		if (arrowStack.isEmpty()) return;
+		if (arrowStack.isEmpty()) return 20;
 		AbstractArrow arrowEntity = bow.customArrow(user.createArrow(arrowStack, power));
 		boolean infinite = user.bypassAllConsumption() || user.hasInfiniteArrow(stack, arrowStack);
 		var prop = new ProjectileProperties(
@@ -51,6 +51,7 @@ public class SimpleBowBehavior implements IBowBehavior {
 		if (!user.bypassAllConsumption()) {
 			stack.hurtAndBreak(1, user.user(), e -> e.broadcastBreakEvent(hand));
 		}
+		return 10;
 	}
 
 }

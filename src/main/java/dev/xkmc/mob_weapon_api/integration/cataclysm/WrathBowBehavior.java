@@ -31,11 +31,11 @@ public class WrathBowBehavior implements IBowBehavior {
 	}
 
 	@Override
-	public void shootArrow(BowUseContext ctx, float power, ItemStack stack, InteractionHand hand) {
+	public int shootArrow(BowUseContext ctx, float power, ItemStack stack, InteractionHand hand) {
 		var user = ctx.user();
 		var level = user.level();
 		LivingEntity target = user instanceof Mob mob ? mob.getTarget() : null;
-		if (target == null) return;
+		if (target == null) return 20;
 		Vec3 diff = target.getEyePosition().subtract(user.getEyePosition()).normalize();
 		for (int j = -1; j <= 1; ++j) {
 			Vec3 rot = diff.yRot(j * 15 * Mth.DEG_TO_RAD);
@@ -46,6 +46,7 @@ public class WrathBowBehavior implements IBowBehavior {
 		}
 		level.playSound(null, user.getX(), user.getY(), user.getZ(), SoundEvents.ARROW_SHOOT, SoundSource.PLAYERS, 1.0F,
 				1.0F / (level.getRandom().nextFloat() * 0.4F + 1.2F) + 0.5F);
+		return 10;
 	}
 
 }

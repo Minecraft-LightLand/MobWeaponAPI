@@ -44,9 +44,10 @@ public class TinkerBowBehavior implements IBowBehavior {
 		return GolemTinkerAmmoHook.hasAmmo(tool, stack, user.user(), bow.getSupportedHeldProjectiles());
 	}
 
-	public void shootArrow(BowUseContext user, float dist, ItemStack stack, InteractionHand hand) {
-		if (!(stack.getItem() instanceof ModifiableBowItem bow)) return;
+	public int shootArrow(BowUseContext user, float dist, ItemStack stack, InteractionHand hand) {
+		if (!(stack.getItem() instanceof ModifiableBowItem bow)) return 20;
 		shoot(bow, stack, user);
+		return 10;
 	}
 
 	// from ModifiableBowItem.releaseUsing

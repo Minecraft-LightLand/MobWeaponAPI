@@ -9,8 +9,8 @@ import java.util.function.Predicate;
 
 public class DummyProjectileWeapon extends ProjectileWeaponItem {
 
-	public static ItemEntry<DummyProjectileWeapon> create(Predicate<ItemStack> pred) {
-		return MobWeaponAPI.REGISTRATE.item("dummy_furnace", p -> new DummyProjectileWeapon(p, pred))
+	public static ItemEntry<DummyProjectileWeapon> create(String id, Predicate<ItemStack> pred) {
+		return MobWeaponAPI.REGISTRATE.item(id, p -> new DummyProjectileWeapon(p, pred))
 				.model((ctx, pvd) -> pvd.withExistingParent("item/" + ctx.getName(), "block/air"))
 				.register();
 	}

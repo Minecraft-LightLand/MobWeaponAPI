@@ -15,12 +15,13 @@ public class VoidHowitzerBehavior implements IBowBehavior, IWeaponWithCD {
 	}
 
 	@Override
-	public void shootArrow(BowUseContext user, float power, ItemStack stack, InteractionHand hand) {
+	public int shootArrow(BowUseContext user, float power, ItemStack stack, InteractionHand hand) {
 		var proj = CataclysmProxy.shootVoid(user.user());
-		if (proj == null) return;
+		if (proj == null) return 20;
 		user.aim(proj.proj().position(), proj.speed(), proj.gravity(), user.getInitialInaccuracy()).shoot(proj.proj(), 0);
 		user.user().level().addFreshEntity(proj.proj());
 		setCD(user.user(), stack, proj.cooldown());
+		return 10;
 	}
 
 	@Override

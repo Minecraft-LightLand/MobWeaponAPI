@@ -30,13 +30,13 @@ public class CursedBowBehavior implements IBowBehavior {
 	}
 
 	@Override
-	public void shootArrow(BowUseContext user, float power, ItemStack stack, InteractionHand hand) {
+	public int shootArrow(BowUseContext user, float power, ItemStack stack, InteractionHand hand) {
 		var player = user.user();
 		var level = player.level();
 		ItemStack ammo = player.getProjectile(stack);
 		boolean infinite = user.hasInfiniteArrow(stack, ammo);
 		LivingEntity target = player instanceof Mob mob ? mob.getTarget() : null;
-		if (target == null) return;
+		if (target == null) return 20;
 		boolean homing = ammo.is(Items.ARROW);
 		float angle = ammo.is(Items.ARROW) ? 6F : 1.5F;
 		float vel = power * user.getInitialVelocityFactor();
@@ -61,6 +61,7 @@ public class CursedBowBehavior implements IBowBehavior {
 				1.0F / (level.getRandom().nextFloat() * 0.4F + 1.2F) + 0.5F);
 		if (!infinite)
 			ammo.shrink(1);
+		return 10;
 	}
 
 }
