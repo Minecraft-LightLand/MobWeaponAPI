@@ -10,7 +10,11 @@ public class PotatoCannonBehavior implements IBowBehavior {
 
 	@Override
 	public boolean hasProjectile(ProjectileWeaponUser user, ItemStack stack) {
-		return !user.getPreferredProjectile(stack).isEmpty();
+		try {
+			return !user.getPreferredProjectile(stack).isEmpty();
+		} catch (Throwable e) {
+			return false;
+		}
 	}
 
 	@Override
