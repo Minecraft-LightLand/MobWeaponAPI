@@ -70,7 +70,7 @@ public abstract class SmartRangedAttackGoal<E extends Mob & IWeaponHolder> exten
 		if (melee.canReachTarget(target)) {
 			this.mob.swing(InteractionHand.MAIN_HAND);
 			this.mob.doHurtTarget(target);
-			meleeTime = melee.adjustedTickDelay(20);
+			meleeTime = melee.getMeleeInterval();
 		}
 	}
 

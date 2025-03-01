@@ -11,6 +11,6 @@ public interface IMeleeGoal {
 
 	boolean canReachTarget(LivingEntity target);
 
-	int adjustedTickDelay(int i);
+	int getMeleeInterval();
 
 }
