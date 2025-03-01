@@ -43,7 +43,7 @@ public class CursedBowBehavior implements IBowBehavior {
 		var pos = player.getEyePosition().add(0, -0.1, 0);
 		var aim = user.aim(pos, vel, 0.05f, user.getInitialInaccuracy());
 		for (int j = -1; j <= 1; ++j) {
-			var arrow = user.createArrow(ammo, vel);
+			var arrow = user.createArrow(ammo, vel, stack);
 			if (homing) {
 				var ghost = CataclysmProxy.createGhostArrow(level, player, target);
 				if (ghost != null) arrow = ghost;

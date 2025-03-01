@@ -13,8 +13,8 @@ public interface ProjectileWeaponUseContext extends ProjectileWeaponUser {
 	/**
 	 * Create default arrows for respective arrow stack, before modified by bow.
 	 */
-	default AbstractArrow createArrow(ItemStack ammo, float velocity) {
-		return ProjectileUtil.getMobArrow(user(), ammo, velocity);
+	default AbstractArrow createArrow(ItemStack ammo, float velocity, ItemStack weapon) {
+		return ProjectileUtil.getMobArrow(user(), ammo, velocity, weapon);
 	}
 
 	/**

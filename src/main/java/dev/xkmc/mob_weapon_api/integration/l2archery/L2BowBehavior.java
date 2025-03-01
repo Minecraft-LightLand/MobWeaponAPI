@@ -47,7 +47,7 @@ public class L2BowBehavior extends SimpleBowBehavior {
 		if (!(stack.getItem() instanceof GenericBowItem bow)) return 20;
 		ItemStack arrowStack = ctx.getPreferredProjectile(stack, bow.getSupportedHeldProjectiles(), bow.getAllSupportedProjectiles());
 		if (arrowStack.isEmpty()) return 20;
-		AbstractArrow proj = bow.customArrow(ctx.createArrow(arrowStack, power));
+		AbstractArrow proj = bow.customArrow(ctx.createArrow(arrowStack, power, stack), arrowStack, stack);
 		boolean infinite = ShootUtils.arrowIsInfinite(arrowStack, stack);
 		float speed = ctx.getInitialVelocityFactor();
 		float gravity = 0.05f;

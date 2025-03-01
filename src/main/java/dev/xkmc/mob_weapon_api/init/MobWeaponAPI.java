@@ -10,21 +10,20 @@ import dev.xkmc.mob_weapon_api.integration.cataclysm.CataclysmIntegration;
 import dev.xkmc.mob_weapon_api.integration.create.CreateIntegration;
 import dev.xkmc.mob_weapon_api.integration.l2archery.L2ArcheryIntegration;
 import dev.xkmc.mob_weapon_api.integration.l2complements.L2ComplementsIntegration;
-import dev.xkmc.mob_weapon_api.integration.tinker.TConstructIntegration;
 import dev.xkmc.mob_weapon_api.integration.twilightforest.TFIntegration;
 import dev.xkmc.mob_weapon_api.registry.WeaponRegistry;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.data.event.GatherDataEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModList;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.neoforge.data.event.GatherDataEvent;
 import org.slf4j.Logger;
-import slimeknights.tconstruct.TConstruct;
 import twilightforest.TwilightForestMod;
 
 @Mod(MobWeaponAPI.MODID)
-@Mod.EventBusSubscriber(modid = MobWeaponAPI.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = MobWeaponAPI.MODID, bus = EventBusSubscriber.Bus.MOD)
 public class MobWeaponAPI {
 
 	public static final String MODID = "mob_weapon_api";
@@ -42,7 +41,7 @@ public class MobWeaponAPI {
 			WeaponRegistry.init();
 			if (ModList.get().isLoaded(L2Complements.MODID)) L2ComplementsIntegration.init();
 			if (ModList.get().isLoaded(L2Archery.MODID)) L2ArcheryIntegration.init();
-			if (ModList.get().isLoaded(TConstruct.MOD_ID)) TConstructIntegration.init();
+			//TODO if (ModList.get().isLoaded(TConstruct.MOD_ID)) TConstructIntegration.init();
 			if (ModList.get().isLoaded(Cataclysm.MODID)) CataclysmIntegration.init();
 			if (ModList.get().isLoaded(TwilightForestMod.ID)) TFIntegration.init();
 			if (ModList.get().isLoaded(Create.ID)) CreateIntegration.init();
@@ -54,7 +53,7 @@ public class MobWeaponAPI {
 	}
 
 	public static ResourceLocation loc(String id) {
-		return new ResourceLocation(MODID, id);
+		return ResourceLocation.fromNamespaceAndPath(MODID, id);
 	}
 
 }

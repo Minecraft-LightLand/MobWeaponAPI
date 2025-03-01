@@ -1,5 +1,6 @@
 package dev.xkmc.mob_weapon_api.example.behavior;
 
+import dev.xkmc.l2core.init.reg.ench.EnchHelper;
 import dev.xkmc.mob_weapon_api.api.projectile.CrossbowUseContext;
 import dev.xkmc.mob_weapon_api.api.projectile.ProjectileWeaponUseContext;
 import net.minecraft.sounds.SoundEvents;
@@ -69,11 +70,11 @@ public class GeneralCrossbowBehavior extends SimpleCrossbowBehavior {
 	}
 
 	private static AbstractArrow getArrow(CrossbowUseContext user, ItemStack bow, ItemStack ammo, float velocity) {
-		var ans = user.createArrow(ammo, velocity);
+		var ans = user.createArrow(ammo, velocity, bow);
 		ans.setCritArrow(true);
 		ans.setSoundEvent(SoundEvents.CROSSBOW_HIT);
 		ans.setShotFromCrossbow(true);
-		int i = bow.getEnchantmentLevel(Enchantments.PIERCING);
+		int i = EnchHelper.getLv(bow, Enchantments.PIERCING);
 		if (i > 0) {
 			ans.setPierceLevel((byte) i);
 		}

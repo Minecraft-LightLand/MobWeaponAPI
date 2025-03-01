@@ -20,7 +20,7 @@ public class TripleBowBehavior extends SimpleBowBehavior {
 		var pos = user.getEyePosition().add(0, -0.1, 0);
 		var aim = ctx.aim(pos, vel, 0.05f, ctx.getInitialInaccuracy());
 		for (int j = -1; j < 2; j++) {
-			AbstractArrow e = ctx.createArrow(ammo, vel);
+			AbstractArrow e = ctx.createArrow(ammo, vel, stack);
 			aim.shoot(e, 0);
 			e.setDeltaMovement(e.getDeltaMovement().add(0.0, 0.15 * (double) j, 0.0));
 			if (j != 0) {

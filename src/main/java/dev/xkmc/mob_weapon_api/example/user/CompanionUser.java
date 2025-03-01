@@ -1,5 +1,6 @@
 package dev.xkmc.mob_weapon_api.example.user;
 
+import dev.xkmc.l2core.init.reg.ench.EnchHelper;
 import dev.xkmc.mob_weapon_api.api.projectile.BowUseContext;
 import dev.xkmc.mob_weapon_api.util.ShootUtils;
 import net.minecraft.world.entity.LivingEntity;
@@ -29,7 +30,7 @@ public record CompanionUser(Mob user, LivingEntity target) implements BowUseCont
 	public boolean hasInfiniteArrow(ItemStack weapon, ItemStack ammo) {
 		if (ShootUtils.arrowIsInfinite(ammo, weapon)) return true;
 		if (ammo.getItem().getClass() != ArrowItem.class) return false;
-		return weapon.getEnchantmentLevel(Enchantments.INFINITY_ARROWS) > 0;
+		return EnchHelper.getLv(weapon, Enchantments.INFINITY) > 0;
 	}
 
 	@Override

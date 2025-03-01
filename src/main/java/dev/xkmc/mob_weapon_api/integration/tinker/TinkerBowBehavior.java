@@ -72,7 +72,7 @@ public class TinkerBowBehavior implements IBowBehavior {
 		var consumer = strategy.aim(origin, velocity, 0.05f, inaccuracy);
 
 		for (int i = 0; i < ammo.getCount(); ++i) {
-			AbstractArrow arrow = arrowItem.createArrow(level, ammo, user);
+			AbstractArrow arrow = arrowItem.createArrow(level, ammo, user, bowStack);
 			float angle = startAngle + (float) (10 * i);
 			consumer.shoot(arrow, angle);
 			arrow.setCritArrow(true);

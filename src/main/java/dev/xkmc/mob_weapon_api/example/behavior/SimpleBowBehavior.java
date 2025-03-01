@@ -31,7 +31,7 @@ public class SimpleBowBehavior implements IBowBehavior {
 		if (!(stack.getItem() instanceof BowItem bow)) return 20;
 		ItemStack arrowStack = user.getPreferredProjectile(stack);
 		if (arrowStack.isEmpty()) return 20;
-		AbstractArrow arrowEntity = bow.customArrow(user.createArrow(arrowStack, power));
+		AbstractArrow arrowEntity = bow.customArrow(user.createArrow(arrowStack, power, stack), arrowStack, stack);
 		boolean infinite = user.bypassAllConsumption() || user.hasInfiniteArrow(stack, arrowStack);
 		var prop = new ProjectileProperties(
 				power * user.getInitialVelocityFactor(),

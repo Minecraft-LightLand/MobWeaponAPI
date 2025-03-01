@@ -87,7 +87,7 @@ public class TinkerCrossbowBehavior implements ICrossbowBehavior {
 				projectile = new FireworkRocketEntity(golem.level(), ammo, golem, pos.x, pos.y, pos.z, true);
 				damage += 3;
 			} else {
-				arrow = strategy.createArrow(ammo, velocity);
+				arrow = strategy.createArrow(ammo, velocity, stack);
 				projectile = arrow;
 				arrow.setCritArrow(true);
 				arrow.setSoundEvent(SoundEvents.CROSSBOW_HIT);

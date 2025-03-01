@@ -2,8 +2,11 @@ package dev.xkmc.mob_weapon_api.util;
 
 import com.tterrag.registrate.util.entry.ItemEntry;
 import dev.xkmc.mob_weapon_api.init.MobWeaponAPI;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ProjectileWeaponItem;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Predicate;
 
@@ -31,4 +34,10 @@ public class DummyProjectileWeapon extends ProjectileWeaponItem {
 	public int getDefaultProjectileRange() {
 		return 0;
 	}
+
+	@Override
+	protected void shootProjectile(LivingEntity livingEntity, Projectile projectile, int i, float v, float v1, float v2, @Nullable LivingEntity livingEntity1) {
+
+	}
+	
 }
