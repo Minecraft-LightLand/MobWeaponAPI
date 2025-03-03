@@ -3,6 +3,7 @@ package dev.xkmc.mob_weapon_api.integration.cataclysm;
 import dev.xkmc.mob_weapon_api.api.projectile.ProjectileWeaponUser;
 import dev.xkmc.mob_weapon_api.api.simple.RechargeableInstantBehavior;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 
@@ -21,7 +22,7 @@ public final class LaserGatlingBehavior extends RechargeableInstantBehavior {
 	protected void triggerImpl(ProjectileWeaponUser ctx, ItemStack stack, LivingEntity target) {
 		CataclysmProxy.shootLaserGatling(ctx.user(), target.getEyePosition().subtract(ctx.user().getEyePosition()).normalize());
 		if (!ctx.bypassAllConsumption())
-			stack.hurtAndBreak(1, ctx.user(), (e) -> e.broadcastBreakEvent(InteractionHand.MAIN_HAND));
+			stack.hurtAndBreak(1, ctx.user(), EquipmentSlot.MAINHAND);
 	}
 
 }

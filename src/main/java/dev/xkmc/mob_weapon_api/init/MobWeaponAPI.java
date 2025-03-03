@@ -6,6 +6,9 @@ import com.simibubi.create.Create;
 import com.tterrag.registrate.Registrate;
 import dev.xkmc.l2archery.init.L2Archery;
 import dev.xkmc.l2complements.init.L2Complements;
+import dev.xkmc.l2core.init.reg.simple.DCReg;
+import dev.xkmc.l2core.init.reg.simple.DCVal;
+import dev.xkmc.l2core.init.reg.simple.Reg;
 import dev.xkmc.mob_weapon_api.integration.cataclysm.CataclysmIntegration;
 import dev.xkmc.mob_weapon_api.integration.create.CreateIntegration;
 import dev.xkmc.mob_weapon_api.integration.l2archery.L2ArcheryIntegration;
@@ -29,6 +32,9 @@ public class MobWeaponAPI {
 	public static final String MODID = "mob_weapon_api";
 	public static final Logger LOGGER = LogUtils.getLogger();
 	public static final Registrate REGISTRATE = Registrate.create(MODID);
+	public static final Reg REG = new Reg(MODID);
+	public static final DCReg DC = DCReg.of(REG);
+	public static final DCVal<Long> TIMESTAMP = DC.longVal("timestamp");
 
 	public MobWeaponAPI() {
 		if (ModList.get().isLoaded(Cataclysm.MODID)) CataclysmIntegration.register();

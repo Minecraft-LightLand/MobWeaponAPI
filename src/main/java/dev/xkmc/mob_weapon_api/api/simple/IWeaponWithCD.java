@@ -7,16 +7,14 @@ import net.minecraft.world.item.ItemStack;
 
 public interface IWeaponWithCD {
 
-	String TIMESTAMP = MobWeaponAPI.MODID + "_WeaponCD";
-
 	default void setCD(LivingEntity user, ItemStack stack, int time) {
 		long next = user.level().getGameTime() + time;
-		stack.getOrCreateTag().putLong(TIMESTAMP, next);
+		MobWeaponAPI.TIMESTAMP.set(stack, next);
 	}
 
 	default boolean isValid(ProjectileWeaponUser user, ItemStack stack) {
 		long current = user.user().level().getGameTime();
-		return current >= stack.getOrCreateTag().getLong(TIMESTAMP);
+		return current >= MobWeaponAPI.TIMESTAMP.getOrDefault(stack, 0L);
 	}
 
 }

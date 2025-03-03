@@ -2,10 +2,12 @@ package dev.xkmc.mob_weapon_api.integration.twilightforest;
 
 import dev.xkmc.mob_weapon_api.api.projectile.ProjectileWeaponUser;
 import dev.xkmc.mob_weapon_api.api.simple.RechargeableInstantBehavior;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import twilightforest.entity.projectile.TwilightWandBolt;
+import twilightforest.util.TFItemStackUtils;
 
 public class TwilightWandBehavior extends RechargeableInstantBehavior {
 
@@ -28,7 +30,7 @@ public class TwilightWandBehavior extends RechargeableInstantBehavior {
 		proj.shoot(vec.x, vec.y, vec.z, 1.5f, 0);
 		level.addFreshEntity(proj);
 		if (!ctx.bypassAllConsumption()) {
-			stack.hurt(1, e.getRandom(), null);
+			TFItemStackUtils.hurtButDontBreak(stack, 1, (ServerLevel) level, e);
 		}
 	}
 

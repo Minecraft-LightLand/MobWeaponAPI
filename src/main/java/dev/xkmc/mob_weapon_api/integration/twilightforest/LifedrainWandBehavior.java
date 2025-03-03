@@ -2,6 +2,7 @@ package dev.xkmc.mob_weapon_api.integration.twilightforest;
 
 import dev.xkmc.mob_weapon_api.api.projectile.ProjectileWeaponUser;
 import dev.xkmc.mob_weapon_api.api.simple.RechargeableInstantBehavior;
+import net.minecraft.core.particles.ColorParticleOption;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
@@ -19,7 +20,8 @@ import net.minecraft.world.phys.Vec3;
 import twilightforest.data.tags.EntityTagGenerator;
 import twilightforest.init.TFDamageTypes;
 import twilightforest.init.TFSounds;
-import twilightforest.util.EntityUtil;
+import twilightforest.util.TFItemStackUtils;
+import twilightforest.util.entities.EntityUtil;
 
 public class LifedrainWandBehavior extends RechargeableInstantBehavior {
 
@@ -45,7 +47,7 @@ public class LifedrainWandBehavior extends RechargeableInstantBehavior {
 				user.heal(1.0F);
 			}
 			if (!ctx.bypassAllConsumption()) {
-				stack.hurt(1, level.getRandom(), null);
+				TFItemStackUtils.hurtButDontBreak(stack, 1, (ServerLevel) level, user);
 			}
 		}
 		if (target.getHealth() <= user.getHealth()) {
@@ -61,7 +63,7 @@ public class LifedrainWandBehavior extends RechargeableInstantBehavior {
 		if (target instanceof Mob mob) {
 			mob.spawnAnim();
 		}
-		target.playSound(TFSounds.SCEPTER_DRAIN.get(), 1.0F, user.getVoicePitch());
+		target.playSound(TFSounds.LIFE_SCEPTER_DRAIN.get(), 1.0F, user.getVoicePitch());
 		SoundEvent deathSound = EntityUtil.getDeathSound(target);
 		if (deathSound != null) {
 			level.playSound(null, target.blockPosition(), deathSound, SoundSource.HOSTILE, 1.0F, target.getVoicePitch());
@@ -83,8 +85,8 @@ public class LifedrainWandBehavior extends RechargeableInstantBehavior {
 		for (int i = 0; i < n; ++i) {
 			double trailFactor = i / (n - 1.0);
 			Vec3 pos = src.add(diff.scale(trailFactor));
-			level.sendParticles(ParticleTypes.ENTITY_EFFECT, pos.x, pos.y, pos.z,
-					0, 1, 0.5f, 0.5f, 1);
+			level.sendParticles(ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, 1, 0.5f, 0.5f),
+					pos.x, pos.y, pos.z, 1, 0, 0, 0, 0);
 		}
 	}
 

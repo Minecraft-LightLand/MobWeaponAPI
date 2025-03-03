@@ -5,6 +5,8 @@ import dev.xkmc.mob_weapon_api.example.behavior.SimpleBowBehavior;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.ItemStack;
 
@@ -33,7 +35,7 @@ public class TripleBowBehavior extends SimpleBowBehavior {
 			user.level().addFreshEntity(e);
 		}
 		if (!ctx.bypassAllConsumption()) {
-			stack.hurtAndBreak(1, user, (e) -> e.broadcastBreakEvent(user.getUsedItemHand()));
+			stack.hurtAndBreak(1, user, LivingEntity.getSlotForHand(hand));
 		}
 		user.level().playSound(null, user.getX(), user.getY(), user.getZ(), SoundEvents.ARROW_SHOOT, SoundSource.PLAYERS, 1.0F,
 				1.0F / (user.level().getRandom().nextFloat() * 0.4F + 1.2F) + 0.5F);

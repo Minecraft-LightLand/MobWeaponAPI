@@ -3,16 +3,19 @@ package dev.xkmc.mob_weapon_api.example.behavior;
 import dev.xkmc.l2core.init.reg.ench.EnchHelper;
 import dev.xkmc.mob_weapon_api.api.projectile.CrossbowUseContext;
 import dev.xkmc.mob_weapon_api.api.projectile.ProjectileWeaponUseContext;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.FireworkRocketEntity;
 import net.minecraft.world.entity.projectile.Projectile;
-import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import org.jetbrains.annotations.Nullable;
 
@@ -29,16 +32,23 @@ public class GeneralCrossbowBehavior extends SimpleCrossbowBehavior {
 	protected void performShooting(CrossbowUseContext user, InteractionHand hand, ItemStack stack, float velocity, float inaccuracy) {
 		List<ItemStack> list = getLoadedProjectile(user.user(), stack);
 		float[] rand = getShotPitches(user.user().getRandom());
+
+		float spread = EnchantmentHelper.processProjectileSpread((ServerLevel) user.user().level(), stack, user.user(), 0);
+		float step = list.size() == 1 ? 0f : 2f * spread / (list.size() - 1);
+		float start = (float) ((list.size() - 1) % 2) * step / 2f;
+		int sign = 1;
+
 		ProjectileWeaponUseContext.AimResult aim = null;
 		for (int i = 0; i < list.size(); ++i) {
+			float angle = start + sign * (i + 1) / 2f * step;
+			sign = -sign;
 			ItemStack ammo = list.get(i);
 			boolean creative = user.hasInfiniteArrow(stack, ammo);
 			if (!ammo.isEmpty()) {
-				float angle = i == 0 ? 0 : i == 1 ? -10 : 10;
 				aim = shootProjectile(user, aim, hand, stack, ammo, rand[i], creative, velocity, inaccuracy, angle);
 			}
 		}
-		CrossbowItem.clearChargedProjectiles(stack);
+		stack.remove(DataComponents.CHARGED_PROJECTILES);
 	}
 
 	private static ProjectileWeaponUseContext.AimResult shootProjectile(
@@ -62,7 +72,7 @@ public class GeneralCrossbowBehavior extends SimpleCrossbowBehavior {
 		aim.shoot(projectile, angle);
 		projectile.setDeltaMovement(projectile.getDeltaMovement().normalize().scale(velocity));
 		if (!ctx.bypassAllConsumption()) {
-			stack.hurtAndBreak(rocket ? 3 : 1, user, (e) -> e.broadcastBreakEvent(hand));
+			stack.hurtAndBreak(rocket ? 3 : 1, user, LivingEntity.getSlotForHand(hand));
 		}
 		level.addFreshEntity(projectile);
 		level.playSound(null, user.getX(), user.getY(), user.getZ(), SoundEvents.CROSSBOW_SHOOT, SoundSource.PLAYERS, 1.0F, rand);
@@ -73,11 +83,6 @@ public class GeneralCrossbowBehavior extends SimpleCrossbowBehavior {
 		var ans = user.createArrow(ammo, velocity, bow);
 		ans.setCritArrow(true);
 		ans.setSoundEvent(SoundEvents.CROSSBOW_HIT);
-		ans.setShotFromCrossbow(true);
-		int i = EnchHelper.getLv(bow, Enchantments.PIERCING);
-		if (i > 0) {
-			ans.setPierceLevel((byte) i);
-		}
 		return ans;
 	}
 

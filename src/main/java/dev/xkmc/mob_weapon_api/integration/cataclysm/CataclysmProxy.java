@@ -66,7 +66,7 @@ public class CataclysmProxy {
 	public static void shootLaserGatling(LivingEntity user, Vec3 vec3) {
 		try {
 			Level level = user.level();
-			Laser_Beam_Entity laser = new Laser_Beam_Entity(user, vec3.x, vec3.y, vec3.z, level, (float) CMConfig.Laserdamage);
+			Laser_Beam_Entity laser = new Laser_Beam_Entity(user, vec3, level, (float) CMConfig.Laserdamage);
 			float yRot = (float) (Mth.atan2(vec3.z, vec3.x) * Mth.RAD_TO_DEG) + 90;
 			float xRot = (float) (-(Mth.atan2(vec3.y, Math.sqrt(vec3.x * vec3.x + vec3.z * vec3.z)) * Mth.RAD_TO_DEG));
 			laser.setYRot(yRot);
@@ -100,7 +100,7 @@ public class CataclysmProxy {
 			double x = player.getX() + offset.x;
 			double z = player.getZ() + offset.y;
 			Wither_Missile_Entity rocket = new Wither_Missile_Entity(ModEntities.WITHER_MISSILE.get(),
-					player, x, player.getEyeY(), z, dir.x, dir.y, dir.z, (float) CMConfig.WASWMissileDamage, level);
+					player, x, player.getEyeY(), z, dir, (float) CMConfig.WASWMissileDamage, level);
 			level.addFreshEntity(rocket);
 			return CMConfig.WASWMissileCooldown;
 		} catch (Throwable e) {
