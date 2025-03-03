@@ -1,20 +1,15 @@
 package dev.xkmc.mob_weapon_api.integration.cataclysm;
 
 import dev.xkmc.mob_weapon_api.api.projectile.ProjectileWeaponUser;
-import dev.xkmc.mob_weapon_api.api.simple.IHoldWeaponBehavior;
+import dev.xkmc.mob_weapon_api.api.simple.IInfiniteHoldBehavior;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 
-public class MeatShredderBehavior implements IHoldWeaponBehavior {
+public class MeatShredderBehavior implements IInfiniteHoldBehavior {
 
 	@Override
 	public double range(LivingEntity user, ItemStack stack) {
 		return 2;
-	}
-
-	@Override
-	public int holdTime(LivingEntity user, ItemStack stack) {
-		return 10000;
 	}
 
 	@Override

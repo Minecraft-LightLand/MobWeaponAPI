@@ -41,21 +41,23 @@ public class SmartHoldRangedAttackGoal<E extends Mob & IWeaponHolder> extends Sm
 		var weapon = WeaponRegistry.HOLD.get(mob, stack);
 		if (weapon.isEmpty()) return;
 		LivingEntity target = mob.getTarget();
+		boolean invalidTarget = target == null || !target.isAlive();
+		boolean withInRange = !invalidTarget && mob.distanceTo(target) < weapon.get().range(mob, stack);
 		var user = mob.toUser();
-		if (mob.isUsingItem() && target != null) {
-			if (seeTime < -60) {
+		if (mob.isUsingItem()) {
+			boolean infiniteUse = weapon.get().infiniteUse(mob, stack);
+			if (seeTime < -60 || infiniteUse && !withInRange) {
 				mob.stopUsingItem();
-			} else if (seeTime > 0) {
+			} else if (seeTime > 0 && !invalidTarget) {
 				int i = mob.getTicksUsingItem();
-				if (i >= weapon.get().holdTime(mob, stack)) {
+				if (!infiniteUse && i >= weapon.get().holdTime(mob, stack)) {
 					attackTime = weapon.get().trigger(user, stack, target, i);
 					mob.stopUsingItem();
 				} else {
 					weapon.get().tickUsing(user, stack, i);
 				}
 			}
-		} else if (--attackTime <= 0 && seeTime >= -60 && target != null &&
-				mob.distanceTo(target) < weapon.get().range(mob, stack)) {
+		} else if (--attackTime <= 0 && seeTime >= -60 && withInRange) {
 			mob.startUsingItem(mob.getWeaponHand());
 		}
 	}

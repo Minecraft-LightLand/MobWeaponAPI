@@ -6,6 +6,10 @@ import net.minecraft.world.item.ItemStack;
 
 public interface IHoldWeaponBehavior extends IWeaponWithCD {
 
+	default boolean infiniteUse(LivingEntity user, ItemStack stack) {
+		return false;
+	}
+
 	double range(LivingEntity user, ItemStack stack);
 
 	int holdTime(LivingEntity user, ItemStack stack);
