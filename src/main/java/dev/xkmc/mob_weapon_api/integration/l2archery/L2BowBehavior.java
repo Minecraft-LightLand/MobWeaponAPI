@@ -56,6 +56,8 @@ public class L2BowBehavior extends SimpleBowBehavior {
 		}
 		if (infinite) {
 			proj.pickup = AbstractArrow.Pickup.CREATIVE_ONLY;
+		} else {
+			arrowStack.shrink(1);
 		}
 		ctx.aim(proj.position(), speed, gravity, ctx.getInitialInaccuracy()).shoot(proj, 0);
 		ctx.user().playSound(SoundEvents.ARROW_SHOOT, 1.0F, 1.0F / (ctx.user().getRandom().nextFloat() * 0.4F + 0.8F));
