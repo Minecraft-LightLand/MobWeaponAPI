@@ -5,14 +5,16 @@ import dev.xkmc.mob_weapon_api.api.goals.IMeleeGoal;
 import dev.xkmc.mob_weapon_api.api.goals.IRangedWeaponGoal;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.EnumSet;
 
-public abstract class SmartRangedAttackGoal<E extends Mob & IWeaponHolder> extends Goal implements IRangedWeaponGoal<E> {
+public abstract class SmartRangedAttackGoal<E extends Mob> extends Goal implements IRangedWeaponGoal<E> {
 
 	protected final E mob;
+	protected final IWeaponHolder holder;
 	protected final IMeleeGoal melee;
 	protected final double speedModifier;
 	protected final double radius;
@@ -23,8 +25,9 @@ public abstract class SmartRangedAttackGoal<E extends Mob & IWeaponHolder> exten
 
 	private int meleeTime = 0;
 
-	protected SmartRangedAttackGoal(E mob, IMeleeGoal melee, double speedModifier, double r) {
+	protected SmartRangedAttackGoal(E mob, IWeaponHolder holder, IMeleeGoal melee, double speedModifier, double r) {
 		this.mob = mob;
+		this.holder = holder;
 		this.melee = melee;
 		this.speedModifier = speedModifier;
 		this.radius = r;
@@ -33,7 +36,7 @@ public abstract class SmartRangedAttackGoal<E extends Mob & IWeaponHolder> exten
 
 	public boolean canUse() {
 		if (mob.getTarget() == null || !mob.getTarget().isAlive()) return false;
-		ItemStack stack = mob.getItemInHand(mob.getWeaponHand());
+		ItemStack stack = mob.getItemInHand(holder.getWeaponHand());
 		return mayActivate(stack);
 	}
 
@@ -44,13 +47,13 @@ public abstract class SmartRangedAttackGoal<E extends Mob & IWeaponHolder> exten
 	public void start() {
 		super.start();
 		mob.setAggressive(true);
-		mob.setInRangeAttack(true);
+		holder.setInRangeAttack(true);
 	}
 
 	public void stop() {
 		super.stop();
 		mob.setAggressive(false);
-		mob.setInRangeAttack(false);
+		holder.setInRangeAttack(false);
 		seeTime = 0;
 		meleeTime = 0;
 		mob.stopUsingItem();
@@ -80,8 +83,13 @@ public abstract class SmartRangedAttackGoal<E extends Mob & IWeaponHolder> exten
 	}
 
 	public final double attackRadiusSqr() {
-		ItemStack stack = mob.getItemInHand(mob.getWeaponHand());
-		return range(stack) * range(stack);
+		ItemStack stack = mob.getItemInHand(holder.getWeaponHand());
+		double range = range(stack);
+		var ins = mob.getAttribute(Attributes.FOLLOW_RANGE);
+		if (ins != null) {
+			range = Math.min(ins.getValue(), range);
+		}
+		return range * range;
 	}
 
 	protected void strafing() {

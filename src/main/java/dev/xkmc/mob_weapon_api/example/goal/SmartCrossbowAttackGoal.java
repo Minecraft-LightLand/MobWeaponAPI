@@ -9,25 +9,33 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.monster.CrossbowAttackMob;
 import net.minecraft.world.item.ItemStack;
 
-public class SmartCrossbowAttackGoal<E extends Mob & IWeaponHolder & CrossbowAttackMob> extends SmartRangedAttackGoal<E> {
+public class SmartCrossbowAttackGoal<E extends Mob> extends SmartRangedAttackGoal<E> {
 	private CrossbowState crossbowState = CrossbowState.UNCHARGED;
 	private int attackDelay;
 
 	public SmartCrossbowAttackGoal(E mob, IMeleeGoal melee, double speed, float radius) {
-		super(mob, melee, speed, radius);
+		super(mob, mob instanceof IWeaponHolder h ? h : IWeaponHolder.simple(mob), melee, speed, radius);
+	}
+
+	public SmartCrossbowAttackGoal(E mob, IWeaponHolder holder, IMeleeGoal melee, double speed, double radius) {
+		super(mob, holder, melee, speed, radius);
 	}
 
 	@Override
 	public boolean mayActivate(ItemStack stack) {
 		var weapon = WeaponRegistry.CROSSBOW.get(mob, stack);
 		if (weapon.isEmpty()) return false;
-		return weapon.get().hasProjectile(mob.toUser(), stack) ||
+		return weapon.get().hasProjectile(holder.toUser(), stack) ||
 				weapon.get().hasLoadedProjectile(mob, stack);
+	}
+
+	public void setChargingCrossbow(boolean bool) {
+		if (mob instanceof CrossbowAttackMob e) e.setChargingCrossbow(bool);
 	}
 
 	public void stop() {
 		super.stop();
-		mob.setChargingCrossbow(false);
+		setChargingCrossbow(false);
 		attackDelay = 0;
 	}
 
@@ -35,24 +43,25 @@ public class SmartCrossbowAttackGoal<E extends Mob & IWeaponHolder & CrossbowAtt
 		doMelee();
 		strafing();
 		LivingEntity target = mob.getTarget();
-		ItemStack stack = mob.getItemInHand(mob.getWeaponHand());
+		var hand = holder.getWeaponHand();
+		ItemStack stack = mob.getItemInHand(hand);
 		var weapon = WeaponRegistry.CROSSBOW.get(mob, stack);
 		if (weapon.isEmpty()) return;
-		var user = mob.toUser();
+		var user = holder.toUser();
 		var behavior = weapon.get();
 		if (crossbowState == CrossbowState.UNCHARGED) {
 			if (behavior.hasLoadedProjectile(mob, stack)) {
 				crossbowState = CrossbowState.CHARGED;
-				mob.setChargingCrossbow(false);
+				setChargingCrossbow(false);
 			} else if (behavior.hasProjectile(user, stack)) {
 				if (behavior.chargeTime(mob, stack) <= 0) {
 					if (weapon.get().tryCharge(user, stack)) {
 						crossbowState = CrossbowState.CHARGED;
 					}
 				} else {
-					mob.startUsingItem(mob.getWeaponHand());
+					mob.startUsingItem(holder.getWeaponHand());
 					crossbowState = CrossbowState.CHARGING;
-					mob.setChargingCrossbow(true);
+					setChargingCrossbow(true);
 				}
 			}
 		} else if (crossbowState == CrossbowState.CHARGING) {
@@ -63,7 +72,7 @@ public class SmartCrossbowAttackGoal<E extends Mob & IWeaponHolder & CrossbowAtt
 				mob.releaseUsingItem();
 				if (weapon.get().tryCharge(user, stack)) {
 					crossbowState = CrossbowState.CHARGED;
-					mob.setChargingCrossbow(false);
+					setChargingCrossbow(false);
 				}
 			}
 		}
@@ -78,7 +87,7 @@ public class SmartCrossbowAttackGoal<E extends Mob & IWeaponHolder & CrossbowAtt
 					crossbowState = CrossbowState.READY_TO_ATTACK;
 				}
 			} else if (crossbowState == CrossbowState.READY_TO_ATTACK && seeTime > 0) {
-				mob.performRangedAttack(target, 1.0F);
+				performRangedAttack(target, 1.0F, stack, hand);
 				behavior.release(stack);
 				crossbowState = CrossbowState.UNCHARGED;
 			}
@@ -87,7 +96,7 @@ public class SmartCrossbowAttackGoal<E extends Mob & IWeaponHolder & CrossbowAtt
 
 	@Override
 	public void performRangedAttack(LivingEntity target, float power, ItemStack stack, InteractionHand hand) {
-		WeaponRegistry.CROSSBOW.get(mob, stack).ifPresent(e -> e.performRangedAttack(mob.toUser(), stack, hand));
+		WeaponRegistry.CROSSBOW.get(mob, stack).ifPresent(e -> e.performRangedAttack(holder.toUser(), stack, hand));
 	}
 
 	enum CrossbowState {

@@ -1,6 +1,5 @@
 package dev.xkmc.mob_weapon_api.api.goals;
 
-import dev.xkmc.mob_weapon_api.api.ai.IWeaponHolder;
 import dev.xkmc.mob_weapon_api.registry.IWeaponStatusPredicate;
 import dev.xkmc.mob_weapon_api.registry.WeaponStatus;
 import net.minecraft.resources.ResourceLocation;
@@ -13,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedHashMap;
 
-public class WeaponGoalRegistry<E extends Mob & IWeaponHolder> {
+public class WeaponGoalRegistry<E extends Mob> {
 
 	private final LinkedHashMap<ResourceLocation, WeaponGoalEntry<E>> knowledge = new LinkedHashMap<>();
 
@@ -31,12 +30,12 @@ public class WeaponGoalRegistry<E extends Mob & IWeaponHolder> {
 		return null;
 	}
 
-	public record WeaponSearchResult<E extends Mob & IWeaponHolder>(
+	public record WeaponSearchResult<E extends Mob>(
 			ResourceLocation id, WeaponStatus status, WeaponGoalEntry<E> entry
 	) {
 	}
 
-	public record WeaponGoalEntry<E extends Mob & IWeaponHolder>(
+	public record WeaponGoalEntry<E extends Mob>(
 			IWeaponStatusPredicate item,
 			IWeaponGoalFactory<E, ?> goal
 	) {

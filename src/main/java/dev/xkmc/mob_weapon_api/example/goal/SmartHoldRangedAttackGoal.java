@@ -8,18 +8,22 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.item.ItemStack;
 
-public class SmartHoldRangedAttackGoal<E extends Mob & IWeaponHolder> extends SmartRangedAttackGoal<E> {
+public class SmartHoldRangedAttackGoal<E extends Mob> extends SmartRangedAttackGoal<E> {
 
 	private int attackTime = -1;
 
 	public SmartHoldRangedAttackGoal(E mob, IMeleeGoal melee, double speed) {
-		super(mob, melee, speed, 0);
+		super(mob, mob instanceof IWeaponHolder h ? h : IWeaponHolder.simple(mob), melee, speed, 0);
+	}
+
+	public SmartHoldRangedAttackGoal(E mob, IWeaponHolder holder, IMeleeGoal melee, double speed, double radius) {
+		super(mob, holder, melee, speed, radius);
 	}
 
 	@Override
 	public boolean mayActivate(ItemStack stack) {
 		var weapon = WeaponRegistry.HOLD.get(mob, stack);
-		return weapon.isPresent() && weapon.get().isValid(mob.toUser(), stack);
+		return weapon.isPresent() && weapon.get().isValid(holder.toUser(), stack);
 	}
 
 	@Override
@@ -37,13 +41,13 @@ public class SmartHoldRangedAttackGoal<E extends Mob & IWeaponHolder> extends Sm
 	public void tick() {
 		doMelee();
 		strafing();
-		ItemStack stack = mob.getItemInHand(mob.getWeaponHand());
+		ItemStack stack = mob.getItemInHand(holder.getWeaponHand());
 		var weapon = WeaponRegistry.HOLD.get(mob, stack);
 		if (weapon.isEmpty()) return;
 		LivingEntity target = mob.getTarget();
 		boolean invalidTarget = target == null || !target.isAlive();
 		boolean withInRange = !invalidTarget && mob.distanceTo(target) < weapon.get().range(mob, stack);
-		var user = mob.toUser();
+		var user = holder.toUser();
 		if (mob.isUsingItem()) {
 			boolean infiniteUse = weapon.get().infiniteUse(mob, stack);
 			if (seeTime < -60 || infiniteUse && !withInRange) {
@@ -58,7 +62,7 @@ public class SmartHoldRangedAttackGoal<E extends Mob & IWeaponHolder> extends Sm
 				}
 			}
 		} else if (--attackTime <= 0 && seeTime >= -60 && withInRange) {
-			mob.startUsingItem(mob.getWeaponHand());
+			mob.startUsingItem(holder.getWeaponHand());
 		}
 	}
 

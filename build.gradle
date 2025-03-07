@@ -128,7 +128,7 @@ dependencies {
     implementation fg.deobf("dev.xkmc.l2itemselector:l2itemselector:0.1.8")
     implementation fg.deobf("dev.xkmc.l2damagetracker:l2damagetracker:0.3.7")
     implementation fg.deobf('dev.xkmc.l2complements:l2complements:2.5.2-slim')
-    implementation fg.deobf('dev.xkmc.modulargolems:modulargolems:2.5.1+1-slim')
+    runtimeOnly fg.deobf('dev.xkmc.modulargolems:modulargolems:2.5.1+1-slim')
 
     implementation fg.deobf("top.theillusivec4.curios:curios-forge:${curios_version}")
     implementation fg.deobf("mezz.jei:jei-${jei_minecraft_version}:${jei_version}")
