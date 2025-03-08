@@ -6,22 +6,25 @@ import dev.xkmc.mob_weapon_api.registry.WeaponRegistry;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.item.ItemStack;
 
-public class SmartBowAttackGoal<E extends Mob & IWeaponHolder & RangedAttackMob> extends SmartRangedAttackGoal<E> {
+public class SmartBowAttackGoal<E extends Mob> extends SmartRangedAttackGoal<E> {
 
 	private int attackTime = -1;
 
 	public SmartBowAttackGoal(E mob, IMeleeGoal melee, double speed, double radius) {
-		super(mob, melee, speed, radius);
+		super(mob, mob instanceof IWeaponHolder h ? h : IWeaponHolder.simple(mob), melee, speed, radius);
+	}
+
+	public SmartBowAttackGoal(E mob, IWeaponHolder holder, IMeleeGoal melee, double speed, double radius) {
+		super(mob, holder, melee, speed, radius);
 	}
 
 	@Override
 	public boolean mayActivate(ItemStack stack) {
 		var weapon = WeaponRegistry.BOW.get(mob, stack);
 		if (weapon.isEmpty()) return false;
-		return weapon.get().hasProjectile(mob.toUser(), stack);
+		return weapon.get().hasProjectile(holder.toUser(), stack);
 	}
 
 	@Override
@@ -33,11 +36,12 @@ public class SmartBowAttackGoal<E extends Mob & IWeaponHolder & RangedAttackMob>
 		doMelee();
 		strafing();
 		LivingEntity target = mob.getTarget();
-		ItemStack stack = mob.getItemInHand(mob.getWeaponHand());
+		var hand = holder.getWeaponHand();
+		ItemStack stack = mob.getItemInHand(hand);
 		var weapon = WeaponRegistry.BOW.get(mob, stack);
 		if (weapon.isEmpty()) return;
 		if (mob.isUsingItem() && target != null) {
-			var user = mob.toUser();
+			var user = holder.toUser();
 			double dist = mob.distanceTo(target);
 			if (seeTime < -60) {
 				mob.stopUsingItem();
@@ -45,23 +49,23 @@ public class SmartBowAttackGoal<E extends Mob & IWeaponHolder & RangedAttackMob>
 				int i = mob.getTicksUsingItem();
 				int pullTime = weapon.get().getPreferredPullTime(user, stack, dist);
 				if (i >= pullTime) {
-					mob.performRangedAttack(target, weapon.get().getPowerForTime(user, stack, i));
+					performRangedAttack(target, weapon.get().getPowerForTime(user, stack, i), stack, hand);
 					mob.stopUsingItem();
 				} else {
 					weapon.get().tickUsingBow(user, stack);
 				}
 			}
 		} else if (--attackTime <= 0 && seeTime >= -60) {
-			var user = mob.toUser();
+			var user = holder.toUser();
 			if (target != null) {
 				double dist = mob.distanceTo(target);
 				int pullTime = weapon.get().getPreferredPullTime(user, stack, dist);
 				if (pullTime <= 0) {
-					mob.performRangedAttack(target, 0);
+					performRangedAttack(target, 0, stack, hand);
 					return;
 				}
 			}
-			mob.startUsingItem(mob.getWeaponHand());
+			mob.startUsingItem(hand);
 			weapon.ifPresent(e -> e.startUsingBow(user, stack));
 
 		}
@@ -71,7 +75,7 @@ public class SmartBowAttackGoal<E extends Mob & IWeaponHolder & RangedAttackMob>
 	public void performRangedAttack(LivingEntity target, float power, ItemStack stack, InteractionHand hand) {
 		var opt = WeaponRegistry.BOW.get(mob, stack);
 		if (opt.isEmpty()) return;
-		attackTime = opt.get().shootArrow(mob.toUser(), power, stack, hand);
+		attackTime = opt.get().shootArrow(holder.toUser(), power, stack, hand);
 	}
 
 }

@@ -30,7 +30,7 @@ public class RangedBehaviorRegistry<T> {
 	}
 
 	public boolean isValidItem(ItemStack stack) {
-		return getProperties(stack).map(WeaponStatus::isRanged).orElse(false);
+		return getProperties(stack).isPresent();
 	}
 
 	public Optional<WeaponStatus> getProperties(ItemStack stack) {
