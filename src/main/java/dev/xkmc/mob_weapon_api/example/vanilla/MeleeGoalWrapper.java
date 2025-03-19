@@ -9,7 +9,7 @@ public record MeleeGoalWrapper(Mob mob, MeleeAttackGoal goal) implements IMeleeG
 
 	@Override
 	public boolean canReachTarget(LivingEntity target) {
-		return goal.getAttackReachSqr(target) >= mob.distanceToSqr(target);
+		return mob.isWithinMeleeAttackRange(target);
 	}
 
 	@Override
