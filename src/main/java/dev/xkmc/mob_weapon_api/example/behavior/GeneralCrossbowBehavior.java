@@ -31,8 +31,6 @@ public class GeneralCrossbowBehavior extends SimpleCrossbowBehavior {
 
 	protected void performShooting(CrossbowUseContext user, InteractionHand hand, ItemStack stack, float velocity, float inaccuracy) {
 		List<ItemStack> list = getLoadedProjectile(user.user(), stack);
-		float[] rand = getShotPitches(user.user().getRandom());
-
 		float spread = EnchantmentHelper.processProjectileSpread((ServerLevel) user.user().level(), stack, user.user(), 0);
 		float step = list.size() == 1 ? 0f : 2f * spread / (list.size() - 1);
 		float start = (float) ((list.size() - 1) % 2) * step / 2f;
@@ -45,7 +43,8 @@ public class GeneralCrossbowBehavior extends SimpleCrossbowBehavior {
 			ItemStack ammo = list.get(i);
 			boolean creative = user.hasInfiniteArrow(stack, ammo);
 			if (!ammo.isEmpty()) {
-				aim = shootProjectile(user, aim, hand, stack, ammo, rand[i], creative, velocity, inaccuracy, angle);
+				float pitch = angle == 0 ? 1 : getRandomShotPitch(i % 2 == 0, user.user().getRandom());
+				aim = shootProjectile(user, aim, hand, stack, ammo, pitch, creative, velocity, inaccuracy, angle);
 			}
 		}
 		stack.remove(DataComponents.CHARGED_PROJECTILES);
