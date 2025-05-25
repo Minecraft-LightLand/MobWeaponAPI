@@ -27,17 +27,25 @@ public class GeneralCrossbowBehavior extends SimpleCrossbowBehavior {
 
 	protected void performShooting(CrossbowUseContext user, InteractionHand hand, ItemStack stack, float velocity, float inaccuracy) {
 		List<ItemStack> list = getLoadedProjectile(user.user(), stack);
-		float[] rand = getShotPitches(user.user().getRandom());
 		ProjectileWeaponUseContext.AimResult aim = null;
 		for (int i = 0; i < list.size(); ++i) {
 			ItemStack ammo = list.get(i);
 			boolean creative = user.hasInfiniteArrow(stack, ammo);
 			if (!ammo.isEmpty()) {
-				float angle = i == 0 ? 0 : i == 1 ? -10 : 10;
-				aim = shootProjectile(user, aim, hand, stack, ammo, rand[i], creative, velocity, inaccuracy, angle);
+				float angle = getAngle(i, list.size());
+				float pitch = angle == 0 ? 1 : getRandomShotPitch(i % 2 == 0, user.user().getRandom());
+				aim = shootProjectile(user, aim, hand, stack, ammo, pitch, creative, velocity, inaccuracy, angle);
 			}
 		}
 		CrossbowItem.clearChargedProjectiles(stack);
+	}
+
+	private float getAngle(int i, int n) {
+		if (i == 0) return 0;
+		int sign = i % 2 == 0 ? -1 : 1;
+		int ind = (i + 1) / 2;
+		int maxInd = n / 2;
+		return 1f * sign * ind / maxInd;
 	}
 
 	private static ProjectileWeaponUseContext.AimResult shootProjectile(
@@ -78,11 +86,6 @@ public class GeneralCrossbowBehavior extends SimpleCrossbowBehavior {
 			ans.setPierceLevel((byte) i);
 		}
 		return ans;
-	}
-
-	private static float[] getShotPitches(RandomSource p_220024_) {
-		boolean flag = p_220024_.nextBoolean();
-		return new float[]{1.0F, getRandomShotPitch(flag, p_220024_), getRandomShotPitch(!flag, p_220024_)};
 	}
 
 	private static float getRandomShotPitch(boolean p_220026_, RandomSource p_220027_) {

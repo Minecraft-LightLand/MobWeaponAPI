@@ -3,6 +3,7 @@ package dev.xkmc.mob_weapon_api.example.goal;
 import dev.xkmc.mob_weapon_api.api.ai.IWeaponHolder;
 import dev.xkmc.mob_weapon_api.api.goals.IMeleeGoal;
 import dev.xkmc.mob_weapon_api.api.goals.IRangedWeaponGoal;
+import dev.xkmc.mob_weapon_api.registry.WeaponStatus;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -10,6 +11,7 @@ import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.EnumSet;
+import java.util.Optional;
 
 public abstract class SmartRangedAttackGoal<E extends Mob> extends Goal implements IRangedWeaponGoal<E> {
 
@@ -44,10 +46,15 @@ public abstract class SmartRangedAttackGoal<E extends Mob> extends Goal implemen
 		return canUse() || !mob.getNavigation().isDone();
 	}
 
+	public Optional<WeaponStatus> getWeaponStatus(ItemStack stack) {
+		return Optional.empty();
+	}
+
 	public void start() {
 		super.start();
 		mob.setAggressive(true);
-		holder.setInRangeAttack(true);
+		var status = getWeaponStatus(mob.getItemInHand(holder.getWeaponHand()));
+		holder.setInRangeAttack(status.isPresent() && status.get().isRanged());
 	}
 
 	public void stop() {

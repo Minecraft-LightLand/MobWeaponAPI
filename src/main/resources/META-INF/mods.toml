@@ -65,3 +65,8 @@ Mob weapon compatibility layer
     versionRange="[1.20,1.21)"
     ordering="NONE"
     side="BOTH"
+[[dependencies.mob_weapon_api]]
+    modId="cataclysm"
+    mandatory=false
+    versionRange="[2.62,)"
+    side="BOTH"

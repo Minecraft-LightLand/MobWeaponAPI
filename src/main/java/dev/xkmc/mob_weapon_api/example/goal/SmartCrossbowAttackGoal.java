@@ -3,11 +3,14 @@ package dev.xkmc.mob_weapon_api.example.goal;
 import dev.xkmc.mob_weapon_api.api.ai.IWeaponHolder;
 import dev.xkmc.mob_weapon_api.api.goals.IMeleeGoal;
 import dev.xkmc.mob_weapon_api.registry.WeaponRegistry;
+import dev.xkmc.mob_weapon_api.registry.WeaponStatus;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.monster.CrossbowAttackMob;
 import net.minecraft.world.item.ItemStack;
+
+import java.util.Optional;
 
 public class SmartCrossbowAttackGoal<E extends Mob> extends SmartRangedAttackGoal<E> {
 	private CrossbowState crossbowState = CrossbowState.UNCHARGED;
@@ -27,6 +30,11 @@ public class SmartCrossbowAttackGoal<E extends Mob> extends SmartRangedAttackGoa
 		if (weapon.isEmpty()) return false;
 		return weapon.get().hasProjectile(holder.toUser(), stack) ||
 				weapon.get().hasLoadedProjectile(mob, stack);
+	}
+
+	@Override
+	public Optional<WeaponStatus> getWeaponStatus(ItemStack stack) {
+		return WeaponRegistry.CROSSBOW.getProperties(stack);
 	}
 
 	public void setChargingCrossbow(boolean bool) {
