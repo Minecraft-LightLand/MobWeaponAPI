@@ -57,8 +57,9 @@ public class ShootUtils {
 			double rt = Math.sqrt(c) / v;
 			var tv = target.getDeltaMovement();
 			dx += tv.x * rt;
-			dy += tv.y * rt;
 			dz += tv.z * rt;
+			if (!target.onGround())
+				dy += tv.y * rt;
 		}
 
 		c = dx * dx + dz * dz + dy * dy;
