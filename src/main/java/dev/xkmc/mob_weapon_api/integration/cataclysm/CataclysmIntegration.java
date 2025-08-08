@@ -61,6 +61,14 @@ public class CataclysmIntegration {
 				e -> WeaponStatus.MELEE.of(e.is(ModItems.INFERNAL_FORGE.get())),
 				(golem, stack) -> new InfernalForgeBehavior(), 70
 		);
+		WeaponRegistry.HOLD.register(ModItems.ASTRAPE.getId(),
+				e -> WeaponStatus.OFFENSIVE.of(e.is(ModItems.ASTRAPE.get())),
+				(golem, stack) -> new AstrapeBehavior(), 100
+		);
+		WeaponRegistry.HOLD.register(ModItems.CERAUNUS.getId(),
+				e -> WeaponStatus.OFFENSIVE.of(e.is(ModItems.CERAUNUS.get())),
+				(golem, stack) -> new CeraunusBehavior(), 100
+		);
 	}
 
 }

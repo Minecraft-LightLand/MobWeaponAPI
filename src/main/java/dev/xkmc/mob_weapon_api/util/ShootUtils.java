@@ -1,5 +1,6 @@
 package dev.xkmc.mob_weapon_api.util;
 
+import dev.xkmc.l2core.init.reg.ench.EnchHelper;
 import dev.xkmc.mob_weapon_api.api.projectile.BowUseContext;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
@@ -7,6 +8,7 @@ import net.minecraft.world.entity.monster.Slime;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ArrowItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -20,6 +22,9 @@ public class ShootUtils {
 
 	@SuppressWarnings("ConstantConditions")
 	public static boolean arrowIsInfinite(ItemStack arrow, ItemStack bow) {
+		if (EnchHelper.getLv(bow, Enchantments.INFINITY) > 0 && arrow.getItem().getClass() == ArrowItem.class) {
+			return true;
+		}
 		if (!(arrow.getItem() instanceof ArrowItem item)) {
 			return false;
 		}
@@ -57,8 +62,9 @@ public class ShootUtils {
 			double rt = Math.sqrt(c) / v;
 			var tv = target.getDeltaMovement();
 			dx += tv.x * rt;
-			dy += tv.y * rt;
 			dz += tv.z * rt;
+			if (!target.onGround())
+				dy += tv.y * rt;
 		}
 
 		c = dx * dx + dz * dz + dy * dy;

@@ -3,10 +3,13 @@ package dev.xkmc.mob_weapon_api.example.goal;
 import dev.xkmc.mob_weapon_api.api.ai.IWeaponHolder;
 import dev.xkmc.mob_weapon_api.api.goals.IMeleeGoal;
 import dev.xkmc.mob_weapon_api.registry.WeaponRegistry;
+import dev.xkmc.mob_weapon_api.registry.WeaponStatus;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.item.ItemStack;
+
+import java.util.Optional;
 
 public class SmartBowAttackGoal<E extends Mob> extends SmartRangedAttackGoal<E> {
 
@@ -25,6 +28,11 @@ public class SmartBowAttackGoal<E extends Mob> extends SmartRangedAttackGoal<E> 
 		var weapon = WeaponRegistry.BOW.get(mob, stack);
 		if (weapon.isEmpty()) return false;
 		return weapon.get().hasProjectile(holder.toUser(), stack);
+	}
+
+	@Override
+	public Optional<WeaponStatus> getWeaponStatus(ItemStack stack) {
+		return WeaponRegistry.BOW.getProperties(stack);
 	}
 
 	@Override

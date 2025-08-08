@@ -3,6 +3,7 @@ package dev.xkmc.mob_weapon_api.integration.cataclysm;
 import com.github.L_Ender.cataclysm.config.CMConfig;
 import com.github.L_Ender.cataclysm.entity.effect.ScreenShake_Entity;
 import com.github.L_Ender.cataclysm.entity.effect.Void_Vortex_Entity;
+import com.github.L_Ender.cataclysm.entity.effect.Wave_Entity;
 import com.github.L_Ender.cataclysm.entity.projectile.*;
 import com.github.L_Ender.cataclysm.init.ModEntities;
 import com.github.L_Ender.cataclysm.init.ModParticle;
@@ -334,6 +335,58 @@ public class CataclysmProxy {
 			}
 		}
 
+	}
+
+	public static int ceraunus(Level level, LivingEntity user, LivingEntity target) {
+		try {
+			var diff = target.getEyePosition().subtract(user.getEyePosition()).normalize();
+			double vec = 2.0F;
+			double spawnX = user.getX() + diff.x * vec;
+			double spawnY = user.getY();
+			double spawnZ = user.getZ() + diff.z * vec;
+			int numberOfWaves = 4;
+			float angleStep = 25.0F;
+			double firstAngleOffset = (double) (numberOfWaves - 1) / (double) 2.0F * (double) angleStep;
+			level.playSound(null, user.getX(), user.getY(), user.getZ(), ModSounds.HEAVY_SMASH.get(), SoundSource.PLAYERS, 0.6F, 1.0F);
+			for (int k = 0; k < numberOfWaves; ++k) {
+				double angle = (double) user.getYRot() - firstAngleOffset + (double) ((float) k * angleStep);
+				double rad = Math.toRadians(angle);
+				double dx = -Math.sin(rad);
+				double dz = Math.cos(rad);
+				Wave_Entity WaveEntity = new Wave_Entity(level, user, 60, (float) CMConfig.CeraunusWaveDamage);
+				WaveEntity.setPos(spawnX, spawnY, spawnZ);
+				WaveEntity.setState(1);
+				WaveEntity.setYRot(-((float) (Mth.atan2(dx, dz) * (180D / Math.PI))));
+				level.addFreshEntity(WaveEntity);
+			}
+			return CMConfig.CeraunusCooldown;
+		} catch (Throwable ignored) {
+		}
+		return 20;
+	}
+
+	public static int astrape(Level level, LivingEntity user, LivingEntity target) {
+		try {
+			level.playSound(null, user.getX(), user.getY(), user.getZ(), ModSounds.EMP_ACTIVATED.get(), SoundSource.PLAYERS, 1.0F, 0.8F);
+			Vec3 vec3 = target.getEyePosition().subtract(user.getEyePosition()).normalize();
+			double x = user.getX() + vec3.x;
+			double y = user.getEyeY();
+			double Z = user.getZ() + vec3.z;
+			float yRot = (float) (Mth.atan2(vec3.z, vec3.x) * (180D / Math.PI)) + 90.0F;
+			float xRot = (float) (-(Mth.atan2(vec3.y, Math.sqrt(vec3.x * vec3.x + vec3.z * vec3.z)) * (180D / Math.PI)));
+			Lightning_Spear_Entity lightning = new Lightning_Spear_Entity(user, vec3.normalize(), level, (float) CMConfig.AstrapeDamage);
+			lightning.accelerationPower = 0.15;
+			lightning.setYRot(yRot);
+			lightning.setXRot(xRot);
+			lightning.setPosRaw(x, y, Z);
+			lightning.setAreaDamage((float) CMConfig.AstrapeAreaDamage);
+			lightning.setAreaRadius(1.0F);
+			level.addFreshEntity(lightning);
+			return CMConfig.AstrapeCooldown;
+		} catch (Throwable ignored) {
+
+		}
+		return 20;
 	}
 
 }

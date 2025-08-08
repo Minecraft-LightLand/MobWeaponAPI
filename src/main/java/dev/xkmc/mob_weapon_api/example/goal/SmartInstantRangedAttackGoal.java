@@ -3,10 +3,13 @@ package dev.xkmc.mob_weapon_api.example.goal;
 import dev.xkmc.mob_weapon_api.api.ai.IWeaponHolder;
 import dev.xkmc.mob_weapon_api.api.goals.IMeleeGoal;
 import dev.xkmc.mob_weapon_api.registry.WeaponRegistry;
+import dev.xkmc.mob_weapon_api.registry.WeaponStatus;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.item.ItemStack;
+
+import java.util.Optional;
 
 public class SmartInstantRangedAttackGoal<E extends Mob> extends SmartRangedAttackGoal<E> {
 
@@ -24,6 +27,11 @@ public class SmartInstantRangedAttackGoal<E extends Mob> extends SmartRangedAtta
 	public boolean mayActivate(ItemStack stack) {
 		var weapon = WeaponRegistry.INSTANT.get(mob, stack);
 		return weapon.isPresent() && weapon.get().isValid(holder.toUser(), stack);
+	}
+
+	@Override
+	public Optional<WeaponStatus> getWeaponStatus(ItemStack stack) {
+		return WeaponRegistry.INSTANT.getProperties(stack);
 	}
 
 	@Override

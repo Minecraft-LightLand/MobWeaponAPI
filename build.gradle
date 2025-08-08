@@ -172,7 +172,7 @@ dependencies {
     implementation "dev.xkmc:l2archery:${l2archery_ver}"
 
     implementation "curse.maven:lionfish-api-1001614:6168249"
-    implementation "curse.maven:lendercataclysm-551586:6208715"
+    implementation "curse.maven:lendercataclysm-551586:6849033"
     implementation "curse.maven:create-328085:6255497"
 
     compileOnly("com.simibubi.create:create-1.21.1:6.0.1-13") { transitive = false }
