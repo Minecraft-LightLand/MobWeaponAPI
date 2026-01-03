@@ -2,6 +2,7 @@ package dev.xkmc.mob_weapon_api.example.goal;
 
 import dev.xkmc.mob_weapon_api.api.ai.IWeaponHolder;
 import dev.xkmc.mob_weapon_api.api.goals.IMeleeGoal;
+import dev.xkmc.mob_weapon_api.api.simple.IHoldWeaponBehavior;
 import dev.xkmc.mob_weapon_api.registry.WeaponRegistry;
 import dev.xkmc.mob_weapon_api.registry.WeaponStatus;
 import net.minecraft.world.InteractionHand;
@@ -23,10 +24,8 @@ public class SmartHoldRangedAttackGoal<E extends Mob> extends SmartRangedAttackG
 		super(mob, holder, melee, speed, radius);
 	}
 
-	@Override
-	public boolean mayActivate(ItemStack stack) {
-		var weapon = WeaponRegistry.HOLD.get(mob, stack);
-		return weapon.isPresent() && weapon.get().isValid(holder.toUser(), stack);
+	public Optional<IHoldWeaponBehavior> get(ItemStack stack) {
+		return WeaponRegistry.HOLD.get(mob, stack);
 	}
 
 	@Override
@@ -35,22 +34,35 @@ public class SmartHoldRangedAttackGoal<E extends Mob> extends SmartRangedAttackG
 	}
 
 	@Override
+	public boolean mayActivate(ItemStack stack) {
+		var weapon = get(stack);
+		return weapon.isPresent() && weapon.get().isValid(holder.toUser(), stack);
+	}
+
+	@Override
 	public void stop() {
 		attackTime = -1;
 	}
 
-
 	@Override
 	public double range(ItemStack stack) {
-		var weapon = WeaponRegistry.HOLD.get(mob, stack);
+		var weapon = get(stack);
 		return weapon.map(b -> b.range(mob, stack)).orElse(0.0);
+	}
+
+	@Override
+	protected void onMelee() {
+		if (mob.isUsingItem()) {
+			mob.stopUsingItem();
+		}
+		super.onMelee();
 	}
 
 	public void tick() {
 		doMelee();
 		strafing();
 		ItemStack stack = mob.getItemInHand(holder.getWeaponHand());
-		var weapon = WeaponRegistry.HOLD.get(mob, stack);
+		var weapon = get(stack);
 		if (weapon.isEmpty()) return;
 		LivingEntity target = mob.getTarget();
 		boolean invalidTarget = target == null || !target.isAlive();
@@ -69,11 +81,10 @@ public class SmartHoldRangedAttackGoal<E extends Mob> extends SmartRangedAttackG
 					weapon.get().tickUsing(user, stack, i);
 				}
 			}
-		} else if (--attackTime <= 0 && seeTime >= -60 && withInRange) {
+		} else if (meleeFinished() && --attackTime <= 0 && seeTime >= -60 && withInRange) {
 			mob.startUsingItem(holder.getWeaponHand());
 		}
 	}
-
 
 	@Override
 	public void performRangedAttack(LivingEntity target, float power, ItemStack stack, InteractionHand hand) {
