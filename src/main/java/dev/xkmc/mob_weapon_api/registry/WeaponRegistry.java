@@ -6,9 +6,11 @@ import dev.xkmc.mob_weapon_api.api.simple.IHoldWeaponBehavior;
 import dev.xkmc.mob_weapon_api.api.simple.IInstantWeaponBehavior;
 import dev.xkmc.mob_weapon_api.example.behavior.GeneralCrossbowBehavior;
 import dev.xkmc.mob_weapon_api.example.behavior.SimpleBowBehavior;
+import dev.xkmc.mob_weapon_api.example.behavior.TridentBehavior;
 import dev.xkmc.mob_weapon_api.init.MobWeaponAPI;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.CrossbowItem;
+import net.minecraft.world.item.Items;
 
 public class WeaponRegistry {
 
@@ -26,7 +28,8 @@ public class WeaponRegistry {
 	public static final RangedBehaviorRegistry<IHoldWeaponBehavior> HOLD = new RangedBehaviorRegistry<>(MobWeaponAPI.loc("hold"));
 
 	public static void init() {
-
+		HOLD.register(MobWeaponAPI.loc("trident"), stack -> WeaponStatus.OFFENSIVE.of(stack.is(Items.TRIDENT)),
+				(e, stack) -> new TridentBehavior(), 10);
 	}
 
 }

@@ -78,10 +78,18 @@ public abstract class SmartRangedAttackGoal<E extends Mob> extends Goal implemen
 		var target = mob.getTarget();
 		if (target == null) return;
 		if (melee.canReachTarget(target)) {
-			this.mob.swing(InteractionHand.MAIN_HAND);
+			onMelee();
 			this.mob.doHurtTarget(target);
 			meleeTime = melee.getMeleeInterval();
 		}
+	}
+
+	protected void onMelee() {
+		this.mob.swing(InteractionHand.MAIN_HAND);
+	}
+
+	protected boolean meleeFinished() {
+		return meleeTime <= 0;
 	}
 
 	@Override

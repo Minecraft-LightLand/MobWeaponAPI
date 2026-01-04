@@ -69,6 +69,10 @@ public class CataclysmIntegration {
 				e -> WeaponStatus.OFFENSIVE.of(e.is(ModItems.CERAUNUS.get())),
 				(golem, stack) -> new CeraunusBehavior(), 100
 		);
+		WeaponRegistry.HOLD.register(ModItems.CORAL_SPEAR.getId(),
+				e -> WeaponStatus.OFFENSIVE.of(e.is(ModItems.CORAL_SPEAR.get())),
+				(golem, stack) -> new CoralSpearBehavior(), 10
+		);
 	}
 
 }

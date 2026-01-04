@@ -79,6 +79,11 @@ public class AbstractWeaponManager<T extends Mob & IWeaponHolder> {
 		}
 	}
 
+	public boolean isRangedModeAvailable(ItemStack stack) {
+		var goal = getGoalForWeapon(stack, null);
+		return goal != null && goal.isRanged() && goal.mayActivate();
+	}
+
 	public boolean checkSwitch(@Nullable LivingEntity target, ItemWrapper mainhand, ItemWrapper offhand) {
 		ItemStack main = mainhand.getItem();
 		ItemStack off = offhand.getItem();

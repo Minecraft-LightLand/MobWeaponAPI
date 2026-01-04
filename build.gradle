@@ -170,6 +170,7 @@ dependencies {
     implementation "curse.maven:the-twilight-forest-227639:5699076"
     runtimeOnly "curse.maven:touhou-little-maid-355044:5896992"
     implementation "dev.xkmc:l2archery:${l2archery_ver}"
+    implementation "dev.xkmc:l2weaponry:${l2weaponry_ver}"
 
     implementation "curse.maven:lionfish-api-1001614:6168249"
     implementation "curse.maven:lendercataclysm-551586:6849033"
