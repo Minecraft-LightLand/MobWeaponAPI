@@ -20,4 +20,8 @@ public interface IHoldWeaponBehavior extends IWeaponWithCD {
 
 	}
 
+	default boolean canMelee() {
+		return true;
+	}
+
 }

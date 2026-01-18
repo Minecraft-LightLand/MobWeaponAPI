@@ -59,11 +59,11 @@ public class SmartHoldRangedAttackGoal<E extends Mob> extends SmartRangedAttackG
 	}
 
 	public void tick() {
-		doMelee();
-		strafing();
 		ItemStack stack = mob.getItemInHand(holder.getWeaponHand());
 		var weapon = get(stack);
 		if (weapon.isEmpty()) return;
+		if (weapon.get().canMelee()) doMelee();
+		strafing();
 		LivingEntity target = mob.getTarget();
 		boolean invalidTarget = target == null || !target.isAlive();
 		boolean withInRange = !invalidTarget && mob.distanceTo(target) < weapon.get().range(mob, stack);

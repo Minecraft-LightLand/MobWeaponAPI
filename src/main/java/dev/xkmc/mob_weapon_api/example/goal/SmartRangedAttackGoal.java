@@ -131,6 +131,7 @@ public abstract class SmartRangedAttackGoal<E extends Mob> extends Goal implemen
 		}
 		if (sqr < 15) {
 			strafingTime = 0;
+			mob.getLookControl().setLookAt(target, 30.0F, 30.0F);
 			return;
 		}
 		if (strafingTime >= 20) {
@@ -145,7 +146,7 @@ public abstract class SmartRangedAttackGoal<E extends Mob> extends Goal implemen
 		if (strafingTime > -1) {
 			if (dist > sqr * 0.75) {
 				strafingBackwards = false;
-			} else if (dist < sqr * 0.25) {
+			} else if (dist < sqr * 0.5) {
 				strafingBackwards = true;
 			}
 			mob.getMoveControl().strafe(strafingBackwards ? -0.5F : 0.5F, strafingClockwise ? 0.5F : -0.5F);
