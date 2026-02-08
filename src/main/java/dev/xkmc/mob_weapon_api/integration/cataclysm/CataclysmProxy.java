@@ -1,6 +1,6 @@
 package dev.xkmc.mob_weapon_api.integration.cataclysm;
 
-import com.github.L_Ender.cataclysm.config.CMConfig;
+import com.github.L_Ender.cataclysm.config.CMCommonConfig;
 import com.github.L_Ender.cataclysm.entity.effect.ScreenShake_Entity;
 import com.github.L_Ender.cataclysm.entity.effect.Void_Vortex_Entity;
 import com.github.L_Ender.cataclysm.entity.effect.Wave_Entity;
@@ -43,7 +43,7 @@ public class CataclysmProxy {
 		try {
 			Phantom_Arrow_Entity hommingArrowEntity;
 			hommingArrowEntity = new Phantom_Arrow_Entity(level, player, target);
-			hommingArrowEntity.setBaseDamage(CMConfig.PlayerPhantomArrowbasedamage);
+			hommingArrowEntity.setBaseDamage(CMCommonConfig.CursedBow.damage);
 			return hommingArrowEntity;
 		} catch (Throwable e) {
 			LOGGER.throwing(e);
@@ -55,7 +55,7 @@ public class CataclysmProxy {
 	public static Entity createGhostStorm(LivingEntity user, Vec3 pos, Vec3 rot, LivingEntity target) {
 		try {
 			Cursed_Sandstorm_Entity e = new Cursed_Sandstorm_Entity(user, rot.x, rot.y, rot.z, user.level(),
-					(float) CMConfig.CursedSandstormDamage, target);
+					(float) CMCommonConfig.WrathOfTheDesert.damage, target);
 			e.setPos(pos.x, user.getEyeY() - 0.5, pos.z);
 			e.setUp(15);
 			return e;
@@ -68,7 +68,8 @@ public class CataclysmProxy {
 	public static void shootLaserGatling(LivingEntity user, Vec3 vec3) {
 		try {
 			Level level = user.level();
-			Laser_Beam_Entity laser = new Laser_Beam_Entity(user, vec3, level, (float) CMConfig.Laserdamage);
+			Laser_Beam_Entity laser = new Laser_Beam_Entity(user, vec3, level,
+					(float) CMCommonConfig.LaserGatling.damage);
 			float yRot = (float) (Mth.atan2(vec3.z, vec3.x) * Mth.RAD_TO_DEG) + 90;
 			float xRot = (float) (-(Mth.atan2(vec3.y, Math.sqrt(vec3.x * vec3.x + vec3.z * vec3.z)) * Mth.RAD_TO_DEG));
 			laser.setYRot(yRot);
@@ -88,7 +89,7 @@ public class CataclysmProxy {
 			Level level = player.level();
 			level.playSound(null, player.getX(), player.getY(), player.getZ(), ModSounds.ROCKET_LAUNCH.get(), SoundSource.PLAYERS, 1.0F, 0.7F);
 			Void_Howitzer_Entity rocket = new Void_Howitzer_Entity(ModEntities.VOID_HOWITZER.get(), level, player);
-			return new ProjectileData(rocket, 1, 0.03f, CMConfig.VASWCooldown);
+			return new ProjectileData(rocket, 1, 0.03f, CMCommonConfig.VASW.howitzerCooldown);
 		} catch (Throwable e) {
 			LOGGER.throwing(e);
 		}
@@ -102,9 +103,9 @@ public class CataclysmProxy {
 			double x = player.getX() + offset.x;
 			double z = player.getZ() + offset.y;
 			Wither_Missile_Entity rocket = new Wither_Missile_Entity(ModEntities.WITHER_MISSILE.get(),
-					player, x, player.getEyeY(), z, dir, (float) CMConfig.WASWMissileDamage, level);
+					player, x, player.getEyeY(), z, dir, (float) CMCommonConfig.WASW.missileDamage, level);
 			level.addFreshEntity(rocket);
-			return CMConfig.WASWMissileCooldown;
+			return CMCommonConfig.WASW.missileCooldown;
 		} catch (Throwable e) {
 			LOGGER.throwing(e);
 		}
@@ -116,7 +117,7 @@ public class CataclysmProxy {
 		try {
 			if (player.level() instanceof ServerLevel sl)
 				Helper.strikeWindmillHalberd(sl, player, 7, 5, 1.0, 1.0, 0.2, 1);
-			return CMConfig.SoulRenderCooldown;
+			return CMCommonConfig.SoulRender.cooldown;
 		} catch (Throwable e) {
 			LOGGER.throwing(e);
 		}
@@ -143,7 +144,7 @@ public class CataclysmProxy {
 			int minY = Mth.floor(user.getY()) - 10;
 			float yrot = (float) Math.toRadians(90.0F + user.getYRot());
 			if (Helper.spawnVortex(pos.x, pos.y, pos.z, minY, yrot, user.level(), user))
-				return CMConfig.GauntletOfMaelstromCooldown;
+				return CMCommonConfig.GauntletOfMaelstrom.cooldown;
 		} catch (Throwable e) {
 			LOGGER.throwing(e);
 		}
@@ -165,7 +166,7 @@ public class CataclysmProxy {
 					Helper.spawnFangs(user.getX() + (double) Mth.cos(f) * d2, headY, user.getZ() + (double) Mth.sin(f) * d2, standingOnY, f, i, level, user);
 				}
 			}
-			return CMConfig.VoidForgeCooldown;
+			return CMCommonConfig.VoidForge.cooldown;
 		} catch (Throwable e) {
 			LOGGER.throwing(e);
 		}
@@ -239,7 +240,8 @@ public class CataclysmProxy {
 			} while (blockpos.getY() >= Mth.floor(minY) - 1);
 
 			if (flag) {
-				world.addFreshEntity(new Phantom_Halberd_Entity(world, x, (double) blockpos.getY() + d0, z, rotation, delay, player, (float) CMConfig.PhantomHalberddamage));
+				world.addFreshEntity(new Phantom_Halberd_Entity(world, x, (double) blockpos.getY() + d0, z, rotation, delay, player,
+						(float) CMCommonConfig.SoulRender.phantomHalberdDamage));
 			}
 
 		}
@@ -301,7 +303,8 @@ public class CataclysmProxy {
 			} while (blockpos.getY() >= lowestYCheck);
 
 			if (flag) {
-				world.addFreshEntity(new Void_Rune_Entity(world, x, (double) blockpos.getY() + d0, z, yRot, warmupDelayTicks, (float) CMConfig.Voidrunedamage, player));
+				world.addFreshEntity(new Void_Rune_Entity(world, x, (double) blockpos.getY() + d0, z, yRot, warmupDelayTicks,
+						(float) CMCommonConfig.VoidForge.runeDamage, player));
 				return true;
 			} else {
 				return false;
@@ -321,7 +324,7 @@ public class CataclysmProxy {
 				}
 			}
 			infernalForgeParticles((ServerLevel) level, user, radius);
-			return CMConfig.InfernalForgeCooldown;
+			return CMCommonConfig.InfernalForge.cooldown;
 		}
 
 		private static void infernalForgeParticles(ServerLevel level, LivingEntity entity, double radius) {
@@ -354,13 +357,14 @@ public class CataclysmProxy {
 				double rad = Math.toRadians(angle);
 				double dx = -Math.sin(rad);
 				double dz = Math.cos(rad);
-				Wave_Entity WaveEntity = new Wave_Entity(level, user, 60, (float) CMConfig.CeraunusWaveDamage);
+				Wave_Entity WaveEntity = new Wave_Entity(level, user, 60,
+						(float) CMCommonConfig.Ceraunus.waveDamage);
 				WaveEntity.setPos(spawnX, spawnY, spawnZ);
 				WaveEntity.setState(1);
 				WaveEntity.setYRot(-((float) (Mth.atan2(dx, dz) * (180D / Math.PI))));
 				level.addFreshEntity(WaveEntity);
 			}
-			return CMConfig.CeraunusCooldown;
+			return CMCommonConfig.Ceraunus.cooldown;
 		} catch (Throwable ignored) {
 		}
 		return 20;
@@ -375,15 +379,16 @@ public class CataclysmProxy {
 			double Z = user.getZ() + vec3.z;
 			float yRot = (float) (Mth.atan2(vec3.z, vec3.x) * (180D / Math.PI)) + 90.0F;
 			float xRot = (float) (-(Mth.atan2(vec3.y, Math.sqrt(vec3.x * vec3.x + vec3.z * vec3.z)) * (180D / Math.PI)));
-			Lightning_Spear_Entity lightning = new Lightning_Spear_Entity(user, vec3.normalize(), level, (float) CMConfig.AstrapeDamage);
+			Lightning_Spear_Entity lightning = new Lightning_Spear_Entity(user, vec3.normalize(), level,
+					(float) CMCommonConfig.Astrape.damage, 2.5);
 			lightning.accelerationPower = 0.15;
 			lightning.setYRot(yRot);
 			lightning.setXRot(xRot);
 			lightning.setPosRaw(x, y, Z);
-			lightning.setAreaDamage((float) CMConfig.AstrapeAreaDamage);
+			lightning.setAreaDamage((float) CMCommonConfig.Astrape.areaDamage);
 			lightning.setAreaRadius(1.0F);
 			level.addFreshEntity(lightning);
-			return CMConfig.AstrapeCooldown;
+			return CMCommonConfig.Astrape.cooldown;
 		} catch (Throwable ignored) {
 
 		}
