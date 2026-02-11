@@ -70,3 +70,8 @@ Mob weapon compatibility layer
     mandatory=false
     versionRange="[2.62,)"
     side="BOTH"
+[[dependencies.mob_weapon_api]]
+    modId="l2complements"
+    mandatory=false
+    versionRange="[2.6.1,)"
+    side="BOTH"

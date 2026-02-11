@@ -22,6 +22,16 @@ public class L2ComplementsIntegration {
 				(golem, stack) -> new WinterstormWandBehavior(), 50
 		);
 
+		WeaponRegistry.HOLD.register(LCItems.HELIOS_SCEPTER.getId(),
+				e -> WeaponStatus.RANGED.of(e.is(LCItems.HELIOS_SCEPTER.get())),
+				(golem, stack) -> new HeliosScepterBehavior(), 10
+		);
+
+		WeaponRegistry.HOLD.register(LCItems.BOREAS_CEEPTER.getId(),
+				e -> WeaponStatus.OFFENSIVE.of(e.is(LCItems.BOREAS_CEEPTER.get())),
+				(golem, stack) -> new BoreasScepterBehavior(), 50
+		);
+
 	}
 
 }
