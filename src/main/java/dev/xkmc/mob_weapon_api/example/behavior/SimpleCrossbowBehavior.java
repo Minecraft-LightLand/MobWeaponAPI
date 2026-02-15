@@ -35,6 +35,7 @@ public class SimpleCrossbowBehavior implements ICrossbowBehavior {
 
 	@Override
 	public boolean tryCharge(ProjectileWeaponUser user, ItemStack stack) {
+		if (CrossbowItem.isCharged(stack)) return true;
 		if (CrossbowItem.tryLoadProjectiles(user.user(), stack)) {
 			CrossbowItem.setCharged(stack, true);
 			return true;
