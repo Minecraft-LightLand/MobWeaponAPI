@@ -3,7 +3,10 @@ plugins {
     id 'eclipse'
     id 'idea'
     id 'maven-publish'
-    id 'net.neoforged.gradle.userdev' version '7.0.165'
+    id 'net.neoforged.moddev' version '2.0.80'
+    id 'net.darkhax.curseforgegradle' version '[1.1.24,)'
+    id "at.stnwtr.gradle-secrets-plugin" version "1.0.1"
+    id "com.modrinth.minotaur" version "2.+"
 }
 
 version = mod_version
@@ -17,36 +20,52 @@ base {
     archivesName = mod_id
 }
 
+java {
+    withSourcesJar()
+}
+
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
-minecraft.accessTransformers.file rootProject.file('src/main/resources/META-INF/accesstransformer.cfg')
+sourceSets {
+    client {}
+    server {}
+    data {}
+    common {}
+}
 
-runs {
-    configureEach {
-        systemProperty 'forge.logging.markers', 'REGISTRIES'
-        systemProperty 'forge.logging.console.level', 'debug'
-        modSource project.sourceSets.main
+neoForge {
+    // We currently only support NeoForge versions later than 21.0.x
+    // See https://projects.neoforged.net/neoforged/neoforge for the latest updates
+    version = "${neo_version}"
+
+    // Validate AT files and raise errors when they have invalid targets
+    // This option is false by default, but turning it on is recommended
+    //validateAccessTransformers = true
+    accessTransformers.from "./src/main/resources/META-INF/accesstransformer.cfg"
+
+    runs {
+        client {
+            client()
+        }
+        data {
+            data()
+
+            programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+
+        }
+        server {
+            server()
+        }
     }
-    client {
-        systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
-    }
-    server {
-        systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
-    }
-    gameTestServer {
-        systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
-    }
-    data {
-        programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+
+    mods {
+        "${mod_id}" {
+            sourceSet sourceSets.main
+        }
     }
 }
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
-
-
-dependencies {
-    implementation "net.neoforged:neoforge:${neo_version}"
-}
 
 tasks.withType(ProcessResources).configureEach {
     var replaceProperties = [
@@ -81,12 +100,6 @@ tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
 }
 
-if (lljij.toBoolean()) jarJar.enable()
-
-java {
-    withSourcesJar()
-}
-
 jar {
     manifest {
         attributes([
@@ -100,18 +113,6 @@ jar {
                 'MixinConfigs'            : "${mod_id}.mixins.json"
         ])
     }
-}
-
-if (lljij.toBoolean()) {
-
-    tasks.jarJar.configure {
-        archiveClassifier.set('')
-    }
-
-    jar {
-        archiveClassifier.set('slim')
-    }
-
 }
 
 repositories {
@@ -159,7 +160,7 @@ dependencies {
     implementation "dev.xkmc:l2library:${l2library_ver}-slim"
     implementation "dev.xkmc:l2damagetracker:${l2damagetracker_ver}"
     runtimeOnly "dev.xkmc:l2backpack:${l2backpack_ver}"
-    implementation "dev.xkmc:l2complements:${l2complements_ver}-slim"
+    implementation "dev.xkmc:l2complements:${l2complements_ver}"
     implementation "dev.xkmc:modulargolems:${modulargolems_ver}-slim"
     runtimeOnly "vazkii.patchouli:Patchouli:${patchouli_ver}"
 
