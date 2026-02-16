@@ -79,7 +79,7 @@ public class GeneralCrossbowBehavior extends SimpleCrossbowBehavior {
 	}
 
 	private static AbstractArrow getArrow(CrossbowUseContext user, ItemStack bow, ItemStack ammo, float velocity) {
-		var ans = user.createArrow(ammo, velocity, bow);
+		var ans = user.createArrow(ammo, 1, bow);
 		ans.setCritArrow(true);
 		ans.setSoundEvent(SoundEvents.CROSSBOW_HIT);
 		return ans;
