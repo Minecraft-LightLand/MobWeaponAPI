@@ -8,6 +8,7 @@ import com.github.L_Ender.cataclysm.entity.projectile.*;
 import com.github.L_Ender.cataclysm.init.ModEntities;
 import com.github.L_Ender.cataclysm.init.ModParticle;
 import com.github.L_Ender.cataclysm.init.ModSounds;
+import com.github.L_Ender.cataclysm.util.AttributeUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.BlockParticleOption;
@@ -183,6 +184,18 @@ public class CataclysmProxy {
 		return 20;
 	}
 
+	public static @Nullable Projectile brontes(LivingEntity user, ItemStack stack, LivingEntity target) {
+		try {
+			Brontes_Entity brontes = new Brontes_Entity(user.level(), user);
+			brontes.setBaseDamage(AttributeUtils.OriginDamage(target, stack));
+			brontes.setAreaDamage((float) CMCommonConfig.Brontes.stormareadamage);
+			brontes.setStormDamage((float) com.github.L_Ender.cataclysm.config.CMCommonConfig.Brontes.stormdamage);
+			return brontes;
+		} catch (Throwable e) {
+			LOGGER.throwing(e);
+		}
+		return null;
+	}
 
 	public record ProjectileData(Projectile proj, float speed, float gravity, int cooldown) {
 
