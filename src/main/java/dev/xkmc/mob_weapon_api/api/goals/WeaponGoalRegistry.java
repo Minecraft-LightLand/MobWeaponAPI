@@ -19,15 +19,17 @@ public class WeaponGoalRegistry<E extends Mob> {
 	public <T extends Goal & IWeaponGoal<E>> void register(ResourceLocation id, IWeaponStatusPredicate item, IWeaponGoalFactory<E, T> goal) {
 		knowledge.put(id, new WeaponGoalEntry<>(item, goal));
 	}
-
 	@Nullable
 	public WeaponSearchResult<E> find(LivingEntity user, ItemStack weapon, @Nullable InteractionHand hand) {
+		WeaponSearchResult<E> ans = null;
 		for (var ent : knowledge.entrySet()) {
 			var status = ent.getValue().item().getProperties(user, weapon, hand);
-			if (status.isPresent())
-				return new WeaponSearchResult<>(ent.getKey(), status.get(), ent.getValue());
+			if (status.isPresent()) {
+				if (ans == null || status.get().priority() > ans.status.priority())
+					ans = new WeaponSearchResult<>(ent.getKey(), status.get(), ent.getValue());
+			}
 		}
-		return null;
+		return ans;
 	}
 
 	public record WeaponSearchResult<E extends Mob>(
