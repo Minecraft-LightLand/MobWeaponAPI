@@ -106,7 +106,7 @@ public class AbstractWeaponManager<T extends Mob & IWeaponHolder> {
 					return false;
 				}
 			}
-			return meleeGoal.canReachTarget(target);
+			return !mainGoal.isMelee() && meleeGoal.canReachTarget(target);
 		}
 		if (offGoal != null && offGoal.isRanged()) {
 			if (!offGoal.mayActivate()) return false;

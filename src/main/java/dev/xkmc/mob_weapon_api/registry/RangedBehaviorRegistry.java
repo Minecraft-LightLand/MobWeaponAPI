@@ -34,11 +34,15 @@ public class RangedBehaviorRegistry<T> {
 	}
 
 	public Optional<WeaponStatus> getProperties(ItemStack stack) {
+		WeaponStatus ans = null;
 		for (var e : MAP.values()) {
 			var status = e.item().getProperties(stack);
-			if (status.isPresent())
-				return Optional.of(status.get().withPriority(e.priority));
+			if (status.isPresent()) {
+				if (ans == null || status.get().priority() > ans.priority())
+					ans = status.get().withPriority(e.priority);
+			}
 		}
+		if (ans != null) return Optional.of(ans);
 		return fallback == null ? Optional.empty() : fallback.item().getProperties(stack);
 	}
 
