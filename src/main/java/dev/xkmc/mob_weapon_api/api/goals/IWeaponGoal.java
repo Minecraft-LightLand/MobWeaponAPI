@@ -11,4 +11,8 @@ public interface IWeaponGoal<E extends Mob> {
 
 	double range(ItemStack stack);
 
+	default boolean shouldUseForMelee() {
+		return true;
+	}
+
 }

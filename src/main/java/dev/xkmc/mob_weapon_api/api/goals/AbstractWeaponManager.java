@@ -56,7 +56,7 @@ public class AbstractWeaponManager<T extends Mob & IWeaponHolder> {
 				currentGoal = ans.holder();
 				user.goalSelector.addGoal(2, currentGoal.goal());
 
-				if (!ans.isMelee()) {
+				if (!ans.status().isMelee()) {
 					if (meleeActive) {
 						user.goalSelector.removeGoal(meleeGoal.asGoal());
 						meleeActive = false;
@@ -140,7 +140,7 @@ public class AbstractWeaponManager<T extends Mob & IWeaponHolder> {
 		}
 
 		public boolean isMelee() {
-			return status().isMelee();
+			return status().isMelee() && holder.goal.shouldUseForMelee();
 		}
 
 		public boolean isRanged() {
