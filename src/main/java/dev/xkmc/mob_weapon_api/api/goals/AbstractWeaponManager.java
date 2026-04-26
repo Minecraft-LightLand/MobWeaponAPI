@@ -56,7 +56,7 @@ public class AbstractWeaponManager<T extends Mob & IWeaponHolder> {
 				currentGoal = ans.holder();
 				user.goalSelector.addGoal(2, currentGoal.goal());
 
-				if (!ans.isMelee()) {
+				if (!ans.status().isMelee()) {
 					if (meleeActive) {
 						user.goalSelector.removeGoal(meleeGoal.asGoal());
 						meleeActive = false;
@@ -81,7 +81,7 @@ public class AbstractWeaponManager<T extends Mob & IWeaponHolder> {
 
 	public boolean isRangedModeAvailable(ItemStack stack) {
 		var goal = getGoalForWeapon(stack, null);
-		return goal != null && goal.isRanged() && goal.mayActivate();
+		return goal != null && goal.isRanged() && goal.isAvailable();
 	}
 
 	public boolean checkSwitch(@Nullable LivingEntity target, ItemWrapper mainhand, ItemWrapper offhand) {
@@ -94,7 +94,7 @@ public class AbstractWeaponManager<T extends Mob & IWeaponHolder> {
 				return false;
 			}
 			if (!mainGoal.mayActivate()) {
-				if (!mainGoal.isMelee())
+				if (!mainGoal.isMelee(off))
 					return true;
 			}
 			if (offGoal != null) {
@@ -102,11 +102,11 @@ public class AbstractWeaponManager<T extends Mob & IWeaponHolder> {
 					if (offGoal.isWithinRange(target, 0))
 						return true;
 				}
-				if (!offGoal.isMelee() && offGoal.isRanged()) {
+				if (!offGoal.isMelee(main) && offGoal.isRanged()) {
 					return false;
 				}
 			}
-			return !mainGoal.isMelee() && meleeGoal.canReachTarget(target);
+			return !mainGoal.isMelee(off) && meleeGoal.canReachTarget(target);
 		}
 		if (offGoal != null && offGoal.isRanged()) {
 			if (!offGoal.mayActivate()) return false;
@@ -140,7 +140,11 @@ public class AbstractWeaponManager<T extends Mob & IWeaponHolder> {
 		}
 
 		public boolean isMelee() {
-			return status().isMelee();
+			return isMelee(ItemStack.EMPTY);
+		}
+
+		public boolean isMelee(ItemStack other) {
+			return status().isMelee() && holder.goal.shouldUseForMelee(other);
 		}
 
 		public boolean isRanged() {
@@ -149,6 +153,10 @@ public class AbstractWeaponManager<T extends Mob & IWeaponHolder> {
 
 		public boolean mayActivate() {
 			return goal().mayActivate(stack);
+		}
+
+		public boolean isAvailable() {
+			return goal().isAvailable(stack);
 		}
 
 		public boolean isWithinRange(LivingEntity target, double buffer) {
