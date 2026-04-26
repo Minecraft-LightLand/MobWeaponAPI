@@ -119,7 +119,7 @@ public class AbstractWeaponManager<T extends Mob & IWeaponHolder> {
 					return false;
 				}
 			}
-			return !meleeGoal.canReachTarget(target);
+			return !meleeGoal.canReachTarget(target) || offGoal.isMelee(main);
 		}
 		return main.isEmpty() && !off.isEmpty();
 	}
