@@ -3,7 +3,7 @@ package dev.xkmc.mob_weapon_api.api.goals;
 import dev.xkmc.mob_weapon_api.api.ai.IWeaponHolder;
 import dev.xkmc.mob_weapon_api.api.ai.ItemWrapper;
 import dev.xkmc.mob_weapon_api.registry.WeaponStatus;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -19,7 +19,7 @@ public class AbstractWeaponManager<T extends Mob & IWeaponHolder> {
 	private final WeaponGoalRegistry<T> registry;
 	private final T user;
 	private final IMeleeGoal meleeGoal;
-	private final LinkedHashMap<ResourceLocation, WeaponGoalHolder<?>> goals = new LinkedHashMap<>();
+	private final LinkedHashMap<Identifier, WeaponGoalHolder<?>> goals = new LinkedHashMap<>();
 
 	@Nullable
 	private WeaponGoalHolder<?> currentGoal = null;
@@ -124,7 +124,7 @@ public class AbstractWeaponManager<T extends Mob & IWeaponHolder> {
 		return main.isEmpty() && !off.isEmpty();
 	}
 
-	private record WeaponGoalHolder<T extends Goal & IWeaponGoal>(ResourceLocation id, T goal) {
+	private record WeaponGoalHolder<T extends Goal & IWeaponGoal>(Identifier id, T goal) {
 	}
 
 	private record WeaponHolder<E extends Mob, T extends Goal & IWeaponGoal>(

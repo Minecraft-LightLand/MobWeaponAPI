@@ -1,6 +1,6 @@
 package dev.xkmc.mob_weapon_api.registry;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -10,22 +10,22 @@ import java.util.Optional;
 
 public class RangedBehaviorRegistry<T> {
 
-	private final ResourceLocation id;
-	private final LinkedHashMap<ResourceLocation, RangedBehaviorEntry<T>> MAP = new LinkedHashMap<>();
+	private final Identifier id;
+	private final LinkedHashMap<Identifier, RangedBehaviorEntry<T>> MAP = new LinkedHashMap<>();
 	@Nullable
 	private final RangedBehaviorEntry<T> fallback;
 
-	public RangedBehaviorRegistry(ResourceLocation id) {
+	public RangedBehaviorRegistry(Identifier id) {
 		this.id = id;
 		fallback = null;
 	}
 
-	public RangedBehaviorRegistry(ResourceLocation id, RangedStatusPredicate item, RangedBehaviorFactory<T> factory) {
+	public RangedBehaviorRegistry(Identifier id, RangedStatusPredicate item, RangedBehaviorFactory<T> factory) {
 		this.id = id;
 		this.fallback = new RangedBehaviorEntry<>(item, factory, 0);
 	}
 
-	public void register(ResourceLocation id, RangedStatusPredicate item, RangedBehaviorFactory<T> factory, int priority) {
+	public void register(Identifier id, RangedStatusPredicate item, RangedBehaviorFactory<T> factory, int priority) {
 		MAP.put(id, new RangedBehaviorEntry<>(item, factory, priority));
 	}
 

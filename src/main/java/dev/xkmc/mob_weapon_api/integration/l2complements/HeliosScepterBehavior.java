@@ -1,7 +1,6 @@
 package dev.xkmc.mob_weapon_api.integration.l2complements;
 
 import dev.xkmc.l2complements.content.item.wand.HeliosScepter;
-import dev.xkmc.l2complements.content.item.wand.HellfireWand;
 import dev.xkmc.mob_weapon_api.api.projectile.ProjectileWeaponUser;
 import dev.xkmc.mob_weapon_api.api.simple.IHoldWeaponBehavior;
 import net.minecraft.server.level.ServerLevel;

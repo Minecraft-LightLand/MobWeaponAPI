@@ -2,7 +2,7 @@ package dev.xkmc.mob_weapon_api.api.goals;
 
 import dev.xkmc.mob_weapon_api.registry.IWeaponStatusPredicate;
 import dev.xkmc.mob_weapon_api.registry.WeaponStatus;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -14,11 +14,12 @@ import java.util.LinkedHashMap;
 
 public class WeaponGoalRegistry<E extends Mob> {
 
-	private final LinkedHashMap<ResourceLocation, WeaponGoalEntry<E>> knowledge = new LinkedHashMap<>();
+	private final LinkedHashMap<Identifier, WeaponGoalEntry<E>> knowledge = new LinkedHashMap<>();
 
-	public <T extends Goal & IWeaponGoal<E>> void register(ResourceLocation id, IWeaponStatusPredicate item, IWeaponGoalFactory<E, T> goal) {
+	public <T extends Goal & IWeaponGoal<E>> void register(Identifier id, IWeaponStatusPredicate item, IWeaponGoalFactory<E, T> goal) {
 		knowledge.put(id, new WeaponGoalEntry<>(item, goal));
 	}
+
 	@Nullable
 	public WeaponSearchResult<E> find(LivingEntity user, ItemStack weapon, @Nullable InteractionHand hand) {
 		WeaponSearchResult<E> ans = null;
@@ -33,7 +34,7 @@ public class WeaponGoalRegistry<E extends Mob> {
 	}
 
 	public record WeaponSearchResult<E extends Mob>(
-			ResourceLocation id, WeaponStatus status, WeaponGoalEntry<E> entry
+			Identifier id, WeaponStatus status, WeaponGoalEntry<E> entry
 	) {
 	}
 

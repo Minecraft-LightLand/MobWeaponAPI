@@ -39,5 +39,5 @@ public class DummyProjectileWeapon extends ProjectileWeaponItem {
 	protected void shootProjectile(LivingEntity livingEntity, Projectile projectile, int i, float v, float v1, float v2, @Nullable LivingEntity livingEntity1) {
 
 	}
-	
+
 }

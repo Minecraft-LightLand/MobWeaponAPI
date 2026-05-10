@@ -18,7 +18,7 @@ import dev.xkmc.mob_weapon_api.integration.l2complements.L2ComplementsIntegratio
 import dev.xkmc.mob_weapon_api.integration.l2weaponry.L2WeaponryIntegration;
 import dev.xkmc.mob_weapon_api.integration.twilightforest.TFIntegration;
 import dev.xkmc.mob_weapon_api.registry.WeaponRegistry;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -29,7 +29,7 @@ import org.slf4j.Logger;
 import twilightforest.TwilightForestMod;
 
 @Mod(MobWeaponAPI.MODID)
-@EventBusSubscriber(modid = MobWeaponAPI.MODID, bus = EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = MobWeaponAPI.MODID)
 public class MobWeaponAPI {
 
 	public static final String MODID = "mob_weapon_api";
@@ -63,8 +63,8 @@ public class MobWeaponAPI {
 	public static void gatherData(GatherDataEvent event) {
 	}
 
-	public static ResourceLocation loc(String id) {
-		return ResourceLocation.fromNamespaceAndPath(MODID, id);
+	public static Identifier loc(String id) {
+		return Identifier.fromNamespaceAndPath(MODID, id);
 	}
 
 }

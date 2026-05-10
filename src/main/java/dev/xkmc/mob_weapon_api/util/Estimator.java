@@ -53,7 +53,7 @@ public class Estimator {
 	}
 
 	public static SolResult solve(Function<Double, Double> f2, Function<Double, Double> f1, double v, double x0,
-								  double x1, double err) {
+	                              double x1, double err) {
 		SolResult sr = solve(f1, 0, x0, x1, err);
 		if (sr.getType() == SolType.ZERO) {
 			double tip = sr.getVal();

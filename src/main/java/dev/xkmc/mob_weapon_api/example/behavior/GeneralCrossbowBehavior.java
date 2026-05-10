@@ -1,6 +1,5 @@
 package dev.xkmc.mob_weapon_api.example.behavior;
 
-import dev.xkmc.l2core.init.reg.ench.EnchHelper;
 import dev.xkmc.mob_weapon_api.api.projectile.CrossbowUseContext;
 import dev.xkmc.mob_weapon_api.api.projectile.ProjectileWeaponUseContext;
 import net.minecraft.core.component.DataComponents;
@@ -16,7 +15,6 @@ import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import net.minecraft.world.item.enchantment.Enchantments;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
