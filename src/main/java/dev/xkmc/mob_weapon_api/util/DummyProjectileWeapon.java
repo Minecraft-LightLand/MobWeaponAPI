@@ -14,7 +14,8 @@ public class DummyProjectileWeapon extends ProjectileWeaponItem {
 
 	public static ItemEntry<DummyProjectileWeapon> create(String id, Predicate<ItemStack> pred) {
 		return MobWeaponAPI.REGISTRATE.item(id, p -> new DummyProjectileWeapon(p, pred))
-				.model((ctx, pvd) -> pvd.withExistingParent("item/" + ctx.getName(), "block/air"))
+				.model(() -> (ctx, pvd) ->
+						pvd.createWithExistingModel(ctx.get(), pvd.mcLoc("block/air")))
 				.register();
 	}
 

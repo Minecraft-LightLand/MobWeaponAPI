@@ -2,7 +2,7 @@ package dev.xkmc.mob_weapon_api.example.user;
 
 import dev.xkmc.mob_weapon_api.api.projectile.BowUseContext;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.monster.AbstractSkeleton;
+import net.minecraft.world.entity.monster.skeleton.AbstractSkeleton;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 

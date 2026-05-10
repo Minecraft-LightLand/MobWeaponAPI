@@ -44,7 +44,7 @@ public class AbstractWeaponManager<T extends Mob & IWeaponHolder> {
 	}
 
 	public void reassessWeaponGoal() {
-		if (user.level().isClientSide) return;
+		if (user.level().isClientSide()) return;
 		InteractionHand hand = user.getWeaponHand();
 		ItemStack weapon = user.getItemInHand(hand);
 		if (!weapon.isEmpty()) {

@@ -2,9 +2,9 @@ package dev.xkmc.mob_weapon_api.example.behavior;
 
 import dev.xkmc.mob_weapon_api.api.projectile.ProjectileWeaponUser;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.entity.projectile.Projectile;
-import net.minecraft.world.entity.projectile.ThrownTrident;
+import net.minecraft.world.entity.projectile.arrow.ThrownTrident;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 

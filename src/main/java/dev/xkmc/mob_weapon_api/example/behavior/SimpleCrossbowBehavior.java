@@ -28,7 +28,7 @@ public class SimpleCrossbowBehavior implements ICrossbowBehavior {
 	public List<ItemStack> getLoadedProjectile(LivingEntity user, ItemStack stack) {
 		var data = stack.get(DataComponents.CHARGED_PROJECTILES);
 		if (data == null) return List.of();
-		return data.getItems();
+		return data.itemCopies();
 	}
 
 	@Override

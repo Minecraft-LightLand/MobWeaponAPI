@@ -6,8 +6,7 @@ import dev.xkmc.mob_weapon_api.api.projectile.ProjectileProperties;
 import dev.xkmc.mob_weapon_api.api.projectile.ProjectileWeaponUser;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.ItemStack;
 
@@ -50,7 +49,7 @@ public class SimpleBowBehavior implements IBowBehavior {
 		user.user().playSound(SoundEvents.ARROW_SHOOT, 1.0F, 1.0F / (user.user().getRandom().nextFloat() * 0.4F + 0.8F));
 		user.user().level().addFreshEntity(arrowEntity);
 		if (!user.bypassAllConsumption()) {
-			stack.hurtAndBreak(1, user.user(), LivingEntity.getSlotForHand(hand));
+			stack.hurtAndBreak(1, user.user(), hand.asEquipmentSlot());
 		}
 		return 10;
 	}

@@ -9,7 +9,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.entity.projectile.FireworkRocketEntity;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
@@ -69,7 +69,7 @@ public class GeneralCrossbowBehavior extends SimpleCrossbowBehavior {
 		aim.shoot(projectile, angle);
 		projectile.setDeltaMovement(projectile.getDeltaMovement().normalize().scale(velocity));
 		if (!ctx.bypassAllConsumption()) {
-			stack.hurtAndBreak(rocket ? 3 : 1, user, LivingEntity.getSlotForHand(hand));
+			stack.hurtAndBreak(rocket ? 3 : 1, user, hand.asEquipmentSlot());
 		}
 		level.addFreshEntity(projectile);
 		level.playSound(null, user.getX(), user.getY(), user.getZ(), SoundEvents.CROSSBOW_SHOOT, SoundSource.PLAYERS, 1.0F, rand);

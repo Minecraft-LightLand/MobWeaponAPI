@@ -4,6 +4,7 @@ import dev.xkmc.mob_weapon_api.api.ai.IWeaponHolder;
 import dev.xkmc.mob_weapon_api.api.goals.IMeleeGoal;
 import dev.xkmc.mob_weapon_api.api.goals.IRangedWeaponGoal;
 import dev.xkmc.mob_weapon_api.registry.WeaponStatus;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -77,9 +78,9 @@ public abstract class SmartRangedAttackGoal<E extends Mob> extends Goal implemen
 		}
 		var target = mob.getTarget();
 		if (target == null) return;
-		if (melee.canReachTarget(target)) {
+		if (melee.canReachTarget(target) && mob.level() instanceof ServerLevel sl) {
 			onMelee();
-			this.mob.doHurtTarget(target);
+			this.mob.doHurtTarget(sl, target);
 			meleeTime = melee.getMeleeInterval();
 		}
 	}
