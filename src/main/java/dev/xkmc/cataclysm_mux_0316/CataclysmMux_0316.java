@@ -1,11 +1,11 @@
-package dev.xkmc.cataclysm_mux;
+package dev.xkmc.cataclysm_mux_0316;
 
 import net.minecraftforge.fml.common.Mod;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-@Mod(CataclysmMux.MODID)
-public class CataclysmMux {
+@Mod(CataclysmMux_0316.MODID)
+public class CataclysmMux_0316 {
 
 	public static final String MODID = "cataclysm_mux";
 

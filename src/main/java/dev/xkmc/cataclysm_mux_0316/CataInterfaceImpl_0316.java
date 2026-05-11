@@ -1,4 +1,4 @@
-package dev.xkmc.cataclysm_mux;
+package dev.xkmc.cataclysm_mux_0316;
 
 import com.github.L_Ender.cataclysm.config.CMConfig;
 import com.github.L_Ender.cataclysm.entity.AnimationMonster.BossMonsters.The_Leviathan.Abyss_Blast_Portal_Entity;
@@ -9,6 +9,7 @@ import com.github.L_Ender.cataclysm.init.ModEffect;
 import com.github.L_Ender.cataclysm.init.ModEntities;
 import com.github.L_Ender.cataclysm.init.ModParticle;
 import com.github.L_Ender.cataclysm.init.ModSounds;
+import dev.xkmc.cataclysm_mux.CataInterface;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.BlockParticleOption;
@@ -35,7 +36,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class CataInterfaceImpl implements CataInterface {
+public class CataInterfaceImpl_0316 implements CataInterface {
 
 	// 逻辑
 	public boolean isLaser(DamageSource source) {
