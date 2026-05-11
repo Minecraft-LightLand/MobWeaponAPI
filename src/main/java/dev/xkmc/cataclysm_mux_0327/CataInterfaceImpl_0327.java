@@ -414,7 +414,7 @@ public class CataInterfaceImpl_0327 implements CataInterface {
 		double Z = user.getZ() + vec3.z;
 		float yRot = (float) (Mth.atan2(vec3.z, vec3.x) * (180D / Math.PI)) + 90.0F;
 		float xRot = (float) (-(Mth.atan2(vec3.y, Math.sqrt(vec3.x * vec3.x + vec3.z * vec3.z)) * (180D / Math.PI)));
-		Lightning_Spear_Entity lightning = new Lightning_Spear_Entity(user, vec3.normalize(), level, (float) CMCommonConfig.Astrape.damage, 0.0);
+		Lightning_Spear_Entity lightning = new Lightning_Spear_Entity(user, vec3.normalize(), level, (float) CMCommonConfig.Astrape.damage, 2.5);
 		lightning.accelerationPower = 0.15;
 		lightning.setYRot(yRot);
 		lightning.setXRot(xRot);
