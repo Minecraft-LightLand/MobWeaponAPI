@@ -1,6 +1,6 @@
-package dev.xkmc.cataclysm_mux_0316;
+package dev.xkmc.cataclysm_mux_0327;
 
-import com.github.L_Ender.cataclysm.config.CMConfig;
+import com.github.L_Ender.cataclysm.config.CMCommonConfig;
 import com.github.L_Ender.cataclysm.entity.AnimationMonster.BossMonsters.The_Leviathan.Abyss_Blast_Portal_Entity;
 import com.github.L_Ender.cataclysm.entity.AnimationMonster.BossMonsters.The_Leviathan.Portal_Abyss_Blast_Entity;
 import com.github.L_Ender.cataclysm.entity.effect.*;
@@ -36,7 +36,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class CataInterfaceImpl_0316 implements CataInterface {
+public class CataInterfaceImpl_0327 implements CataInterface {
 
 	// 逻辑
 	public boolean isLaser(DamageSource source) {
@@ -83,21 +83,21 @@ public class CataInterfaceImpl_0316 implements CataInterface {
 		Death_Laser_Beam_Entity beam = new Death_Laser_Beam_Entity(ModEntities.DEATH_LASER_BEAM.get(),
 				user.level(), user, user.getX(), user.getEyeY(), user.getZ(),
 				(user.yHeadRot + 90.0F) * Mth.DEG_TO_RAD,
-				-user.getXRot() * Mth.DEG_TO_RAD, dur, (float) CMConfig.DeathLaserdamage, (float) CMConfig.DeathLaserHpdamage);
+				-user.getXRot() * Mth.DEG_TO_RAD, dur, (float) CMCommonConfig.Harbinger.DeathLaserdamage, (float) CMCommonConfig.Harbinger.DeathLaserHpdamage);
 		user.level().addFreshEntity(beam);
 		return beam;
 	}
 
 	public float monstrosityEarthquakeDamage() {
 
-		return (float) CMConfig.MonstrositysHpdamage;
+		return (float) CMCommonConfig.NetheriteMonstrosity.SmashHpdamage;
 
 
 	}
 
 	public float maledictusEarthquakeDamage() {
 
-		return (float) CMConfig.MaledictusAOEHpDamage;
+		return (float) CMCommonConfig.Maledictus.SmashHpDamage;
 
 
 	}
@@ -117,7 +117,7 @@ public class CataInterfaceImpl_0316 implements CataInterface {
 		int i = old == null ? 0 : Math.min(4, old.getAmplifier() + 1);
 		MobEffectInstance ins = new MobEffectInstance(eff, 240, i, false, true, true);
 		target.addEffect(ins);
-		user.heal(factor * (float) CMConfig.IgnisHealingMultiplier * (float) (i + 1));
+		user.heal(factor * (float) CMCommonConfig.Ignis.HealingMultiplier * (float) (i + 1));
 
 	}
 
@@ -205,7 +205,7 @@ public class CataInterfaceImpl_0316 implements CataInterface {
 	public void addMissile(LivingEntity user, LivingEntity target, Vec3 pos) {
 
 		var diff = target.getEyePosition().subtract(pos).normalize();
-		Wither_Homing_Missile_Entity laserBeam = new Wither_Homing_Missile_Entity(user, diff, user.level(), (float) CMConfig.HarbingerWitherMissiledamage, target);
+		Wither_Homing_Missile_Entity laserBeam = new Wither_Homing_Missile_Entity(user, diff, user.level(), (float) CMCommonConfig.Harbinger.WitherMissiledamage, target);
 		laserBeam.setPosRaw(pos.x(), pos.y(), pos.z());
 		user.level().addFreshEntity(laserBeam);
 
@@ -243,7 +243,7 @@ public class CataInterfaceImpl_0316 implements CataInterface {
 		int minY = Mth.floor(user.getY()) - 10;
 		float yrot = (float) Math.toRadians(90.0F + user.getYRot());
 		if (spawnVortex(pos.x, pos.y, pos.z, minY, yrot, user.level(), user))
-			return CMConfig.GauntletOfMaelstromCooldown;
+			return CMCommonConfig.GauntletOfMaelstrom.cooldown;
 
 		return 20;
 	}
@@ -263,7 +263,7 @@ public class CataInterfaceImpl_0316 implements CataInterface {
 				spawnFangs(user.getX() + (double) Mth.cos(f) * d2, headY, user.getZ() + (double) Mth.sin(f) * d2, standingOnY, f, i, level, user);
 			}
 		}
-		return CMConfig.VoidForgeCooldown;
+		return CMCommonConfig.VoidForge.cooldown;
 	}
 
 	public void addRune(LivingEntity user, LivingEntity target) {
@@ -284,7 +284,7 @@ public class CataInterfaceImpl_0316 implements CataInterface {
 	public void spawnBlastPortal(LivingEntity user, double x, double y, double z, float rotation, int delay) {
 
 		user.level().addFreshEntity(new Abyss_Blast_Portal_Entity(user.level(), x, y, z, rotation, delay,
-				(float) CMConfig.AbyssBlastdamage, (float) CMConfig.AbyssBlastHpdamage, user));
+				(float) CMCommonConfig.Leviathan.AbyssBlastDamage, (float) CMCommonConfig.Leviathan.AbyssBlastHpDamage, user));
 
 	}
 
@@ -295,7 +295,7 @@ public class CataInterfaceImpl_0316 implements CataInterface {
 		if (player.level() instanceof ServerLevel sl) {
 			strikeWindmillHalberd(sl, pos, player, 7, 5, 1.0F, 1.0F, 0.2, delay);
 		}
-		return CMConfig.SoulRenderCooldown;
+		return CMCommonConfig.SoulRender.cooldown;
 
 	}
 
@@ -306,7 +306,7 @@ public class CataInterfaceImpl_0316 implements CataInterface {
 
 		Phantom_Arrow_Entity hommingArrowEntity;
 		hommingArrowEntity = new Phantom_Arrow_Entity(level, player, target);
-		hommingArrowEntity.setBaseDamage(CMConfig.PlayerPhantomArrowbasedamage);
+		hommingArrowEntity.setBaseDamage(CMCommonConfig.Maledictus.PhantomArrowDamage);
 		return hommingArrowEntity;
 
 
@@ -316,7 +316,7 @@ public class CataInterfaceImpl_0316 implements CataInterface {
 	public Entity createGhostStorm(LivingEntity user, Vec3 pos, Vec3 rot, LivingEntity target) {
 
 		Cursed_Sandstorm_Entity e = new Cursed_Sandstorm_Entity(user, rot.x, rot.y, rot.z, user.level(),
-				(float) CMConfig.CursedSandstormDamage, target);
+				(float) CMCommonConfig.Wadjet.Sandstorm_damage, target);
 		e.setPos(pos.x, user.getEyeY() - 0.5, pos.z);
 		e.setUp(15);
 		return e;
@@ -326,7 +326,7 @@ public class CataInterfaceImpl_0316 implements CataInterface {
 	public void shootLaserGatling(LivingEntity user, Vec3 vec3) {
 
 		Level level = user.level();
-		Laser_Beam_Entity laser = new Laser_Beam_Entity(user, vec3.x, vec3.y, vec3.z, level, (float) CMConfig.Laserdamage);
+		Laser_Beam_Entity laser = new Laser_Beam_Entity(user, vec3, level, (float) CMCommonConfig.LaserGatling.damage);
 		float yRot = (float) (Mth.atan2(vec3.z, vec3.x) * Mth.RAD_TO_DEG) + 90;
 		float xRot = (float) (-(Mth.atan2(vec3.y, Math.sqrt(vec3.x * vec3.x + vec3.z * vec3.z)) * Mth.RAD_TO_DEG));
 		laser.setYRot(yRot);
@@ -344,7 +344,7 @@ public class CataInterfaceImpl_0316 implements CataInterface {
 		Level level = player.level();
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), ModSounds.ROCKET_LAUNCH.get(), SoundSource.PLAYERS, 1.0F, 0.7F);
 		Void_Howitzer_Entity rocket = new Void_Howitzer_Entity(ModEntities.VOID_HOWITZER.get(), level, player);
-		return new CataInterface.ProjectileData(rocket, 1, 0.03f, CMConfig.VASWCooldown);
+		return new CataInterface.ProjectileData(rocket, 1, 0.03f, CMCommonConfig.VASW.howitzerCooldown);
 
 	}
 
@@ -355,9 +355,9 @@ public class CataInterfaceImpl_0316 implements CataInterface {
 		double x = player.getX() + offset.x;
 		double z = player.getZ() + offset.y;
 		Wither_Missile_Entity rocket = new Wither_Missile_Entity(ModEntities.WITHER_MISSILE.get(),
-				player, x, player.getEyeY(), z, dir.x, dir.y, dir.z, (float) CMConfig.WASWMissileDamage, level);
+				player, x, player.getEyeY(), z, dir, (float) CMCommonConfig.WASW.missileDamage, level);
 		level.addFreshEntity(rocket);
-		return CMConfig.WASWMissileCooldown;
+		return CMCommonConfig.WASW.missileCooldown;
 
 
 	}
@@ -376,7 +376,7 @@ public class CataInterfaceImpl_0316 implements CataInterface {
 			}
 		}
 		infernalForgeParticles((ServerLevel) level, user, radius);
-		return CMConfig.InfernalForgeCooldown;
+		return CMCommonConfig.InfernalForge.cooldown;
 
 	}
 
@@ -396,13 +396,13 @@ public class CataInterfaceImpl_0316 implements CataInterface {
 			double rad = Math.toRadians(angle);
 			double dx = -Math.sin(rad);
 			double dz = Math.cos(rad);
-			Wave_Entity WaveEntity = new Wave_Entity(level, user, 60, (float) CMConfig.CeraunusWaveDamage);
+			Wave_Entity WaveEntity = new Wave_Entity(level, user, 60, (float) CMCommonConfig.Ceraunus.waveDamage);
 			WaveEntity.setPos(spawnX, spawnY, spawnZ);
 			WaveEntity.setState(1);
 			WaveEntity.setYRot(-((float) (Mth.atan2(dx, dz) * (180D / Math.PI))));
 			level.addFreshEntity(WaveEntity);
 		}
-		return CMConfig.CeraunusCooldown;
+		return CMCommonConfig.Ceraunus.cooldown;
 	}
 
 	public int astrape(Level level, LivingEntity user, LivingEntity target) {
@@ -414,15 +414,15 @@ public class CataInterfaceImpl_0316 implements CataInterface {
 		double Z = user.getZ() + vec3.z;
 		float yRot = (float) (Mth.atan2(vec3.z, vec3.x) * (180D / Math.PI)) + 90.0F;
 		float xRot = (float) (-(Mth.atan2(vec3.y, Math.sqrt(vec3.x * vec3.x + vec3.z * vec3.z)) * (180D / Math.PI)));
-		Lightning_Spear_Entity lightning = new Lightning_Spear_Entity(user, vec3.normalize(), level, (float) CMConfig.AstrapeDamage);
+		Lightning_Spear_Entity lightning = new Lightning_Spear_Entity(user, vec3.normalize(), level, (float) CMCommonConfig.Astrape.damage, 0.0);
 		lightning.accelerationPower = 0.15;
 		lightning.setYRot(yRot);
 		lightning.setXRot(xRot);
 		lightning.setPosRaw(x, y, Z);
-		lightning.setAreaDamage((float) CMConfig.AstrapeAreaDamage);
+		lightning.setAreaDamage((float) CMCommonConfig.Astrape.areaDamage);
 		lightning.setAreaRadius(1.0F);
 		level.addFreshEntity(lightning);
-		return CMConfig.AstrapeCooldown;
+		return CMCommonConfig.Astrape.cooldown;
 	}
 
 	@Nullable
@@ -483,7 +483,7 @@ public class CataInterfaceImpl_0316 implements CataInterface {
 		} while (blockpos.getY() >= Mth.floor(minY) - 1);
 
 		if (flag) {
-			world.addFreshEntity(new Phantom_Halberd_Entity(world, x, (double) blockpos.getY() + d0, z, rotation, delay, player, (float) CMConfig.PhantomHalberddamage));
+			world.addFreshEntity(new Phantom_Halberd_Entity(world, x, (double) blockpos.getY() + d0, z, rotation, delay, player, (float) CMCommonConfig.SoulRender.phantomHalberdDamage));
 		}
 
 	}
@@ -544,7 +544,7 @@ public class CataInterfaceImpl_0316 implements CataInterface {
 		} while (pos.getY() >= Mth.floor(minY) - 1);
 
 		if (flag) {
-			level.addFreshEntity(new Void_Rune_Entity(level, x, pos.getY() + dy, z, rot, delay, (float) CMConfig.Voidrunedamage, player));
+			level.addFreshEntity(new Void_Rune_Entity(level, x, pos.getY() + dy, z, rot, delay, (float) CMCommonConfig.VoidForge.runeDamage, player));
 			return true;
 		} else {
 			return false;
