@@ -10,23 +10,24 @@ import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.loading.LoadingModList;
+import net.minecraftforge.fml.loading.moddiscovery.ModFileInfo;
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.jetbrains.annotations.Nullable;
 
 public interface CataInterface {
 
+	@Nullable
 	static CataInterface get() {
 		try {
-			var v = ModList.get().getModContainerById("cataclysm")
-					.map(c -> c.getModInfo().getVersion().toString())
-					.orElse("3.16");
-			var p = v.split("\\.");
-			var major = Integer.parseInt(p[0]);
-			var minor = p.length > 1 ? Integer.parseInt(p[1]) : 0;
-			if (major > 3 || major == 3 && minor > 16) return new CataInterfaceImpl_0327();
-		} catch (Throwable ignored) {
+			ModFileInfo cataclysm = LoadingModList.get().getModFileById("cataclysm");
+			if (cataclysm == null) return null;
+			return cataclysm.getMods().stream().anyMatch(modInfo -> modInfo.getModId().equals("cataclysm")
+					&& modInfo.getVersion().compareTo(new DefaultArtifactVersion("3.16")) > 0)
+					? new CataInterfaceImpl_0327() : new CataInterfaceImpl_0316();
+		} catch (Throwable e) {
+			return null;
 		}
-		return new CataInterfaceImpl_0316();
 	}
 
 	record ProjectileData(Projectile proj, float speed, float gravity, int cooldown) {
