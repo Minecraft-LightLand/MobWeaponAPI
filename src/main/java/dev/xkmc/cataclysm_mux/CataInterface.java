@@ -1,5 +1,6 @@
 package dev.xkmc.cataclysm_mux;
 
+import dev.xkmc.cataclysm_mux_0316.CataInterfaceImpl_0316;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -13,7 +14,7 @@ import org.jetbrains.annotations.Nullable;
 public interface CataInterface {
 
 	static CataInterface get() {
-		return null;
+		return new CataInterfaceImpl_0316();
 	}
 
 	record ProjectileData(Projectile proj, float speed, float gravity, int cooldown) {
