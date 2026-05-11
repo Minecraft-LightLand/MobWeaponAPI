@@ -12,95 +12,91 @@ import org.jetbrains.annotations.Nullable;
 
 public interface CataInterface {
 
-    static CataInterface get() {
-        return new CataInterfaceImpl();
-    }
+	static CataInterface get() {
+		return new CataInterfaceImpl();
+	}
 
-    record ProjectileData(Projectile proj, float speed, float gravity, int cooldown) {
+	record ProjectileData(Projectile proj, float speed, float gravity, int cooldown) {
 
-    }
+	}
 
-    // 傀儡
-    void sandstormAttack(LivingEntity golem, LivingEntity target, int life);
+	// 傀儡
+	void sandstormAttack(LivingEntity golem, LivingEntity target, int life);
 
-    boolean isLaser(DamageSource source);
+	boolean isLaser(DamageSource source);
 
-    boolean isMissile(DamageSource source);
+	boolean isMissile(DamageSource source);
 
-    boolean isSandstorm(DamageSource source);
+	boolean isSandstorm(DamageSource source);
 
-    boolean isIgnisExplosive(Entity entity);
+	boolean isIgnisExplosive(Entity entity);
 
-    boolean isSoul(Entity entity);
+	boolean isSoul(Entity entity);
 
-    boolean isAbyssFireball(Entity entity);
+	boolean isAbyssFireball(Entity entity);
 
-    boolean isIgnisStrike(Entity entity);
+	boolean isIgnisStrike(Entity entity);
 
-    int getSandCurseLevel(LivingEntity e);
+	int getSandCurseLevel(LivingEntity e);
 
-    @Nullable
-    Entity addLaserBeam(LivingEntity user, int dur);
+	@Nullable
+	Entity addLaserBeam(LivingEntity user, int dur);
 
-    void addMissile(LivingEntity user, LivingEntity target, Vec3 pos);
+	void addMissile(LivingEntity user, LivingEntity target, Vec3 pos);
 
-    void spawnFangs(LivingEntity user, double x, double y, double z, float rotation, int delay);
+	void addRune(LivingEntity user, LivingEntity target);
 
-    void spawnBlastPortal(LivingEntity user, double x, double y, double z, float rotation, int delay);
+	void spawnBlastPortal(LivingEntity user, double x, double y, double z, float rotation, int delay);
 
-    void golemStackBlazingBrandRaw(LivingEntity golem, LivingEntity target, float dmg, int min);
+	void golemStackBlazingBrandRaw(LivingEntity golem, LivingEntity target, float dmg, int min);
 
-    void shootFireball(LivingEntity user, Vec3 shotAt, int timer, boolean abyss, boolean isBlue);
+	void shootFireball(LivingEntity user, Vec3 shotAt, int timer, boolean abyss, boolean isBlue);
 
-    void createBlast(LivingEntity user, Vec3 pos, int dur, int delay, float radius, float dmg, boolean soul);
+	void createBlast(LivingEntity user, Vec3 pos, int dur, int delay, float radius, float dmg, boolean soul);
 
-    float monstrosityEarthquakeDamage();
+	float monstrosityEarthquakeDamage();
 
-    float maledictusEarthquakeDamage();
+	float maledictusEarthquakeDamage();
 
-    void updateLaser(LivingEntity golem, Entity e);
+	void updateLaser(LivingEntity golem, Entity e);
 
-    void stun(LivingEntity le, int time);
+	@Nullable
+	LivingEntity getOwner(Entity entity);
 
-    @Nullable
-    LivingEntity getOwner(Entity entity);
+	// 武器
+	void stackBlazingBrand(LivingEntity user, LivingEntity target, float factor);
 
-    // 武器
-    void stackBlazingBrand(LivingEntity user, LivingEntity target, float factor);
+	void inflictStun(LivingEntity user, LivingEntity target, int time);
 
-    void inflictStun(LivingEntity user, LivingEntity target, int time);
+	int spawnHalberd(Vec3 pos, LivingEntity player, int delay);
 
-    int spawnHalberd(Vec3 pos, LivingEntity player, int delay);
+	// 生物武器兼容
+	@Nullable
+	AbstractArrow createGhostArrow(Level level, LivingEntity player, LivingEntity target);
 
-    // 生物武器兼容
-    @Nullable
-    AbstractArrow createGhostArrow(Level level, LivingEntity player, LivingEntity target);
+	@Nullable
+	Entity createGhostStorm(LivingEntity user, Vec3 pos, Vec3 rot, LivingEntity target);
 
-    @Nullable
-    Entity createGhostStorm(LivingEntity user, Vec3 pos, Vec3 rot, LivingEntity target);
+	void shootLaserGatling(LivingEntity user, Vec3 vec3);
 
-    void shootLaserGatling(LivingEntity user, Vec3 vec3);
+	@Nullable
+	ProjectileData shootVoid(LivingEntity player);
 
-    @Nullable
-    ProjectileData shootVoid(LivingEntity player);
+	int shootMissile(LivingEntity player, Vec3 dir);
 
-    int shootMissile(LivingEntity player, Vec3 dir);
+	void launchTornado(LivingEntity user, Vec3 dir);
 
-    int spawnHalberdRaw(LivingEntity player);
+	int spawnVortex(LivingEntity user, Vec3 pos);
 
-    void launchTornado(LivingEntity user, Vec3 dir);
+	int spawnVoidFangs(LivingEntity user, Vec3 dir);
 
-    int spawnVortex(LivingEntity user, Vec3 pos);
+	int infernalForge(LivingEntity user, LivingEntity target);
 
-    int spawnVoidFangs(LivingEntity user, Vec3 dir);
+	int ceraunus(Level level, LivingEntity user, LivingEntity target);
 
-    int infernalForge(LivingEntity user, LivingEntity target);
+	int astrape(Level level, LivingEntity user, LivingEntity target);
 
-    int ceraunus(Level level, LivingEntity user, LivingEntity target);
-
-    int astrape(Level level, LivingEntity user, LivingEntity target);
-
-    @Nullable
-    Projectile coralSpear(LivingEntity user, Level level, ItemStack stack);
+	@Nullable
+	Projectile coralSpear(LivingEntity user, Level level, ItemStack stack);
 
 }

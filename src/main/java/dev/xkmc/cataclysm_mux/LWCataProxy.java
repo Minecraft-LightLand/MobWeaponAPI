@@ -2,12 +2,10 @@ package dev.xkmc.cataclysm_mux;
 
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+
+import static dev.xkmc.cataclysm_mux.CataclysmMux.LOGGER;
 
 public class LWCataProxy {
-
-	private static final Logger LOGGER = LogManager.getLogger();
 
 	public static void stackBlazingBrand(LivingEntity user, LivingEntity target, float factor) {
 		try {

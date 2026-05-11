@@ -4,13 +4,11 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
-public class GolemCataProxy {
+import static dev.xkmc.cataclysm_mux.CataclysmMux.LOGGER;
 
-	private static final Logger LOGGER = LogManager.getLogger();
+public class GolemCataProxy {
 
 	public static void sandstormAttack(LivingEntity golem, LivingEntity target, int life) {
 		try {
@@ -102,9 +100,9 @@ public class GolemCataProxy {
 		}
 	}
 
-	public static void spawnFangs(LivingEntity user, double x, double y, double z, float rotation, int delay) {
+	public static void addRune(LivingEntity user, LivingEntity target) {
 		try {
-			CataInterface.get().spawnFangs(user, x, y, z, rotation, delay);
+			CataInterface.get().addRune(user, target);
 		} catch (Throwable e) {
 			LOGGER.error(e);
 		}
@@ -167,9 +165,9 @@ public class GolemCataProxy {
 		}
 	}
 
-	public static void stun(LivingEntity le, int time) {
+	public static void inflictStun(LivingEntity user, LivingEntity le, int time) {
 		try {
-			CataInterface.get().stun(le, time);
+			CataInterface.get().inflictStun(user, le, time);
 		} catch (Throwable e) {
 			LOGGER.error(e);
 		}

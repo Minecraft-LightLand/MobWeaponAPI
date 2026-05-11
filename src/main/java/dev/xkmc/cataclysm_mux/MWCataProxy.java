@@ -7,13 +7,11 @@ import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
-public class MWCataProxy {
+import static dev.xkmc.cataclysm_mux.CataclysmMux.LOGGER;
 
-	private static final Logger LOGGER = LogManager.getLogger();
+public class MWCataProxy {
 
 	@Nullable
 	public static AbstractArrow createGhostArrow(Level level, LivingEntity player, LivingEntity target) {
@@ -63,7 +61,7 @@ public class MWCataProxy {
 
 	public static int spawnHalberd(LivingEntity player) {
 		try {
-			return CataInterface.get().spawnHalberdRaw(player);
+			return CataInterface.get().spawnHalberd(player.position(), player, 0);
 		} catch (Throwable e) {
 			LOGGER.throwing(e);
 		}
