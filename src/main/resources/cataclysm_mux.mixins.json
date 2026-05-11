@@ -1,9 +1,9 @@
 {
   "required": true,
   "priority": 1000,
-  "package": "dev.xkmc.mob_weapon_api.mixin",
+  "package": "dev.xkmc.cataclysm_mux.mixin",
   "compatibilityLevel": "JAVA_17",
-  "refmap": "mob_weapon_api.refmap.json",
+  "refmap": "cataclysm_mux.refmap.json",
   "mixins": [
   ],
   "client": [
