@@ -13,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
 public interface CataInterface {
 
 	static CataInterface get() {
-		return new CataInterfaceImpl();
+		return null;
 	}
 
 	record ProjectileData(Projectile proj, float speed, float gravity, int cooldown) {
