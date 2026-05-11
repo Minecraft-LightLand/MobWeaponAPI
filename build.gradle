@@ -136,7 +136,7 @@ dependencies {
 
     implementation fg.deobf("curse.maven:jade-324717:4654448")
     implementation fg.deobf("curse.maven:lionfish-api-1001614:5922047")
-    implementation fg.deobf("curse.maven:lendercataclysm-551586:6906993")
+    implementation fg.deobf("curse.maven:lendercataclysm-551586:7934870")
 
 }
 
