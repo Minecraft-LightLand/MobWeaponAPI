@@ -17,7 +17,6 @@ import org.jetbrains.annotations.Nullable;
 
 public interface CataInterface {
 
-	@Nullable
 	static CataInterface get() {
 		try {
 			ModFileInfo cataclysm = LoadingModList.get().getModFileById("cataclysm");
