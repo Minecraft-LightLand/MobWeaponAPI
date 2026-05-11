@@ -121,6 +121,8 @@ dependencies {
     annotationProcessor "org.spongepowered:mixin:${mixin_version}:processor"
     compileOnly fg.deobf("com.tterrag.registrate:Registrate:${registrate_version}")
 
+    implementation fg.deobf(jarJar('dev.xkmc.cataclysm_mux:cataclysm_mux:[0,)'))
+
     implementation fg.deobf("dev.xkmc.l2library:l2library:2.5.3-slim")
     implementation fg.deobf("dev.xkmc.l2serial:l2serial:1.2.2")
     implementation fg.deobf("dev.xkmc.l2screentracker:l2screentracker:0.1.4")
@@ -180,6 +182,21 @@ jar {
                 'MixinConfigs'            : "${modid}.mixins.json"
         ])
     }
+}
+
+jarJar.enable()
+reobf {
+    jarJar {}
+}
+
+tasks.jarJar.finalizedBy('reobfJarJar')
+
+tasks.jarJar.configure {
+    archiveClassifier.set('')
+}
+
+jar {
+    archiveClassifier.set('slim')
 }
 
 // Example configuration to allow publishing using the maven-publish plugin

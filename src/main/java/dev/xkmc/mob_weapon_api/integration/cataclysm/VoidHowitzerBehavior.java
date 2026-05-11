@@ -1,5 +1,6 @@
 package dev.xkmc.mob_weapon_api.integration.cataclysm;
 
+import dev.xkmc.cataclysm_mux.MWCataProxy;
 import dev.xkmc.mob_weapon_api.api.projectile.BowUseContext;
 import dev.xkmc.mob_weapon_api.api.projectile.IBowBehavior;
 import dev.xkmc.mob_weapon_api.api.projectile.ProjectileWeaponUser;
@@ -16,7 +17,7 @@ public class VoidHowitzerBehavior implements IBowBehavior, IWeaponWithCD {
 
 	@Override
 	public int shootArrow(BowUseContext user, float power, ItemStack stack, InteractionHand hand) {
-		var proj = CataclysmProxy.shootVoid(user.user());
+		var proj = MWCataProxy.shootVoid(user.user());
 		if (proj == null) return 20;
 		user.aim(proj.proj().position(), proj.speed(), proj.gravity(), user.getInitialInaccuracy()).shoot(proj.proj(), 0);
 		user.user().level().addFreshEntity(proj.proj());

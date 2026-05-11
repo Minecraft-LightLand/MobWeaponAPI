@@ -1,5 +1,6 @@
 package dev.xkmc.mob_weapon_api.integration.cataclysm;
 
+import dev.xkmc.cataclysm_mux.MWCataProxy;
 import dev.xkmc.mob_weapon_api.api.projectile.ProjectileWeaponUser;
 import dev.xkmc.mob_weapon_api.api.simple.IInstantWeaponBehavior;
 import net.minecraft.world.InteractionHand;
@@ -15,7 +16,7 @@ public class AncientSpearBehavior implements IInstantWeaponBehavior {
 
 	@Override
 	public int trigger(ProjectileWeaponUser user, ItemStack stack, LivingEntity target) {
-		CataclysmProxy.launchTornado(user.user(), target.getEyePosition().subtract(user.user().getEyePosition()).normalize());
+		MWCataProxy.launchTornado(user.user(), target.getEyePosition().subtract(user.user().getEyePosition()).normalize());
 		if (!user.bypassAllConsumption()) {
 			stack.hurtAndBreak(1, user.user(), e -> e.broadcastBreakEvent(InteractionHand.MAIN_HAND));
 		}

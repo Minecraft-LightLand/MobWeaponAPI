@@ -1,5 +1,6 @@
 package dev.xkmc.mob_weapon_api.integration.cataclysm;
 
+import dev.xkmc.cataclysm_mux.MWCataProxy;
 import dev.xkmc.mob_weapon_api.api.projectile.BowUseContext;
 import dev.xkmc.mob_weapon_api.api.projectile.IBowBehavior;
 import dev.xkmc.mob_weapon_api.api.projectile.ProjectileWeaponUser;
@@ -45,7 +46,7 @@ public class CursedBowBehavior implements IBowBehavior {
 		for (int j = -1; j <= 1; ++j) {
 			var arrow = user.createArrow(ammo, power);
 			if (homing) {
-				var ghost = CataclysmProxy.createGhostArrow(level, player, target);
+				var ghost = MWCataProxy.createGhostArrow(level, player, target);
 				if (ghost != null) arrow = ghost;
 			}
 			if (j != 0 || infinite) {
