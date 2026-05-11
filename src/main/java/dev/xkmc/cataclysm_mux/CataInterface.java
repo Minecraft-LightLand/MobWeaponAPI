@@ -1,6 +1,7 @@
 package dev.xkmc.cataclysm_mux;
 
 import dev.xkmc.cataclysm_mux_0316.CataInterfaceImpl_0316;
+import dev.xkmc.cataclysm_mux_0327.CataInterfaceImpl_0327;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -9,11 +10,22 @@ import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.fml.ModList;
 import org.jetbrains.annotations.Nullable;
 
 public interface CataInterface {
 
 	static CataInterface get() {
+		try {
+			var v = ModList.get().getModContainerById("cataclysm")
+					.map(c -> c.getModInfo().getVersion().toString())
+					.orElse("3.16");
+			var p = v.split("\\.");
+			var major = Integer.parseInt(p[0]);
+			var minor = p.length > 1 ? Integer.parseInt(p[1]) : 0;
+			if (major > 3 || major == 3 && minor > 16) return new CataInterfaceImpl_0327();
+		} catch (Throwable ignored) {
+		}
 		return new CataInterfaceImpl_0316();
 	}
 
