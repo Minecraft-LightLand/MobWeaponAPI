@@ -394,6 +394,10 @@ public class CataInterfaceImpl_0316 implements CataInterface {
 
 	}
 
+	public @Nullable Projectile brontes(LivingEntity user, ItemStack stack, LivingEntity target) {
+		return null;
+	}
+
 	public int ceraunus(Level level, LivingEntity user, LivingEntity target) {
 
 		var diff = target.getEyePosition().subtract(user.getEyePosition()).normalize();
