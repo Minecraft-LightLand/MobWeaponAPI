@@ -9,6 +9,7 @@ import com.github.L_Ender.cataclysm.init.ModEffect;
 import com.github.L_Ender.cataclysm.init.ModEntities;
 import com.github.L_Ender.cataclysm.init.ModParticle;
 import com.github.L_Ender.cataclysm.init.ModSounds;
+import com.github.L_Ender.cataclysm.util.AttributeUtils;
 import dev.xkmc.cataclysm_mux.CataInterface;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -393,6 +394,14 @@ public class CataInterfaceImpl_0327 implements CataInterface {
 		infernalForgeParticles((ServerLevel) level, user, radius);
 		return CMCommonConfig.InfernalForge.cooldown;
 
+	}
+
+	public @Nullable Projectile brontes(LivingEntity user, ItemStack stack, LivingEntity target) {
+		Brontes_Entity brontes = new Brontes_Entity(user.level(), user);
+		brontes.setBaseDamage(AttributeUtils.OriginDamage(target, stack));
+		brontes.setAreaDamage((float) CMCommonConfig.Brontes.stormareadamage);
+		brontes.setStormDamage((float) com.github.L_Ender.cataclysm.config.CMCommonConfig.Brontes.stormdamage);
+		return brontes;
 	}
 
 	public int ceraunus(Level level, LivingEntity user, LivingEntity target) {
