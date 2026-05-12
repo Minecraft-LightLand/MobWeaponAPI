@@ -1,7 +1,7 @@
 package dev.xkmc.cataclysm_mux;
 
-//import dev.xkmc.cataclysm_mux_0316.CataInterfaceImpl_0316;
-//import dev.xkmc.cataclysm_mux_0327.CataInterfaceImpl_0327;
+import dev.xkmc.cataclysm_mux_0316.CataInterfaceImpl_0316;
+import dev.xkmc.cataclysm_mux_0327.CataInterfaceImpl_0327;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -10,24 +10,23 @@ import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-//import net.minecraftforge.fml.loading.LoadingModList;
-//import net.minecraftforge.fml.loading.moddiscovery.ModFileInfo;
+import net.neoforged.fml.loading.LoadingModList;
+import net.neoforged.fml.loading.moddiscovery.ModFileInfo;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.jetbrains.annotations.Nullable;
 
 public interface CataInterface {
 
 	static CataInterface get() {
-//		try {
-//			ModFileInfo cataclysm = LoadingModList.get().getModFileById("cataclysm");
-//			if (cataclysm == null) return null;
-//			return cataclysm.getMods().stream().anyMatch(modInfo -> modInfo.getModId().equals("cataclysm")
-//					&& modInfo.getVersion().compareTo(new DefaultArtifactVersion("3.16")) > 0)
-//					? new CataInterfaceImpl_0327() : new CataInterfaceImpl_0316();
-//		} catch (Throwable e) {
-//			return null;
-//		}
-        return null;
+		try {
+			ModFileInfo cataclysm = LoadingModList.get().getModFileById("cataclysm");
+			if (cataclysm == null) return null;
+			return cataclysm.getMods().stream().anyMatch(modInfo -> modInfo.getModId().equals("cataclysm")
+					&& modInfo.getVersion().compareTo(new DefaultArtifactVersion("3.16")) > 0)
+					? new CataInterfaceImpl_0327() : new CataInterfaceImpl_0316();
+		} catch (Throwable e) {
+			return null;
+		}
 	}
 
 	record ProjectileData(Projectile proj, float speed, float gravity, int cooldown) {
