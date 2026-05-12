@@ -9,7 +9,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
-//@Mod(CataclysmMux.MODID)
+@Mod(CataclysmMux.MODID)
 public class CataclysmMux {
 
 	public static final String MODID = "cataclysm_mux";
