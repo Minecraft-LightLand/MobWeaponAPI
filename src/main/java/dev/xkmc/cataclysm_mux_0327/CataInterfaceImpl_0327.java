@@ -84,6 +84,7 @@ public class CataInterfaceImpl_0327 implements CataInterface {
 				user.level(), user, user.getX(), user.getEyeY(), user.getZ(),
 				(user.yHeadRot + 90.0F) * Mth.DEG_TO_RAD,
 				-user.getXRot() * Mth.DEG_TO_RAD, dur, (float) CMCommonConfig.Harbinger.DeathLaserdamage, (float) CMCommonConfig.Harbinger.DeathLaserHpdamage);
+		user.level().playSound(null, user.getX(), user.getY(), user.getZ(), ModSounds.DEATH_LASER.get(), SoundSource.HOSTILE, 1.0F, 1.0F);
 		user.level().addFreshEntity(beam);
 		return beam;
 	}
@@ -186,12 +187,14 @@ public class CataInterfaceImpl_0327 implements CataInterface {
 		double d2 = shotAt.z;
 		float f = Mth.sqrt((float) (d0 * d0 + d2 * d2)) * 0.35F;
 		shot.shoot(d0, d1 + f, d2, 0.25F, 3.0F);
+		user.level().playSound(null, user.getX(), user.getY(), user.getZ(), ModSounds.FLAME_BURST.get(), SoundSource.HOSTILE, 1.0F, 1.0F);
 		user.level().addFreshEntity(shot);
 
 	}
 
 	public void createBlast(LivingEntity user, Vec3 pos, int dur, int delay, float radius, float dmg, boolean soul) {
 
+		user.level().playSound(null, pos.x, pos.y, pos.z, ModSounds.FLAME_BURST.get(), SoundSource.HOSTILE, 1.0F, 1.0F);
 		user.level().addFreshEntity(
 				new Flame_Strike_Entity(user.level(), pos.x, pos.y, pos.z,
 						user.getYRot(), dur, delay, delay, radius,
@@ -207,6 +210,7 @@ public class CataInterfaceImpl_0327 implements CataInterface {
 		var diff = target.getEyePosition().subtract(pos).normalize();
 		Wither_Homing_Missile_Entity laserBeam = new Wither_Homing_Missile_Entity(user, diff, user.level(), (float) CMCommonConfig.Harbinger.WitherMissiledamage, target);
 		laserBeam.setPosRaw(pos.x(), pos.y(), pos.z());
+		user.level().playSound(null, pos.x(), pos.y(), pos.z(), ModSounds.HARBINGER_PREPARE.get(), SoundSource.HOSTILE, 1.0F, 1.0F);
 		user.level().addFreshEntity(laserBeam);
 
 	}
@@ -221,6 +225,7 @@ public class CataInterfaceImpl_0327 implements CataInterface {
 		double sy = target.getY();
 		double sz = target.getZ();
 		Sandstorm_Entity projectile = new Sandstorm_Entity(golem.level(), sx, sy, sz, life, angle, golem);
+		golem.level().playSound(null, sx, sy, sz, ModSounds.SANDSTORM.get(), SoundSource.HOSTILE, 0.8F, 1.0F);
 		golem.level().addFreshEntity(projectile);
 
 	}
@@ -233,6 +238,7 @@ public class CataInterfaceImpl_0327 implements CataInterface {
 		Sandstorm_Projectile b = new Sandstorm_Projectile(user, dir.x, dir.y, dir.z, user.level(), 6.0F);
 		b.setState(1);
 		b.setPos(x, user.getEyeY() - 0.5, z);
+		worldIn.playSound(null, user.getX(), user.getY(), user.getZ(), ModSounds.SANDSTORM.get(), SoundSource.HOSTILE, 0.8F, 1.0F);
 		worldIn.addFreshEntity(b);
 	}
 
@@ -242,6 +248,7 @@ public class CataInterfaceImpl_0327 implements CataInterface {
 
 		int minY = Mth.floor(user.getY()) - 10;
 		float yrot = (float) Math.toRadians(90.0F + user.getYRot());
+		user.level().playSound(null, pos.x, pos.y, pos.z, ModSounds.VOID_RUNE_RISING.get(), SoundSource.PLAYERS, 1.5F, 1.0F);
 		if (spawnVortex(pos.x, pos.y, pos.z, minY, yrot, user.level(), user))
 			return CMCommonConfig.GauntletOfMaelstrom.cooldown;
 
@@ -254,6 +261,7 @@ public class CataInterfaceImpl_0327 implements CataInterface {
 		Level level = user.level();
 		double headY = user.getY() + 1.0;
 		Vec3[] all = new Vec3[]{dir, dir.yRot(0.3F), dir.yRot(-0.3F), dir.yRot(0.6F), dir.yRot(-0.6F), dir.yRot(0.9F), dir.yRot(-0.9F)};
+		level.playSound(null, user.getX(), user.getY(), user.getZ(), ModSounds.VOID_RUNE_RISING.get(), SoundSource.PLAYERS, 1.5F, 1.0F);
 		level.playSound(null, user.getX(), user.getY(), user.getZ(), SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS, 1.5F, 1.0F / (user.getRandom().nextFloat() * 0.4F + 0.8F));
 		ScreenShake_Entity.ScreenShake(level, user.position(), 30.0F, 0.1F, 0, 30);
 		for (Vec3 vector3d : all) {
@@ -271,6 +279,7 @@ public class CataInterfaceImpl_0327 implements CataInterface {
 		double maxY = Math.max(target.getY(), user.getY()) + 1;
 		Vec3 v = target.getEyePosition().subtract(user.getEyePosition()).normalize();
 		float angle = (float) (Mth.atan2(v.z, v.x));
+		user.level().playSound(null, user.getX(), user.getY(), user.getZ(), ModSounds.VOID_RUNE_RISING.get(), SoundSource.PLAYERS, 1.5F, 1.0F);
 		for (int j = 1; j <= 15; ++j) {
 			double dist = 1.25 * j;
 			spawnFangs(user.getX() + Mth.cos(angle) * dist, maxY, user.getZ() + Mth.sin(angle) * dist, minY, angle, j, user.level(), user);
@@ -283,6 +292,7 @@ public class CataInterfaceImpl_0327 implements CataInterface {
 
 	public void spawnBlastPortal(LivingEntity user, double x, double y, double z, float rotation, int delay) {
 
+		user.level().playSound(null, x, y, z, ModSounds.PORTAL_ABYSS_BLAST.get(), SoundSource.HOSTILE, 1.0F, 1.0F);
 		user.level().addFreshEntity(new Abyss_Blast_Portal_Entity(user.level(), x, y, z, rotation, delay,
 				(float) CMCommonConfig.Leviathan.AbyssBlastDamage, (float) CMCommonConfig.Leviathan.AbyssBlastHpDamage, user));
 
@@ -292,6 +302,7 @@ public class CataInterfaceImpl_0327 implements CataInterface {
 
 	public int spawnHalberd(Vec3 pos, LivingEntity player, int delay) {
 
+		player.level().playSound(null, pos.x, pos.y, pos.z, ModSounds.PHANTOM_SPEAR.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
 		if (player.level() instanceof ServerLevel sl) {
 			strikeWindmillHalberd(sl, pos, player, 7, 5, 1.0F, 1.0F, 0.2, delay);
 		}
@@ -307,6 +318,7 @@ public class CataInterfaceImpl_0327 implements CataInterface {
 		Phantom_Arrow_Entity hommingArrowEntity;
 		hommingArrowEntity = new Phantom_Arrow_Entity(level, player, target);
 		hommingArrowEntity.setBaseDamage(CMCommonConfig.Maledictus.PhantomArrowDamage);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), ModSounds.PHANTOM_SPEAR.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
 		return hommingArrowEntity;
 
 
@@ -319,6 +331,7 @@ public class CataInterfaceImpl_0327 implements CataInterface {
 				(float) CMCommonConfig.Wadjet.Sandstorm_damage, target);
 		e.setPos(pos.x, user.getEyeY() - 0.5, pos.z);
 		e.setUp(15);
+		user.level().playSound(null, pos.x, pos.y, pos.z, ModSounds.SANDSTORM.get(), SoundSource.HOSTILE, 0.8F, 1.0F);
 		return e;
 
 	}
@@ -355,6 +368,7 @@ public class CataInterfaceImpl_0327 implements CataInterface {
 		double x = player.getX() + offset.x;
 		double z = player.getZ() + offset.y;
 		Wither_Missile_Entity rocket = new Wither_Missile_Entity(ModEntities.WITHER_MISSILE.get(), player, x, player.getEyeY(), z, new Vec3(dir.x, dir.y, dir.z), (float) CMCommonConfig.WASW.missileDamage, level);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), ModSounds.ROCKET_LAUNCH.get(), SoundSource.PLAYERS, 1.0F, 0.7F);
 		level.addFreshEntity(rocket);
 		return CMCommonConfig.WASW.missileCooldown;
 
@@ -365,6 +379,7 @@ public class CataInterfaceImpl_0327 implements CataInterface {
 		int radius = 4;
 		Level level = user.level();
 		ScreenShake_Entity.ScreenShake(level, target.position(), 30.0F, 0.1F, 0, 30);
+		level.playSound(null, user.getX(), user.getY(), user.getZ(), ModSounds.EXPLOSION.get(), SoundSource.PLAYERS, 1.5F, 1.0F);
 		level.playSound(null, user.getX(), user.getY(), user.getZ(), SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS,
 				1.5F, 1.0F / (user.getRandom().nextFloat() * 0.4F + 0.8F));
 		List<Entity> list = level.getEntities(user, target.getBoundingBox().inflate(radius, radius, radius));
@@ -430,6 +445,7 @@ public class CataInterfaceImpl_0327 implements CataInterface {
 		ThrownCoral_Spear_Entity throwntrident = new ThrownCoral_Spear_Entity(level, user, stack);
 		throwntrident.pickup = AbstractArrow.Pickup.CREATIVE_ONLY;
 		throwntrident.setPos(user.getEyePosition().add(user.getForward()));
+		level.playSound(null, user.getX(), user.getY(), user.getZ(), ModSounds.DEEPLING_SWING.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
 		return throwntrident;
 	}
 
