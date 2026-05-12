@@ -119,6 +119,15 @@ public class MWCataProxy {
 		return 20;
 	}
 
+	public static @Nullable Projectile brontes(LivingEntity user, ItemStack stack, LivingEntity target) {
+		try {
+			return CataInterface.get().brontes(user, stack, target);
+		} catch (Throwable e) {
+			LOGGER.throwing(e);
+		}
+		return null;
+	}
+
 	@Nullable
 	public static Projectile coralSpear(LivingEntity user, Level level, ItemStack stack) {
 		try {

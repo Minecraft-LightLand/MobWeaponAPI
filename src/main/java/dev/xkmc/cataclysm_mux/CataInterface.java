@@ -110,6 +110,9 @@ public interface CataInterface {
 	int astrape(Level level, LivingEntity user, LivingEntity target);
 
 	@Nullable
+	Projectile brontes(LivingEntity user, ItemStack stack, LivingEntity target);
+
+	@Nullable
 	Projectile coralSpear(LivingEntity user, Level level, ItemStack stack);
 
 }
