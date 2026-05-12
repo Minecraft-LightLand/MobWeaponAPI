@@ -148,8 +148,7 @@ repositories {
 dependencies {
     implementation "com.tterrag.registrate:Registrate:${registrate_version}"
 
-//    implementation "dev.xkmc.cataclysm_mux:cataclysm_mux_0316:[1,)"
-//    implementation "dev.xkmc.cataclysm_mux:cataclysm_mux_0327:[1,)"
+    implementation "dev.xkmc.cataclysm_mux:cataclysm_mux:[1,)"
 
     implementation "mezz.jei:jei-${jei_minecraft_version}:${jei_version}"
     implementation "top.theillusivec4.curios:curios-neoforge:${curios_version}"
