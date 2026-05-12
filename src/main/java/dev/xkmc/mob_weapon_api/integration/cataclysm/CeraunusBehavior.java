@@ -1,5 +1,6 @@
 package dev.xkmc.mob_weapon_api.integration.cataclysm;
 
+import dev.xkmc.cataclysm_mux.MWCataProxy;
 import dev.xkmc.mob_weapon_api.api.projectile.ProjectileWeaponUser;
 import dev.xkmc.mob_weapon_api.api.simple.IHoldWeaponBehavior;
 import net.minecraft.world.entity.LivingEntity;
@@ -19,7 +20,7 @@ public class CeraunusBehavior implements IHoldWeaponBehavior {
 
 	@Override
 	public int trigger(ProjectileWeaponUser user, ItemStack stack, LivingEntity target, int time) {
-		int cd = CataclysmProxy.ceraunus(user.user().level(), user.user(), target);
+		int cd = MWCataProxy.ceraunus(user.user().level(), user.user(), target);
 		setCD(user.user(), stack, cd);
 		return 20;
 	}

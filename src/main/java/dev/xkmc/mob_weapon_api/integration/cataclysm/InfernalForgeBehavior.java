@@ -1,5 +1,6 @@
 package dev.xkmc.mob_weapon_api.integration.cataclysm;
 
+import dev.xkmc.cataclysm_mux.MWCataProxy;
 import dev.xkmc.mob_weapon_api.api.projectile.ProjectileWeaponUser;
 import dev.xkmc.mob_weapon_api.api.simple.IInstantWeaponBehavior;
 import net.minecraft.world.entity.LivingEntity;
@@ -15,7 +16,7 @@ public class InfernalForgeBehavior implements IInstantWeaponBehavior {
 	@Override
 	public int trigger(ProjectileWeaponUser ctx, ItemStack stack, LivingEntity target) {
 		LivingEntity user = ctx.user();
-		setCD(user, stack, CataclysmProxy.infernalForge(user, target));
+		setCD(user, stack, MWCataProxy.infernalForge(user, target));
 		return 10;
 	}
 
