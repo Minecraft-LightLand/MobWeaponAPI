@@ -65,6 +65,10 @@ public class CataclysmIntegration {
 				e -> WeaponStatus.OFFENSIVE.of(e.is(ModItems.ASTRAPE.get())),
 				(golem, stack) -> new AstrapeBehavior(), 100
 		);
+		WeaponRegistry.HOLD.register(ModItems.BRONTES.getId(),
+				e -> WeaponStatus.OFFENSIVE.of(e.is(ModItems.BRONTES.get())),
+				(golem, stack) -> new BrontesBehavior(), 100
+		);
 		WeaponRegistry.HOLD.register(ModItems.CERAUNUS.getId(),
 				e -> WeaponStatus.OFFENSIVE.of(e.is(ModItems.CERAUNUS.get())),
 				(golem, stack) -> new CeraunusBehavior(), 100
