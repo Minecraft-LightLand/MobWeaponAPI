@@ -154,5 +154,5 @@ dependencies {
     implementation "top.theillusivec4.curios:curios-neoforge:${curios_version}"
 
     implementation "curse.maven:lionfish-api-1001614:6168249"
-    implementation "curse.maven:lendercataclysm-551586:6906997"
+    implementation "curse.maven:lendercataclysm-551586:7908490"
 }
