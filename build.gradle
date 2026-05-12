@@ -146,36 +146,14 @@ repositories {
 }
 
 dependencies {
-    compileOnly "com.tterrag.registrate:Registrate:${registrate_version}"
+    implementation "com.tterrag.registrate:Registrate:${registrate_version}"
 
-    implementation "dev.xkmc:l2serial:${l2serial_ver}"
-    implementation "dev.xkmc:l2modularblocks:${l2modularblocks_ver}"
-    implementation "dev.xkmc:l2core:${l2core_ver}"
-    implementation "dev.xkmc:l2tabs:${l2tabs_ver}"
-    implementation "dev.xkmc:l2menustacker:${l2menustacker_ver}"
-    implementation "dev.xkmc:l2itemselector:${l2itemselector_ver}"
-    implementation "dev.xkmc:l2library:${l2library_ver}-slim"
-    implementation "dev.xkmc:l2damagetracker:${l2damagetracker_ver}"
-    runtimeOnly "dev.xkmc:l2backpack:${l2backpack_ver}"
-    implementation "dev.xkmc:l2complements:${l2complements_ver}"
-    implementation "dev.xkmc:modulargolems:${modulargolems_ver}-slim"
-    runtimeOnly "vazkii.patchouli:Patchouli:${patchouli_ver}"
-
-    runtimeOnly "dev.xkmc:better_creative_tabs:0.1.0"
+//    implementation "dev.xkmc.cataclysm_mux:cataclysm_mux_0316:[1,)"
+//    implementation "dev.xkmc.cataclysm_mux:cataclysm_mux_0327:[1,)"
 
     implementation "mezz.jei:jei-${jei_minecraft_version}:${jei_version}"
     implementation "top.theillusivec4.curios:curios-neoforge:${curios_version}"
-    implementation "curse.maven:the-twilight-forest-227639:5699076"
-    runtimeOnly "curse.maven:touhou-little-maid-355044:5896992"
-    implementation "dev.xkmc:l2archery:${l2archery_ver}"
-    implementation "dev.xkmc:l2weaponry:${l2weaponry_ver}"
 
     implementation "curse.maven:lionfish-api-1001614:6168249"
-    implementation "curse.maven:lendercataclysm-551586:7578941"
-    implementation "curse.maven:create-328085:6255497"
-
-    compileOnly("com.simibubi.create:create-1.21.1:6.0.1-13") { transitive = false }
-    compileOnly("net.createmod.ponder:Ponder-NeoForge-1.21.1:1.0.39") { transitive = false }
-    compileOnly("dev.engine-room.flywheel:flywheel-neoforge-1.21.1:1.0.0-10")
-
+    implementation "curse.maven:lendercataclysm-551586:6906997"
 }
