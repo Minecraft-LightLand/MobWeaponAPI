@@ -1,10 +1,12 @@
 package dev.xkmc.mob_weapon_api.util;
 
 import dev.xkmc.l2core.init.reg.ench.EnchHelper;
+import dev.xkmc.l2library.init.FlagMarker;
 import dev.xkmc.mob_weapon_api.api.projectile.BowUseContext;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Slime;
+import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ArrowItem;
 import net.minecraft.world.item.ItemStack;
@@ -100,7 +102,9 @@ public class ShootUtils {
 		@Override
 		public void shoot(Projectile projectile, float angleInDegree) {
 			rotate(angleInDegree).apply(projectile);
-			projectile.getPersistentData().putInt("DespawnFactor", 20);
+			if (projectile instanceof AbstractArrow arr && arr.pickup == AbstractArrow.Pickup.ALLOWED)
+				return;
+			projectile.getPersistentData().putInt(FlagMarker.ARROW_DESPAWN, 20);
 		}
 	}
 
