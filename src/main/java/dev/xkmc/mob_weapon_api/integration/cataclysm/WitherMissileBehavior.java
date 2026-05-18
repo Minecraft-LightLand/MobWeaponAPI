@@ -1,5 +1,6 @@
 package dev.xkmc.mob_weapon_api.integration.cataclysm;
 
+import dev.xkmc.cataclysm_mux.MWCataProxy;
 import dev.xkmc.mob_weapon_api.api.projectile.ProjectileWeaponUser;
 import dev.xkmc.mob_weapon_api.api.simple.IHoldWeaponBehavior;
 import net.minecraft.world.entity.LivingEntity;
@@ -19,7 +20,7 @@ public class WitherMissileBehavior implements IHoldWeaponBehavior {
 
 	@Override
 	public int trigger(ProjectileWeaponUser user, ItemStack stack, LivingEntity target, int time) {
-		return CataclysmProxy.shootMissile(user.user(), target.getEyePosition().subtract(user.user().getEyePosition()).normalize());
+		return MWCataProxy.shootMissile(user.user(), target.getEyePosition().subtract(user.user().getEyePosition()).normalize());
 	}
 
 }

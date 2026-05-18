@@ -8,8 +8,13 @@ import net.minecraft.world.item.ItemStack;
 public class MeatShredderBehavior implements IInfiniteHoldBehavior {
 
 	@Override
+	public boolean canMelee() {
+		return false;
+	}
+
+	@Override
 	public double range(LivingEntity user, ItemStack stack) {
-		return 2;
+		return 3;
 	}
 
 	@Override

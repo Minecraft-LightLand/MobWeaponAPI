@@ -1,5 +1,6 @@
 package dev.xkmc.mob_weapon_api.integration.cataclysm;
 
+import dev.xkmc.cataclysm_mux.MWCataProxy;
 import dev.xkmc.mob_weapon_api.api.projectile.ProjectileWeaponUser;
 import dev.xkmc.mob_weapon_api.example.behavior.ThrowableBehavior;
 import net.minecraft.world.entity.LivingEntity;
@@ -11,7 +12,7 @@ public class CoralSpearBehavior extends ThrowableBehavior {
 
 	@Override
 	protected @Nullable Projectile getProjectile(ProjectileWeaponUser user, ItemStack stack, LivingEntity target, int time) {
-		return CataclysmProxy.coralSpear(user.user(), user.user().level(), stack);
+		return MWCataProxy.coralSpear(user.user(), user.user().level(), stack);
 	}
 
 }

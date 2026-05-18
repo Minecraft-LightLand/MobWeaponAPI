@@ -148,6 +148,8 @@ repositories {
 dependencies {
     compileOnly "com.tterrag.registrate:Registrate:${registrate_version}"
 
+    implementation "dev.xkmc.cataclysm_mux:cataclysm_mux:[1,)"
+
     implementation "dev.xkmc:l2serial:${l2serial_ver}"
     implementation "dev.xkmc:l2modularblocks:${l2modularblocks_ver}"
     implementation "dev.xkmc:l2core:${l2core_ver}"

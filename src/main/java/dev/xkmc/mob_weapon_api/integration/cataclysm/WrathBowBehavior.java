@@ -1,5 +1,6 @@
 package dev.xkmc.mob_weapon_api.integration.cataclysm;
 
+import dev.xkmc.cataclysm_mux.MWCataProxy;
 import dev.xkmc.mob_weapon_api.api.projectile.BowUseContext;
 import dev.xkmc.mob_weapon_api.api.projectile.IBowBehavior;
 import dev.xkmc.mob_weapon_api.api.projectile.ProjectileWeaponUser;
@@ -40,7 +41,7 @@ public class WrathBowBehavior implements IBowBehavior {
 		for (int j = -1; j <= 1; ++j) {
 			Vec3 rot = diff.yRot(j * 15 * Mth.DEG_TO_RAD);
 			Vec3 pos = user.position().add(rot);
-			Entity e = CataclysmProxy.createGhostStorm(user, pos, rot, target);
+			Entity e = MWCataProxy.createGhostStorm(user, pos, rot, target);
 			if (e != null)
 				level.addFreshEntity(e);
 		}

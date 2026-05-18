@@ -1,5 +1,6 @@
 package dev.xkmc.mob_weapon_api.integration.cataclysm;
 
+import dev.xkmc.cataclysm_mux.MWCataProxy;
 import dev.xkmc.mob_weapon_api.api.projectile.ProjectileWeaponUser;
 import dev.xkmc.mob_weapon_api.api.simple.IInstantWeaponBehavior;
 import net.minecraft.world.entity.LivingEntity;
@@ -14,7 +15,7 @@ public class VoidForgeBehavior implements IInstantWeaponBehavior {
 
 	@Override
 	public int trigger(ProjectileWeaponUser user, ItemStack stack, LivingEntity target) {
-		int cd = CataclysmProxy.spawnVoidFangs(user.user(), target.position().subtract(user.user().position()).normalize());
+		int cd = MWCataProxy.spawnVoidFangs(user.user(), target.position().subtract(user.user().position()).normalize());
 		setCD(user.user(), stack, cd);
 		return 20;
 	}

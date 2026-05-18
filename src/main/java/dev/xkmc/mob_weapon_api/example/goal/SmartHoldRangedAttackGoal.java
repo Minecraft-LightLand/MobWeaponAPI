@@ -24,12 +24,6 @@ public class SmartHoldRangedAttackGoal<E extends Mob> extends SmartRangedAttackG
 		super(mob, holder, melee, speed, radius);
 	}
 
-	@Override
-	public boolean mayActivate(ItemStack stack) {
-		var weapon = get(stack);
-		return weapon.isPresent() && weapon.get().isValid(holder.toUser(), stack);
-	}
-
 	public Optional<IHoldWeaponBehavior> get(ItemStack stack) {
 		return WeaponRegistry.HOLD.get(mob, stack);
 	}
@@ -39,12 +33,16 @@ public class SmartHoldRangedAttackGoal<E extends Mob> extends SmartRangedAttackG
 		return WeaponRegistry.HOLD.getProperties(stack);
 	}
 
+	@Override
+	public boolean mayActivate(ItemStack stack) {
+		var weapon = get(stack);
+		return weapon.isPresent() && weapon.get().isValid(holder.toUser(), stack);
+	}
 
 	@Override
 	public void stop() {
 		attackTime = -1;
 	}
-
 
 	@Override
 	public double range(ItemStack stack) {
@@ -61,11 +59,11 @@ public class SmartHoldRangedAttackGoal<E extends Mob> extends SmartRangedAttackG
 	}
 
 	public void tick() {
-		doMelee();
-		strafing();
 		ItemStack stack = mob.getItemInHand(holder.getWeaponHand());
 		var weapon = get(stack);
 		if (weapon.isEmpty()) return;
+		if (weapon.get().canMelee()) doMelee();
+		strafing();
 		LivingEntity target = mob.getTarget();
 		boolean invalidTarget = target == null || !target.isAlive();
 		boolean withInRange = !invalidTarget && mob.distanceTo(target) < weapon.get().range(mob, stack);
@@ -87,7 +85,6 @@ public class SmartHoldRangedAttackGoal<E extends Mob> extends SmartRangedAttackG
 			mob.startUsingItem(holder.getWeaponHand());
 		}
 	}
-
 
 	@Override
 	public void performRangedAttack(LivingEntity target, float power, ItemStack stack, InteractionHand hand) {
