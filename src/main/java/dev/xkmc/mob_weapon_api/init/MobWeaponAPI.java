@@ -12,7 +12,6 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.neoforged.neoforge.data.event.GatherDataEvent;
 import org.slf4j.Logger;
 
 @Mod(MobWeaponAPI.MODID)
@@ -44,10 +43,6 @@ public class MobWeaponAPI {
 			//if (ModList.get().isLoaded(Create.ID)) CreateIntegration.init();
 			VanillaMobManager.init();
 		});
-	}
-
-	@SubscribeEvent
-	public static void gatherData(GatherDataEvent event) {
 	}
 
 	public static Identifier loc(String id) {

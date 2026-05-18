@@ -1,6 +1,7 @@
 package dev.xkmc.mob_weapon_api.example.behavior;
 
 import dev.xkmc.l2core.init.reg.ench.EnchHelper;
+import dev.xkmc.l2core.util.FlagMarker;
 import dev.xkmc.mob_weapon_api.api.projectile.ProjectileWeaponUser;
 import dev.xkmc.mob_weapon_api.api.simple.IHoldWeaponBehavior;
 import dev.xkmc.mob_weapon_api.util.ShootUtils;
@@ -56,7 +57,7 @@ public abstract class ThrowableBehavior implements IHoldWeaponBehavior {
 		if (proj == null) return 20;
 		ShootUtils.shootAimHelper(target, proj, getSpeed(stack, proj), getGravity(stack, proj));
 		user.user().playSound(SoundEvents.TRIDENT_THROW.value(), 1.0F, 1.0F / (user.user().getRandom().nextFloat() * 0.4F + 0.8F));
-		proj.getPersistentData().putInt("DespawnFactor", 20);
+		proj.getPersistentData().putInt(FlagMarker.ARROW_DESPAWN, 20);
 		user.user().level().addFreshEntity(proj);
 		if (!user.bypassAllConsumption())
 			stack.hurtAndBreak(1, user.user(), EquipmentSlot.MAINHAND);
