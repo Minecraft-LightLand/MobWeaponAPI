@@ -1,0 +1,15 @@
+{
+	"required": false,
+	"priority": 1000,
+	"package": "dev.xkmc.cataclysm_mux_0316.mixin",
+	"compatibilityLevel": "JAVA_17",
+	"refmap": "mixin.refmap.json",
+	"mixins": [
+		"VoidVortexAllyMixin",
+		"WitherHomingMissileRetargetMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	},
+	"minVersion": "0.8"
+}
