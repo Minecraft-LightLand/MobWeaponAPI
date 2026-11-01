@@ -68,6 +68,22 @@ public class MWCataProxy {
 		return 20;
 	}
 
+	public static void spawnHalberdCircle(LivingEntity user, Vec3 pos, int count, float radius, int delay) {
+		try {
+			CataInterface.get().spawnHalberdCircle(user, pos, count, radius, delay);
+		} catch (Throwable e) {
+			LOGGER.throwing(e);
+		}
+	}
+
+	public static void spawnWindmillHalberd(LivingEntity user, Vec3 pos, int branches, int perBranch, float initRadius, float radiusIncr, float curve, int delay) {
+		try {
+			CataInterface.get().spawnWindmillHalberd(user, pos, branches, perBranch, initRadius, radiusIncr, curve, delay);
+		} catch (Throwable e) {
+			LOGGER.throwing(e);
+		}
+	}
+
 	public static void launchTornado(LivingEntity user, Vec3 dir) {
 		try {
 			CataInterface.get().launchTornado(user, dir);
@@ -114,6 +130,14 @@ public class MWCataProxy {
 	public static int astrape(Level level, LivingEntity user, LivingEntity target) {
 		try {
 			return CataInterface.get().astrape(level, user, target);
+		} catch (Throwable ignored) {
+		}
+		return 20;
+	}
+
+	public static int astrape(Level level, LivingEntity user, LivingEntity target, float lateral) {
+		try {
+			return CataInterface.get().astrape(level, user, target, lateral);
 		} catch (Throwable ignored) {
 		}
 		return 20;
