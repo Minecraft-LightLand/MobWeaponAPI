@@ -31,7 +31,7 @@ public class WeaponUtil {
 			}
 		}
 		LinkedHashMap<UUID, AttributeModifier> item = new LinkedHashMap<>();
-		for (var mod : remove.getAttributeModifiers(EquipmentSlot.MAINHAND).get(Attributes.ATTACK_DAMAGE)) {
+		for (var mod : stack.getAttributeModifiers(EquipmentSlot.MAINHAND).get(Attributes.ATTACK_DAMAGE)) {
 			item.put(mod.getId(), mod);
 		}
 		for (var e : item.values()) {

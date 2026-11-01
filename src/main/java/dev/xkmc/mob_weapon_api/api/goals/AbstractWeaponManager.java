@@ -3,6 +3,7 @@ package dev.xkmc.mob_weapon_api.api.goals;
 import dev.xkmc.mob_weapon_api.api.ai.IWeaponHolder;
 import dev.xkmc.mob_weapon_api.api.ai.ItemWrapper;
 import dev.xkmc.mob_weapon_api.registry.WeaponStatus;
+import dev.xkmc.mob_weapon_api.util.WeaponUtil;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
@@ -90,9 +91,10 @@ public class AbstractWeaponManager<T extends Mob & IWeaponHolder> {
 		var mainGoal = getGoalForWeapon(main, null);
 		var offGoal = getGoalForWeapon(off, null);
 		if (mainGoal != null && mainGoal.isRanged()) {
-			if (target == null || off.isEmpty() || off.getItem() instanceof ArrowItem) {
-				return false;
-			}
+			if (target == null) return false;
+			// main ranged weapon out of ammo and no spare weapon: swap to fists instead of standing still
+			if (off.isEmpty() || off.getItem() instanceof ArrowItem)
+				return !mainGoal.mayActivate();
 			if (!mainGoal.mayActivate()) {
 				if (!mainGoal.isMelee(off))
 					return true;
@@ -106,7 +108,10 @@ public class AbstractWeaponManager<T extends Mob & IWeaponHolder> {
 					return false;
 				}
 			}
-			return !mainGoal.isMelee(off) && meleeGoal.canReachTarget(target);
+			boolean reach = meleeGoal.canReachTarget(target);
+			if (reach && !mainGoal.isMelee(off)) return true;
+			// main doubles as melee weapon (e.g. OFFENSIVE hold weapons): swap only if offhand hits harder
+			return reach && offGoal == null && WeaponUtil.isBetterWeapon(user, off, main);
 		}
 		if (offGoal != null && offGoal.isRanged()) {
 			if (!offGoal.mayActivate()) return false;
@@ -119,7 +124,9 @@ public class AbstractWeaponManager<T extends Mob & IWeaponHolder> {
 					return false;
 				}
 			}
-			return !meleeGoal.canReachTarget(target) || offGoal.isMelee(main);
+			if (!meleeGoal.canReachTarget(target)) return true;
+			// in reach: swap to off only if it is melee-usable and actually better (avoids swap oscillation)
+			return offGoal.isMelee(main) && (mainGoal == null || WeaponUtil.isBetterWeapon(user, off, main));
 		}
 		return main.isEmpty() && !off.isEmpty();
 	}
