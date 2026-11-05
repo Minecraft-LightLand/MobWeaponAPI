@@ -1,15 +1,21 @@
 {
-  "required": true,
+  "required": false,
   "priority": 1000,
   "package": "dev.xkmc.mob_weapon_api.mixin",
   "compatibilityLevel": "JAVA_17",
   "refmap": "mob_weapon_api.refmap.json",
   "mixins": [
+    "CandyCaneHookOwnerMixin",
+    "DinosaurSpiritOwnerMixin",
+    "ExtinctionSpearReturnMixin",
+    "GalenaGauntletGolemMixin",
+    "MagneticWeaponGolemMixin",
+    "MeleeAttackGoalInvoker",
+    "SpinningPeppermintFollowMixin"
   ],
-  "client": [
-  ],
+  "client": [],
   "injectors": {
-    "defaultRequire": 1
+    "defaultRequire": 0
   },
   "minVersion": "0.8"
 }

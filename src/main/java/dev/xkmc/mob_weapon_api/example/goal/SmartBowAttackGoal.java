@@ -36,6 +36,15 @@ public class SmartBowAttackGoal<E extends Mob> extends SmartRangedAttackGoal<E> 
 		return WeaponRegistry.BOW.getProperties(stack);
 	}
 
+	/**
+	 * {@code mayActivate} 已经只判断"有没有弹药"（{@code hasProjectile}），不含冷却，
+	 * 所以 {@code checkSwitch} 直接用它就能正确识别"弹药耗尽 → 切近战"。
+	 */
+	@Override
+	public boolean isAvailable(ItemStack stack) {
+		return mayActivate(stack);
+	}
+
 	@Override
 	public boolean shouldUseForMelee(ItemStack other) {
 		return !WeaponUtil.isBetterWeapon(mob, other, mob.getMainHandItem());

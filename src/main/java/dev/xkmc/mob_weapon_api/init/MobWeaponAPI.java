@@ -1,6 +1,7 @@
 package dev.xkmc.mob_weapon_api.init;
 
 import com.github.L_Ender.cataclysm.Cataclysm;
+import com.github.alexmodguy.alexscaves.AlexsCaves;
 import com.mojang.logging.LogUtils;
 import com.simibubi.create.Create;
 import com.tterrag.registrate.Registrate;
@@ -8,6 +9,7 @@ import dev.xkmc.l2archery.init.L2Archery;
 import dev.xkmc.l2complements.init.L2Complements;
 import dev.xkmc.l2weaponry.init.L2Weaponry;
 import dev.xkmc.mob_weapon_api.example.vanilla.VanillaMobManager;
+import dev.xkmc.mob_weapon_api.integration.alexscaves.AlexsCavesIntegration;
 import dev.xkmc.mob_weapon_api.integration.cataclysm.CataclysmIntegration;
 import dev.xkmc.mob_weapon_api.integration.create.CreateIntegration;
 import dev.xkmc.mob_weapon_api.integration.l2archery.L2ArcheryIntegration;
@@ -50,6 +52,7 @@ public class MobWeaponAPI {
 			if (ModList.get().isLoaded(Cataclysm.MODID)) CataclysmIntegration.init();
 			if (ModList.get().isLoaded(TwilightForestMod.ID)) TFIntegration.init();
 			if (ModList.get().isLoaded(Create.ID)) CreateIntegration.init();
+			if (ModList.get().isLoaded(AlexsCaves.MODID)) AlexsCavesIntegration.init();
 			VanillaMobManager.init();
 		});
 	}

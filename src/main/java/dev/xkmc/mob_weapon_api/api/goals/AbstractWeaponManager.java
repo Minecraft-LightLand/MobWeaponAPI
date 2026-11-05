@@ -57,7 +57,12 @@ public class AbstractWeaponManager<T extends Mob & IWeaponHolder> {
 				currentGoal = ans.holder();
 				user.goalSelector.addGoal(2, currentGoal.goal());
 
-				if (!ans.status().isMelee()) {
+				// 只有远程武器"真的能打"时才移除近战 goal。
+				// 之前无条件移除，导致"远程 + 盾牌"组合里：弓没弹药 → 换手后主手是盾牌、
+				// 而 getWeaponHand() 因主手是盾牌返回副手，于是这里找到的是副手的弓（没弹药），
+				// 远程 goal 因 canUse 为 false 不激活，近战 goal 又被移除 → 傀儡站着不动。
+				boolean rangedUsable = ans.isRanged() && ans.isAvailable();
+				if (!ans.status().isMelee() && rangedUsable) {
 					if (meleeActive) {
 						user.goalSelector.removeGoal(meleeGoal.asGoal());
 						meleeActive = false;
@@ -66,6 +71,12 @@ public class AbstractWeaponManager<T extends Mob & IWeaponHolder> {
 				}
 			}
 		}
+		// 走到这里意味着"没有可用的远程/武器 goal"：启用近战 goal 兜底。
+		// 触发情形包括：
+		//   - 主手为空（远程武器被换到副手/备用槽）；
+		//   - 主手是盾牌等非武器物品（例如"远程 + 盾牌"组合里弓没弹药时，
+		//     getAltWeaponHand 返回副手盾牌，换手后盾牌到了主手，而 getGoalForWeapon 找不到 goal）。
+		// 后一种情况如果不兜底，傀儡会站着不动。
 		if (!meleeActive) {
 			user.goalSelector.addGoal(3, meleeGoal.asGoal());
 			meleeActive = true;
@@ -92,10 +103,15 @@ public class AbstractWeaponManager<T extends Mob & IWeaponHolder> {
 		var offGoal = getGoalForWeapon(off, null);
 		if (mainGoal != null && mainGoal.isRanged()) {
 			if (target == null) return false;
-			// main ranged weapon out of ammo and no spare weapon: swap to fists instead of standing still
+			// 主手远程武器、副手为空（或只有箭）：没弹药就换手，让副手的近战武器或拳头接手。
+			// 用 isAvailable()（只看弹药）而不是 mayActivate()（含冷却）：后者在冷却期间会误判成
+			// "打不出去"，换手后新主手仍在冷却，下一轮又换回来，形成主副手来回切换的死循环。
 			if (off.isEmpty() || off.getItem() instanceof ArrowItem)
-				return !mainGoal.mayActivate();
-			if (!mainGoal.mayActivate()) {
+				return !mainGoal.isAvailable();
+			// 用 isAvailable()（只看弹药）而不是 mayActivate()（含冷却）：
+			// 冷却期间 mayActivate 为假，会误判成"打不出去"而换手；换过去后副手的远程武器仍在冷却，
+			// 下一轮又被换回来——主副手来回切换。只有弹药真的耗尽时才该让位给近战。
+			if (!mainGoal.isAvailable()) {
 				if (!mainGoal.isMelee(off))
 					return true;
 			}
@@ -114,7 +130,8 @@ public class AbstractWeaponManager<T extends Mob & IWeaponHolder> {
 			return reach && offGoal == null && WeaponUtil.isBetterWeapon(user, off, main);
 		}
 		if (offGoal != null && offGoal.isRanged()) {
-			if (!offGoal.mayActivate()) return false;
+			// 同上：用 isAvailable() 而不是 mayActivate()，避免因冷却导致反复换手
+			if (!offGoal.isAvailable()) return false;
 			if (target == null) return true;
 			if (mainGoal != null) {
 				if (!mainGoal.isWithinRange(target, 4)) {
@@ -125,9 +142,17 @@ public class AbstractWeaponManager<T extends Mob & IWeaponHolder> {
 				}
 			}
 			if (!meleeGoal.canReachTarget(target)) return true;
+			// 主手没有可用武器（空槽 / 非武器物品）：换回副手的远程武器。
+			// 少了这一句，远程武器因弹药耗尽被换到副手后，即使补上弹药也永远回不到主手
+			// ——主手一直空着，goal 走的是近战兜底。
+			if (mainGoal == null) return true;
 			// in reach: swap to off only if it is melee-usable and actually better (avoids swap oscillation)
-			return offGoal.isMelee(main) && (mainGoal == null || WeaponUtil.isBetterWeapon(user, off, main));
+			return offGoal.isMelee(main) && WeaponUtil.isBetterWeapon(user, off, main);
 		}
+		// 只在主手为空时切回副手的东西。
+		// 不能写成 {@code main.isEmpty() && !off.isEmpty()} 之外还额外放行——主手是远程武器但
+		// 弹药耗尽时，前面已经把武器换到了副手；这里若无条件"看到 off 非空就切回"，
+		// 就会 没弹药→切走→切回→没弹药 无限循环（口香糖枪、射线枪都是这个症状）。
 		return main.isEmpty() && !off.isEmpty();
 	}
 

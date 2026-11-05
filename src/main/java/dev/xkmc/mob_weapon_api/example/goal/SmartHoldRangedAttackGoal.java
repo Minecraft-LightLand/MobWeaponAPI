@@ -39,16 +39,49 @@ public class SmartHoldRangedAttackGoal<E extends Mob> extends SmartRangedAttackG
 		return weapon.isPresent() && weapon.get().isValid(holder.toUser(), stack);
 	}
 
+	/**
+	 * HOLD 类武器必须<b>有目标</b>才继续跑。
+	 * <p>
+	 * 父类是 {@code canUse() || !mob.getNavigation().isDone()}：目标消失后导航往往还没走完，
+	 * goal 会继续存活，{@code start()} 设下的 {@code setAggressive(true)} 就一直不复位，
+	 * 模型的 {@code ArmPose.ITEM} 让傀儡一直抬着手——看起来像"脱战了还举着武器不放"。
+	 * 弓没这个问题是因为它的 goal 由 target 驱动、目标没了立刻停。
+	 */
+	@Override
+	public boolean canContinueToUse() {
+		LivingEntity target = mob.getTarget();
+		if (target == null || !target.isAlive()) return false;
+		// 不能直接委托父类：父类是 {@code canUse() || !navigation.isDone()}，
+		// 目标刚消失时导航往往还没走完，goal 会继续存活，{@code start()} 里的
+		// {@code setAggressive(true)} 一直不复位 → 模型保持 ArmPose.ITEM（抬着手）。
+		// 这跟具体是哪把武器无关，所有 HOLD 类武器共用这条路径。
+		if (!canUse()) return false;
+		return true;
+	}
+
 	@Override
 	public void stop() {
 		attackTime = -1;
 		super.stop();
 	}
 
+	/** 同 {@code SmartInstantRangedAttackGoal#isAvailable}：只判断弹药，不看冷却。 */
+	@Override
+	public boolean isAvailable(ItemStack stack) {
+		var w = get(stack);
+		return w.isPresent() && w.get().hasAmmo(holder.toUser(), stack);
+	}
+
 	@Override
 	public double range(ItemStack stack) {
 		var weapon = get(stack);
 		return weapon.map(b -> b.range(mob, stack)).orElse(0.0);
+	}
+
+	@Override
+	protected boolean keepDistance(ItemStack stack) {
+		var weapon = get(stack);
+		return weapon.map(IHoldWeaponBehavior::keepDistance).orElse(true);
 	}
 
 	@Override

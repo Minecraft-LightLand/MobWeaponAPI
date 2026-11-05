@@ -13,7 +13,6 @@ import dev.xkmc.mob_weapon_api.api.projectile.BowUseContext;
 import net.minecraft.core.HolderSet;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -52,12 +51,22 @@ public class CreateProxy {
 					.map(holder -> holder.value())
 					.orElse(DEFAULT_TYPE);
 
-			// mirrors Create's own aim: gun barrel minus eye, added to the look vector
-			Vec3 barrel = getGunBarrelVec(e, hand == InteractionHand.MAIN_HAND, new Vec3(0.75, -0.15, 1.5));
-			Vec3 correction = getGunBarrelVec(e, hand == InteractionHand.MAIN_HAND, new Vec3(-0.05, 0, 0))
-					.subtract(e.position().add(0, e.getEyeHeight(), 0));
-			Vec3 look = e.getLookAngle();
-			Vec3 motion = look.add(correction).normalize().scale(2).scale(type.velocityMultiplier());
+			// 朝目标而不是朝视线：AI 的视线未必已经转到位，用 getLookAngle() 会让土豆从敌人旁边飞过。
+			// 找不到目标时才退回视线方向。
+			var target = e instanceof net.minecraft.world.entity.Mob mob ? mob.getTarget() : null;
+			Vec3 look = target != null
+					? target.getEyePosition().subtract(e.getEyePosition()).normalize()
+					: e.getLookAngle();
+			// 注意：这里不能再叠加 getGunBarrelVec 算出来的"枪口修正"。那个偏移是用实体自身
+			// 的 yaw/pitch（视线）旋转的，而傀儡每 tick 都在转头对准目标，偏移量随之抖动，
+			// 叠加到朝目标的向量上就会让弹道看起来随机偏移。直接从眼睛出发即可。
+			// 发射点对齐武器（同射线枪的 getGunOffset）：侧移半个身宽、抬到身高 1.05、再沿视线前伸 1.5，
+			// 用 yBodyRot 而不是视线旋转，避免转头时位置抖动。
+			Vec3 barrel = e.getPosition(1.0F)
+					.add(new Vec3(e.getBbWidth() * -0.35F, e.getBbHeight() * 0.95F, 0)
+							.yRot((float) Math.toRadians(-e.yBodyRot)))
+					.add(e.getViewVector(1.0F).normalize().scale(1.5F));
+			Vec3 motion = look.scale(2).scale(type.velocityMultiplier());
 			float soundPitch = type.soundPitch() + (e.getRandom().nextFloat() - 0.5F) / 4.0F;
 
 			boolean spray = type.split() > 1;
@@ -105,14 +114,6 @@ public class CreateProxy {
 			return type.reloadTicks();
 		}
 
-		private static Vec3 getGunBarrelVec(LivingEntity player, boolean mainHand, Vec3 rel) {
-			Vec3 eye = player.position().add(0.0, player.getEyeHeight(), 0.0);
-			float yaw = (float) ((double) (player.getYRot() / -180.0F) * Math.PI);
-			float pitch = (float) ((double) (player.getXRot() / -180.0F) * Math.PI);
-			int flip = mainHand == (player.getMainArm() == HumanoidArm.RIGHT) ? -1 : 1;
-			Vec3 relative = new Vec3(flip * rel.x, rel.y, rel.z);
-			return eye.add(relative.xRot(pitch).yRot(yaw));
-		}
 
 		/**
 		 * Rotates around the Z axis, matching catnip's VecHelper.rotate(vec, deg, Axis.Z). Create reaches these
