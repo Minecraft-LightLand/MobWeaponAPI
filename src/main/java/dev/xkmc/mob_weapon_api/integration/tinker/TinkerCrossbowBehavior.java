@@ -17,6 +17,7 @@ import net.minecraft.world.item.Items;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.modifiers.ModifierHooks;
 import slimeknights.tconstruct.library.modifiers.hook.build.ConditionalStatModifierHook;
+import slimeknights.tconstruct.library.modifiers.hook.ranged.BowAmmoModifierHook;
 import slimeknights.tconstruct.library.tools.capability.EntityModifierCapability;
 import slimeknights.tconstruct.library.tools.capability.PersistentDataCapability;
 import slimeknights.tconstruct.library.tools.helper.ModifierUtil;
@@ -50,7 +51,7 @@ public class TinkerCrossbowBehavior implements ICrossbowBehavior {
 		if (tool.isBroken()) return false;
 		ToolDataNBT data = tool.getPersistentData();
 		var e = user.user();
-		ItemStack ammo = GolemTinkerAmmoHook.findAmmo(tool, stack, e, bow.getSupportedHeldProjectiles());
+		ItemStack ammo = BowAmmoModifierHook.consumeAmmo(tool, stack, e, null, bow.getSupportedHeldProjectiles());
 		if (!ammo.isEmpty()) {
 			e.level().playSound(null, e.getX(), e.getY(), e.getZ(), SoundEvents.CROSSBOW_LOADING_END, SoundSource.PLAYERS,
 					1.0F, 1.0F / (e.level().getRandom().nextFloat() * 0.5F + 1.0F) + 0.2F);
@@ -92,6 +93,7 @@ public class TinkerCrossbowBehavior implements ICrossbowBehavior {
 				arrow.setCritArrow(true);
 				arrow.setSoundEvent(SoundEvents.CROSSBOW_HIT);
 				arrow.setShotFromCrossbow(true);
+                arrow.pickup = AbstractArrow.Pickup.ALLOWED;
 				++damage;
 				angle = (float) (arrow.getBaseDamage() - 2.0 + tool.getStats().get(ToolStats.PROJECTILE_DAMAGE));
 				arrow.setBaseDamage(ConditionalStatModifierHook.getModifiedStat(tool, golem, ToolStats.PROJECTILE_DAMAGE, angle));
@@ -120,7 +122,7 @@ public class TinkerCrossbowBehavior implements ICrossbowBehavior {
 		if (!(stack.getItem() instanceof ModifiableCrossbowItem bow)) return false;
 		ToolStack tool = ToolStack.from(stack);
 		if (tool.isBroken()) return false;
-		return GolemTinkerAmmoHook.hasAmmo(tool, stack, mob.user(), bow.getSupportedHeldProjectiles());
+		return !BowAmmoModifierHook.getAmmo(tool, stack, mob.user(), bow.getSupportedHeldProjectiles()).isEmpty();
 	}
 
 	@Override
