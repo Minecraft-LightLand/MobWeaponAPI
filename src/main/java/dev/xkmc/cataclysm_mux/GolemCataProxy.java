@@ -66,6 +66,14 @@ public class GolemCataProxy {
 		}
 	}
 
+	public static boolean isEarthQuake(DamageSource source) {
+		try {
+			return CataInterface.get().isEarthQuake(source);
+		} catch (Throwable e) {
+			return false;
+		}
+	}
+
 	public static boolean isIgnisExplosive(Entity entity) {
 		try {
 			return CataInterface.get().isIgnisExplosive(entity);
@@ -223,6 +231,14 @@ public class GolemCataProxy {
 		}
 	}
 
+	public static void spawnEarthQuakeTracking(LivingEntity user, Vec3 dir, @Nullable LivingEntity target) {
+		try {
+			CataInterface.get().spawnEarthQuakeTracking(user, dir, target);
+		} catch (Throwable e) {
+			LOGGER.error(e);
+		}
+	}
+
 	public static void remnantRoarParticle(LivingEntity golem, float vec, float math, float y) {
 		try {
 			CataInterface.get().remnantRoarParticle(golem, vec, math, y);
@@ -313,6 +329,14 @@ public class GolemCataProxy {
 		}
 	}
 
+	public static void summonStormSerpent(LivingEntity user, LivingEntity target, float lateral, int warmup) {
+		try {
+			CataInterface.get().summonStormSerpent(user, target, lateral, warmup);
+		} catch (Throwable e) {
+			LOGGER.error(e);
+		}
+	}
+
 	public static void shootHowitzer(LivingEntity user, Vec3 dir) {
 		try {
 			CataInterface.get().shootHowitzer(user, dir);
@@ -340,6 +364,14 @@ public class GolemCataProxy {
 	public static void gravityPull(LivingEntity user) {
 		try {
 			CataInterface.get().gravityPull(user);
+		} catch (Throwable e) {
+			LOGGER.error(e);
+		}
+	}
+
+	public static void gravityPull(LivingEntity user, double radius, double strength) {
+		try {
+			CataInterface.get().gravityPull(user, radius, strength);
 		} catch (Throwable e) {
 			LOGGER.error(e);
 		}
@@ -425,6 +457,21 @@ public class GolemCataProxy {
 		}
 	}
 
+	public static void scyllaSummonWave(LivingEntity user, Vec3 center, float yaw) {
+		try {
+			CataInterface.get().scyllaSummonWave(user, center, yaw);
+		} catch (Throwable e) {
+			LOGGER.error(e);
+		}
+	}
+
+	public static void scyllaSummonWave2(LivingEntity user, Vec3 center, float yaw) {
+		try {
+			CataInterface.get().scyllaSummonWave2(user, center, yaw);
+		} catch (Throwable e) {
+			LOGGER.error(e);
+		}
+	}
 	public static void scyllaSummonWave2(LivingEntity user, LivingEntity target) {
 		try {
 			CataInterface.get().scyllaSummonWave2(user, target);
@@ -505,6 +552,22 @@ public class GolemCataProxy {
 		}
 	}
 
+	public static void guardianStompFangsRow(LivingEntity user, LivingEntity target, float angleOffset) {
+		try {
+			CataInterface.get().guardianStompFangsRow(user, target, angleOffset);
+		} catch (Throwable e) {
+			LOGGER.error(e);
+		}
+	}
+
+	public static void guardianStompFangsRing(LivingEntity user) {
+		try {
+			CataInterface.get().guardianStompFangsRing(user);
+		} catch (Throwable e) {
+			LOGGER.error(e);
+		}
+	}
+
 	public static void guardianUppercut(LivingEntity user, LivingEntity target) {
 		try {
 			CataInterface.get().guardianUppercut(user, target);
@@ -561,6 +624,14 @@ public class GolemCataProxy {
 		}
 	}
 
+	public static void scyllaLightningSelfRing(LivingEntity user) {
+		try {
+			CataInterface.get().scyllaLightningSelfRing(user);
+		} catch (Throwable e) {
+			LOGGER.error(e);
+		}
+	}
+
 	public static void scyllaThunderCloud(LivingEntity user, LivingEntity target) {
 		try {
 			CataInterface.get().scyllaThunderCloud(user, target);
@@ -569,6 +640,13 @@ public class GolemCataProxy {
 		}
 	}
 
+	public static void scyllaThunderCloudLightning(LivingEntity user, double x, double y, double z) {
+		try {
+			CataInterface.get().scyllaThunderCloudLightning(user, x, y, z);
+		} catch (Throwable e) {
+			LOGGER.error(e);
+		}
+	}
 	public static void scyllaThunderCloudStorm(LivingEntity user, double x, double y, double z) {
 		try {
 			CataInterface.get().scyllaThunderCloudStorm(user, x, y, z);
@@ -600,6 +678,52 @@ public class GolemCataProxy {
 			LOGGER.error(e);
 		}
 	}
+	public static void ignisAreaPunch(LivingEntity user, float radius, float arcDegrees) {
+		try {
+			CataInterface.get().ignisAreaPunch(user, radius, arcDegrees);
+		} catch (Throwable e) {
+			LOGGER.error(e);
+		}
+	}
+	public static void ignisCounterStrike(LivingEntity user, boolean blue) {
+		try {
+			CataInterface.get().ignisCounterStrike(user, blue);
+		} catch (Throwable e) {
+			LOGGER.error(e);
+		}
+	}
+	public static void ignisCounterWave(LivingEntity user, Vec3 center, float yaw, int distance, boolean blue) {
+		try {
+			CataInterface.get().ignisCounterWave(user, center, yaw, distance, blue);
+		} catch (Throwable e) {
+			LOGGER.error(e);
+		}
+	}
+	public static void ignisCounterWave(LivingEntity user, Vec3 center, float yaw, int distance, boolean blue, boolean outward) {
+		try {
+			CataInterface.get().ignisCounterWave(user, center, yaw, distance, blue, outward);
+		} catch (Throwable e) {
+			LOGGER.error(e);
+		}
+	}
+
+	public static void ignisRoarPulse(LivingEntity user, boolean blue) {
+		try {
+			CataInterface.get().ignisRoarPulse(user, blue);
+		} catch (Throwable e) {
+			LOGGER.error(e);
+		}
+	}
+
+
+	public static void ignisSmashBlocks(LivingEntity user, float spreadArc, int distance, float mxy) {
+		try {
+			CataInterface.get().ignisSmashBlocks(user, spreadArc, distance, mxy);
+		} catch (Throwable e) {
+			LOGGER.error(e);
+		}
+	}
+
 
 	public static void ignisQuakeWave(LivingEntity user, int distance, float mxy, float vec, boolean grab, float damage, float hpdamage, float airborne, boolean blue) {
 		try {
@@ -869,4 +993,37 @@ public class GolemCataProxy {
 		}
 	}
 
+	public static void scyllaParryParticle(LivingEntity user) {
+		try {
+			CataInterface.get().scyllaParryParticle(user);
+		} catch (Throwable e) {
+			LOGGER.error(e);
+		}
+	}
+
+
+	public static void ancientRemnantStompStart(LivingEntity user, Vec3 center, float yaw) {
+		try {
+			CataInterface.get().ancientRemnantStompStart(user, center, yaw);
+		} catch (Throwable e) {
+			LOGGER.error(e);
+		}
+	}
+
+	public static void ancientRemnantStomp(LivingEntity user, Vec3 center, float yaw, int distance,
+										   java.util.function.Predicate<LivingEntity> filter) {
+		try {
+			CataInterface.get().ancientRemnantStomp(user, center, yaw, distance, filter);
+		} catch (Throwable e) {
+			LOGGER.error(e);
+		}
+	}
+	public static void ancientRemnantStomp(LivingEntity user, Vec3 center, float yaw, int distance,
+										   java.util.function.Predicate<LivingEntity> filter, boolean outward) {
+		try {
+			CataInterface.get().ancientRemnantStomp(user, center, yaw, distance, filter, outward);
+		} catch (Throwable e) {
+			LOGGER.error(e);
+		}
+	}
 }

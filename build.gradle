@@ -121,8 +121,8 @@ dependencies {
     annotationProcessor "org.spongepowered:mixin:${mixin_version}:processor"
     implementation fg.deobf("com.tterrag.registrate:Registrate:${registrate_version}")
 
-    implementation fg.deobf(jarJar('dev.xkmc.cataclysm_mux:cataclysm_mux_0316:[0,)'))
-    implementation fg.deobf(jarJar('dev.xkmc.cataclysm_mux:cataclysm_mux_0327:[0,)'))
+    implementation fg.deobf(jarJar('dev.xkmc.cataclysm_mux:cataclysm_mux_0316:[0.0.8,)'))
+    implementation fg.deobf(jarJar('dev.xkmc.cataclysm_mux:cataclysm_mux_0327:[0.0.8,)'))
 
     implementation fg.deobf("top.theillusivec4.curios:curios-forge:${curios_version}")
     implementation fg.deobf("mezz.jei:jei-${jei_minecraft_version}:${jei_version}")

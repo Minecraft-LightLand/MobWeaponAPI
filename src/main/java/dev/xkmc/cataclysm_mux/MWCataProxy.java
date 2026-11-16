@@ -83,6 +83,13 @@ public class MWCataProxy {
 			LOGGER.throwing(e);
 		}
 	}
+	public static void spawnHalberdFan(LivingEntity user, Vec3 pos, float yaw, int distance, float spreadArc, int delay) {
+		try {
+			CataInterface.get().spawnHalberdFan(user, pos, yaw, distance, spreadArc, delay);
+		} catch (Throwable e) {
+			LOGGER.throwing(e);
+		}
+	}
 
 	public static void launchTornado(LivingEntity user, Vec3 dir) {
 		try {

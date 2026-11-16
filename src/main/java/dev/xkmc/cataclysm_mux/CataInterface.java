@@ -1,5 +1,6 @@
 package dev.xkmc.cataclysm_mux;
 
+import java.util.function.Predicate;
 import dev.xkmc.cataclysm_mux_0316.CataInterfaceImpl_0316;
 import dev.xkmc.cataclysm_mux_0327.CataInterfaceImpl_0327;
 import net.minecraft.world.damagesource.DamageSource;
@@ -92,6 +93,12 @@ public interface CataInterface {
 	void spawnHalberdCircle(LivingEntity user, Vec3 pos, int count, float radius, int delay);
 
 	void spawnWindmillHalberd(LivingEntity user, Vec3 pos, int branches, int perBranch, float initRadius, float radiusIncr, float curve, int delay);
+	/**
+	 * 向前方扇形区域召唤一圈幻影战戟，复刻灾变 Maledictus_Entity#radagonskill。
+	 * yaw 为施法者朝向（度），distance 为该圈半径，spreadArc 为扇形张角（单位 π，本体用 0.7 = 126°）。
+	 * 弧上按一个方块一点均匀铺开，并吸附到方块中心。
+	 */
+	void spawnHalberdFan(LivingEntity user, Vec3 pos, float yaw, int distance, float spreadArc, int delay);
 
 	// 生物武器兼容
 	@Nullable
@@ -133,6 +140,15 @@ public interface CataInterface {
 
 	void spawnEarthQuake(LivingEntity user);
 
+	/**
+	 * An earthquake wave that starts moving along {@code dir} and keeps steering toward {@code target}
+	 * while it travels. Passing a null target makes it behave exactly like {@link #spawnEarthQuake}, so
+	 * a caller that only has a few targets can still fire the rest of the ring as plain waves.
+	 */
+	void spawnEarthQuakeTracking(LivingEntity user, Vec3 dir, @Nullable LivingEntity target);
+
+	boolean isEarthQuake(DamageSource source);
+
 	void remnantRoarParticle(LivingEntity golem, float vec, float math, float y);
 
 	void remnantChargeSound(LivingEntity user);
@@ -162,6 +178,13 @@ public interface CataInterface {
 
 	void summonStormSerpent(LivingEntity user, LivingEntity target);
 
+	/**
+	 * One phantom water serpent, spawned at the ground below the user and aimed at the target, with a
+	 * lateral offset perpendicular to the user's facing (the way Scylla fans its serpents out in pairs).
+	 * {@code lateral} is in blocks; {@code warmup} delays the strike.
+	 */
+	void summonStormSerpent(LivingEntity user, LivingEntity target, float lateral, int warmup);
+
 	// 先驱者 - 技能
 
 	void shootHowitzer(LivingEntity user, Vec3 dir);
@@ -175,6 +198,12 @@ public interface CataInterface {
 	void shootEnderBullet(LivingEntity user, LivingEntity target);
 
 	void gravityPull(LivingEntity user);
+
+	/**
+	 * Same pull, with the reach and strength scaled for a golem that has been upgraded.
+	 * {@code radius} is in blocks, {@code strength} is the per-tick velocity added.
+	 */
+	void gravityPull(LivingEntity user, double radius, double strength);
 
 	void massDestruction(LivingEntity user);
 
@@ -200,7 +229,18 @@ public interface CataInterface {
 
 	void scyllaSummonWave(LivingEntity user, LivingEntity target);
 
+	/**
+	 * 同 {@link #scyllaSummonWave(LivingEntity, LivingEntity)}，但以施法瞬间锁定的位置与朝向为中心，
+	 * 之后傀儡移动/转身都不会把海浪带走。
+	 */
+	void scyllaSummonWave(LivingEntity user, Vec3 center, float yaw);
+
 	void scyllaSummonWave2(LivingEntity user, LivingEntity target);
+
+	/**
+	 * 同 {@link #scyllaSummonWave2(LivingEntity, LivingEntity)}，但以施法瞬间锁定的位置与朝向为中心。
+	 */
+	void scyllaSummonWave2(LivingEntity user, Vec3 center, float yaw);
 
 	void scyllaSpearThrow(LivingEntity user, LivingEntity target, boolean lightning);
 
@@ -220,6 +260,18 @@ public interface CataInterface {
 
 	void guardianStompFangs(LivingEntity user, LivingEntity target);
 
+	/**
+	 * Only the ring of runes around the golem, without the rows toward a target.
+	 */
+	void guardianStompFangsRing(LivingEntity user);
+
+	/**
+	 * A single row of runes from the golem toward {@code target}, rotated by {@code angleOffset}
+	 * radians. Skills that want several rows call this once per row so each row can pick its own
+	 * direction; nothing is delayed, so all rows appear in the same tick.
+	 */
+	void guardianStompFangsRow(LivingEntity user, LivingEntity target, float angleOffset);
+
 	void guardianUppercut(LivingEntity user, LivingEntity target);
 
 	void guardianHugFX(LivingEntity user);
@@ -234,9 +286,16 @@ public interface CataInterface {
 
 	void scyllaStormParticles(LivingEntity user);
 
+	/** 一字闪电起手：傀儡脚下的青色冲击环（本体 attackState 18 tick25/53）+ 闪电爆裂粒子。 */
+	void scyllaLightningSelfRing(LivingEntity user);
+
+
 	void scyllaThunderCloud(LivingEntity user, LivingEntity target);
 
 	void scyllaThunderCloudStorm(LivingEntity user, double x, double y, double z);
+
+	/** 风暴之怒：雷云位置撒圈状闪电粒子（本体 CircleLighning，attackState 9 tick56-114 每 tick）。 */
+	void scyllaThunderCloudLightning(LivingEntity user, double x, double y, double z);
 
 	void scyllaThunderCloudSpear(LivingEntity user, LivingEntity target, double x, double y, double z);
 
@@ -245,6 +304,47 @@ public interface CataInterface {
 	void ignisEarthquakeFX(LivingEntity user, float shakeRadius);
 
 	void ignisAreaPunch(LivingEntity user, float radius);
+
+	/**
+	 * 同 {@link #ignisAreaPunch}，但可指定扇形弧度（度）。360 即整圆。数值照本体 AreaAttack。
+	 */
+	void ignisAreaPunch(LivingEntity user, float radius, float arcDegrees);
+	/**
+	 * 焰魔反击（本体 STRIKE）：向前方扇形释放冲击波——扇形 AreaAttack
+	 * (半径 5.25 / 120° / 1.25×攻击 + 0.1×最大生命) + 逐圈外扩的扇形震地波
+	 * (ShieldSmashDamage(0.75, j, ...) 的 135° 扇形，grab=true)。
+	 */
+	void ignisCounterStrike(LivingEntity user, boolean blue);
+
+	/**
+	 * 烈焰反击的震地波：本体 ShieldSmashDamage(0.75, distance, ...) + distance+1，并播放该距离的震地音效。
+	 */
+	void ignisCounterWave(LivingEntity user, Vec3 center, float yaw, int distance, boolean blue);
+
+	/**
+	 * 同 {@link #ignisCounterWave(LivingEntity, Vec3, float, int, boolean)}，但可以指定击退方向。
+	 * outward 为 true 时向远离傀儡的方向击退（远程模式用），false 时保持本体行为（把目标吸向波形内侧）。
+	 */
+	void ignisCounterWave(LivingEntity user, Vec3 center, float yaw, int distance, boolean blue, boolean outward);
+
+	/**
+	 * 焰魔咆哮（本体 BREAK_THE_SHIELD tick 55）：FLAME_BURST 音效 + 屏幕震动
+	 * （半径 30 / 0.15 / 0 / 50）+ 一团咆哮粒子（魂形态青色，否则橙黄）。
+	 * <p>
+	 * 只做视听，范围眩晕由调用方自行施加（本体 tick 55 对 12 格内目标眩晕 60 tick）。
+	 */
+	void ignisRoarPulse(LivingEntity user, boolean blue);
+
+
+	/**
+	 * 焰魔砸地震起方块：照本体 ShieldSmashDamage 的落点环，沿弧线把地面方块震飞成
+	 * {@code Cm_Falling_Block_Entity}（落地会碎），并生成地面冲击环。
+	 *
+	 * @param spreadArc 弧长比例（本体砸地用 2，覆盖整圈）
+	 * @param distance  环半径
+	 */
+	void ignisSmashBlocks(LivingEntity user, float spreadArc, int distance, float mxy);
+
 
 	void ignisQuakeWave(LivingEntity user, int distance, float mxy, float vec, boolean grab, float damage, float hpdamage, float airborne, boolean blue);
 
@@ -341,4 +441,28 @@ public interface CataInterface {
 
 	void scyllaAnchorSlamFX(LivingEntity user);
 
+	/**
+	 * 斯库拉招架火花：身前环绕一圈灾变自带的 SPARK 粒子（本体 parryParticle）。
+	 */
+	void scyllaParryParticle(LivingEntity user);
+
+
+	/**
+	 * 远古遗魂「裂地重踏」起手：一次环绕自身的碎块尘土爆发，外加重踏音效与屏幕震动。
+	 */
+	void ancientRemnantStompStart(LivingEntity user, Vec3 center, float yaw);
+
+	/**
+	 * 远古遗魂「裂地重踏」的单步：在 distance 与 distance+1 两处各掀起一道 0.4π 的擦地冲击，
+	 * 造成碎块、伤害与击退，并播放冲击波音效。本体每 2 tick 推进一次，距离 2 收到 19。
+	 * <p>
+	 * filter 由调用方提供，用来复用傀儡自身的目标规则。
+	 */
+	void ancientRemnantStomp(LivingEntity user, Vec3 center, float yaw, int distance, Predicate<LivingEntity> filter);
+
+	/**
+	 * 同 {@link #ancientRemnantStomp(LivingEntity, Vec3, float, int, Predicate)}，但可以指定击退方向。
+	 * outward 为 true 时向远离傀儡的方向击退（远程模式用），false 时保持本体行为。
+	 */
+	void ancientRemnantStomp(LivingEntity user, Vec3 center, float yaw, int distance, Predicate<LivingEntity> filter, boolean outward);
 }
