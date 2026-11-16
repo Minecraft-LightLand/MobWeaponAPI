@@ -106,7 +106,7 @@ public class SandstormOrbitEntity_0327 extends Sandstorm_Entity {
 	/**
 	 * 三层同心环，每环三个，沙暴在环上的相位由构造时传入的 offset 决定。
 	 * 半径按环号递增，和原本近战模式的 4/8/12 一致；slot 是展平的下标，环号 = slot / 3。
-	 * 归位用插值而非瞬移，追击途中被收回时不会出现突兀的落点。
+	 * 归位时和追目标一样按速度飞回去，而不是插值瞬移——目标清空后不会瞬间贴回傀儡身边。
 	 */
 	private void orbit(LivingEntity owner) {
 		Vec3 center = owner.position();
@@ -115,7 +115,17 @@ public class SandstormOrbitEntity_0327 extends Sandstorm_Entity {
 		float angle = this.tickCount * this.speed + this.getOffset();
 		Vec3 spot = new Vec3(center.x + Math.cos(angle) * radius, center.y, center.z + Math.sin(angle) * radius);
 		Vec3 cur = this.position();
-		this.setPos(cur.distanceToSqr(spot) < RETURN_SNAP_SQR ? spot : cur.lerp(spot, RETURN_LERP));
+		Vec3 to = spot.subtract(cur);
+		double dist = to.length();
+		if (dist < 1.0E-2D) {
+			this.setPos(spot.x, spot.y, spot.z);
+			return;
+		}
+		float base = this.speed * 4.0F;
+		float gain = Math.min(MAX_SPEED_GAIN, 1.0F + (float) dist * GAIN_PER_BLOCK);
+		float step = (float) Math.min(dist, base * gain);
+		Vec3 next = cur.add(to.normalize().scale(step));
+		this.setPos(next.x, spot.y, next.z);
 	}
 
 }
