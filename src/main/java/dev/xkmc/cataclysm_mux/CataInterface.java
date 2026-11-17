@@ -185,6 +185,13 @@ public interface CataInterface {
 	 */
 	void summonStormSerpent(LivingEntity user, LivingEntity target, float lateral, int warmup);
 
+	/**
+	 * Same as {@link #summonStormSerpent(LivingEntity, LivingEntity, float, int)}, but the serpent is
+	 * spawned {@code reachBonus} blocks further toward the target. The slam itself always lands a fixed
+	 * 8 blocks ahead of the serpent, so pushing the spawn point extends how far the attack reaches.
+	 */
+	void summonStormSerpent(LivingEntity user, LivingEntity target, float lateral, int warmup, double reachBonus);
+
 	// 先驱者 - 技能
 
 	void shootHowitzer(LivingEntity user, Vec3 dir);
@@ -225,7 +232,20 @@ public interface CataInterface {
 
 	void shootSpark(LivingEntity user, float areaRadius);
 
+	/**
+	 * 同 {@link #shootSpark(LivingEntity, float)}，但从指定落点抛出。
+	 * <p>
+	 * 本体是原地砸地，火花从自身脚下飞溅；傀儡的坠雷击是跳向目标，落点离自己可能十几格，
+	 * 所以必须把落点传进来，否则火花会从傀儡脚下冒出来、看着像"没飞出去"。
+	 */
+	void shootSparkAt(LivingEntity user, double x, double y, double z, float areaRadius);
+
 	void spawnLightningArea(LivingEntity user, double x, double y, double z);
+
+	/**
+	 * 同 {@link #spawnLightningArea(LivingEntity, double, double, double)}，静电场半径按 {@code radiusScale} 缩放。
+	 */
+	void spawnLightningArea(LivingEntity user, double x, double y, double z, float radiusScale);
 
 	void scyllaSummonWave(LivingEntity user, LivingEntity target);
 
@@ -250,7 +270,19 @@ public interface CataInterface {
 
 	void scyllaFallingBurstAt(LivingEntity user, double x, double y, double z, int sparkAmount);
 
+	/**
+	 * 同 {@link #scyllaFallingBurstAt(LivingEntity, double, double, double, int)}，但落雷与电火花的伤害
+	 * 判定按 {@code rangeScale} 缩放。雷柱阵列的排布间距不变，只放大每根雷柱的作用范围。
+	 */
+	void scyllaFallingBurstAt(LivingEntity user, double x, double y, double z, int sparkAmount, float rangeScale);
+
 	void scyllaLightningExplosion(LivingEntity user, double x, double y, double z);
+
+	/**
+	 * 同 {@link #scyllaLightningExplosion(LivingEntity, double, double, double)}，落雷与直伤范围按
+	 * {@code rangeScale} 缩放。
+	 */
+	void scyllaLightningExplosion(LivingEntity user, double x, double y, double z, float rangeScale);
 
 	void scyllaBurstLightning(LivingEntity user);
 
@@ -288,6 +320,41 @@ public interface CataInterface {
 
 	/** 一字闪电起手：傀儡脚下的青色冲击环（本体 attackState 18 tick25/53）+ 闪电爆裂粒子。 */
 	void scyllaLightningSelfRing(LivingEntity user);
+
+	/**
+	 * 一字闪电落地打击（本体 attackState 18 tick 25 与 53）：沿目标朝向排一排闪电。
+	 * <p>
+	 * 本体在目标位置按目标自身的 yaw 向两侧各铺 4 道（k = -4..4，间距 1.25 格，size 3.0），
+	 * 并在 tick 25/53 各放一次；两发之间会按目标位移做提前量。
+	 */
+	void scyllaLineLightningRow(LivingEntity user, double x, double z, float yaw);
+
+	/**
+	 * 风暴旋冲起手（本体 attackState 7 tick 12~39）：本体身上叠三层青色雷暴粒子。
+	 */
+	void scyllaStormAura(LivingEntity user);
+
+	/**
+	 * 风暴旋冲横扫（本体 attackState 7 tick 29/40/51）：本体腰高处一道巨型横扫刀光。
+	 */
+	void scyllaSwingParticle(LivingEntity user, float scale);
+
+	/**
+	 * 召唤幻影水蛇起手（本体 attackState 26 tick 1~20）：水粒子向本体汇聚。
+	 */
+	void scyllaSummonGather(LivingEntity user, int tick);
+
+	/** 召唤幻影水蛇咆哮（本体 attackState 26 tick 30）：本体脚下蓝色冲击环。 */
+	void scyllaSummonRing(LivingEntity user);
+
+	/** 召唤幻影水蛇咆哮音效与白色声波粒子（本体 attackState 26 tick 30/33/36/39）。 */
+	void scyllaSummonRoar(LivingEntity user);
+
+	/** 风暴之怒雷云阶段的音效与震屏（本体 attackState 9 tick 114）。 */
+	void scyllaThunderCloudBurst(LivingEntity user);
+
+	/** 一字闪电落地音效（本体 attackState 18 tick 25/53：{@code HEAVY_SMASH} 0.5 + {@code SUPER_LIGHTNING} 0.2）。 */
+	void scyllaLineLightningSound(LivingEntity user);
 
 
 	void scyllaThunderCloud(LivingEntity user, LivingEntity target);

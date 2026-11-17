@@ -329,6 +329,14 @@ public class GolemCataProxy {
 		}
 	}
 
+	public static void summonStormSerpent(LivingEntity user, LivingEntity target, float lateral, int warmup, double reachBonus) {
+		try {
+			CataInterface.get().summonStormSerpent(user, target, lateral, warmup, reachBonus);
+		} catch (Throwable e) {
+			LOGGER.error(e);
+		}
+	}
+
 	public static void summonStormSerpent(LivingEntity user, LivingEntity target, float lateral, int warmup) {
 		try {
 			CataInterface.get().summonStormSerpent(user, target, lateral, warmup);
@@ -441,9 +449,21 @@ public class GolemCataProxy {
 		}
 	}
 
-	public static void spawnLightningArea(LivingEntity user, double x, double y, double z) {
+	public static void shootSparkAt(LivingEntity user, double x, double y, double z, float areaRadius) {
 		try {
-			CataInterface.get().spawnLightningArea(user, x, y, z);
+			CataInterface.get().shootSparkAt(user, x, y, z, areaRadius);
+		} catch (Throwable e) {
+			LOGGER.error(e);
+		}
+	}
+
+	public static void spawnLightningArea(LivingEntity user, double x, double y, double z) {
+		spawnLightningArea(user, x, y, z, 1.0F);
+	}
+
+	public static void spawnLightningArea(LivingEntity user, double x, double y, double z, float radiusScale) {
+		try {
+			CataInterface.get().spawnLightningArea(user, x, y, z, radiusScale);
 		} catch (Throwable e) {
 			LOGGER.error(e);
 		}
@@ -505,16 +525,24 @@ public class GolemCataProxy {
 	}
 
 	public static void scyllaFallingBurstAt(LivingEntity user, double x, double y, double z, int sparkAmount) {
+		scyllaFallingBurstAt(user, x, y, z, sparkAmount, 1.0F);
+	}
+
+	public static void scyllaFallingBurstAt(LivingEntity user, double x, double y, double z, int sparkAmount, float rangeScale) {
 		try {
-			CataInterface.get().scyllaFallingBurstAt(user, x, y, z, sparkAmount);
+			CataInterface.get().scyllaFallingBurstAt(user, x, y, z, sparkAmount, rangeScale);
 		} catch (Throwable e) {
 			LOGGER.error(e);
 		}
 	}
 
 	public static void scyllaLightningExplosion(LivingEntity user, double x, double y, double z) {
+		scyllaLightningExplosion(user, x, y, z, 1.0F);
+	}
+
+	public static void scyllaLightningExplosion(LivingEntity user, double x, double y, double z, float rangeScale) {
 		try {
-			CataInterface.get().scyllaLightningExplosion(user, x, y, z);
+			CataInterface.get().scyllaLightningExplosion(user, x, y, z, rangeScale);
 		} catch (Throwable e) {
 			LOGGER.error(e);
 		}
@@ -627,6 +655,70 @@ public class GolemCataProxy {
 	public static void scyllaLightningSelfRing(LivingEntity user) {
 		try {
 			CataInterface.get().scyllaLightningSelfRing(user);
+		} catch (Throwable e) {
+			LOGGER.error(e);
+		}
+	}
+
+	public static void scyllaLineLightningRow(LivingEntity user, double x, double z, float yaw) {
+		try {
+			CataInterface.get().scyllaLineLightningRow(user, x, z, yaw);
+		} catch (Throwable e) {
+			LOGGER.error(e);
+		}
+	}
+
+	public static void scyllaStormAura(LivingEntity user) {
+		try {
+			CataInterface.get().scyllaStormAura(user);
+		} catch (Throwable e) {
+			LOGGER.error(e);
+		}
+	}
+
+	public static void scyllaSwingParticle(LivingEntity user, float scale) {
+		try {
+			CataInterface.get().scyllaSwingParticle(user, scale);
+		} catch (Throwable e) {
+			LOGGER.error(e);
+		}
+	}
+
+	public static void scyllaSummonGather(LivingEntity user, int tick) {
+		try {
+			CataInterface.get().scyllaSummonGather(user, tick);
+		} catch (Throwable e) {
+			LOGGER.error(e);
+		}
+	}
+
+	public static void scyllaSummonRing(LivingEntity user) {
+		try {
+			CataInterface.get().scyllaSummonRing(user);
+		} catch (Throwable e) {
+			LOGGER.error(e);
+		}
+	}
+
+	public static void scyllaSummonRoar(LivingEntity user) {
+		try {
+			CataInterface.get().scyllaSummonRoar(user);
+		} catch (Throwable e) {
+			LOGGER.error(e);
+		}
+	}
+
+	public static void scyllaThunderCloudBurst(LivingEntity user) {
+		try {
+			CataInterface.get().scyllaThunderCloudBurst(user);
+		} catch (Throwable e) {
+			LOGGER.error(e);
+		}
+	}
+
+	public static void scyllaLineLightningSound(LivingEntity user) {
+		try {
+			CataInterface.get().scyllaLineLightningSound(user);
 		} catch (Throwable e) {
 			LOGGER.error(e);
 		}
