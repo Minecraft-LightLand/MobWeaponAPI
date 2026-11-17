@@ -5,6 +5,8 @@ import com.github.L_Ender.cataclysm.client.particle.Options.RoarParticleOptions;
 import com.github.L_Ender.cataclysm.client.particle.Options.AfterImageParticleOptions;
 import com.github.L_Ender.cataclysm.client.particle.Options.CircleLightningParticleOptions;
 import com.github.L_Ender.cataclysm.client.particle.Options.RingParticleOptions;
+import com.github.L_Ender.cataclysm.client.particle.Options.GatheringWaterParticleOptions;
+import com.github.L_Ender.cataclysm.client.particle.Options.ScyllaSwingParticleOptions;
 import com.github.L_Ender.cataclysm.client.particle.Options.StormParticleOptions;
 import com.github.L_Ender.cataclysm.config.CMCommonConfig;
 import com.github.L_Ender.cataclysm.entity.AnimationMonster.BossMonsters.The_Leviathan.Abyss_Blast_Entity;
@@ -25,6 +27,7 @@ import com.github.L_Ender.cataclysm.init.ModTag;
 import com.github.L_Ender.cataclysm.util.AttributeUtils;
 import com.github.L_Ender.cataclysm.util.CMDamageTypes;
 import com.github.L_Ender.cataclysm.util.EntityUtil;
+import dev.xkmc.cataclysm_mux.StormSerpentAreaAccess;
 import dev.xkmc.cataclysm_mux.CataInterface;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -880,17 +883,19 @@ public class CataInterfaceImpl_0327 implements CataInterface {
 		double len = Math.sqrt(dx * dx + dz * dz);
 		double rx = len < 1e-6 ? 0 : -dz / len;
 		double rz = len < 1e-6 ? 0 : dx / len;
-		Vec3 vec3 = target.getEyePosition().subtract(user.getEyePosition()).normalize();
-		double x = user.getX() + vec3.x + rx * lateral;
+		Vec3 look = target.getEyePosition().subtract(user.getEyePosition()).normalize();
+		// 发射点横向错开 0.5 格后，朝向必须从错开后的点重算，否则多发会平行飞出、打不中目标
+		double x = user.getX() + look.x + rx * lateral;
 		double y = user.getEyeY();
-		double Z = user.getZ() + vec3.z + rz * lateral;
+		double z = user.getZ() + look.z + rz * lateral;
+		Vec3 vec3 = target.getEyePosition().subtract(x, y, z).normalize();
 		float yRot = (float) (Mth.atan2(vec3.z, vec3.x) * (180D / Math.PI)) + 90.0F;
 		float xRot = (float) (-(Mth.atan2(vec3.y, Math.sqrt(vec3.x * vec3.x + vec3.z * vec3.z)) * (180D / Math.PI)));
 		Lightning_Spear_Entity lightning = new Lightning_Spear_Entity(user, vec3.normalize(), level, (float) CMCommonConfig.Astrape.damage, 2.5);
 		lightning.accelerationPower = 0.15;
 		lightning.setYRot(yRot);
 		lightning.setXRot(xRot);
-		lightning.setPosRaw(x, y, Z);
+		lightning.setPosRaw(x, y, z);
 		lightning.setAreaDamage((float) CMCommonConfig.Astrape.areaDamage);
 		lightning.setAreaRadius(1.0F);
 		level.addFreshEntity(lightning);
@@ -1070,6 +1075,15 @@ public class CataInterfaceImpl_0327 implements CataInterface {
 	 * boss' feet Y, so a jumping golem still puts its serpents on the ground instead of in the air.
 	 */
 	public void summonStormSerpent(LivingEntity user, LivingEntity target, float lateral, int warmup) {
+		summonStormSerpent(user, target, lateral, warmup, 1.0);
+	}
+
+	/**
+	 * {@code areaScale} multiplies the slam's damage radius. The serpent always lands a fixed 8 blocks
+	 * ahead of itself; what the storm chestpiece widens is the splash around that landing point
+	 * (本体 1.5 格半宽 → 2 格半径，翻倍即 4 格)。
+	 */
+	public void summonStormSerpent(LivingEntity user, LivingEntity target, float lateral, int warmup, double areaScale) {
 
 		if (target == null) return;
 		float f = Mth.cos(user.yBodyRot * ((float) Math.PI / 180F));
@@ -1081,8 +1095,13 @@ public class CataInterfaceImpl_0327 implements CataInterface {
 		double d4 = target.getY(0.35) - d1;
 		double d5 = target.getZ() - d2;
 		Vec3 vec3 = new Vec3(d3, d4, d5).normalize();
-		user.level().addFreshEntity(new Storm_Serpent_Entity(user.level(), d0, d1, d2,
-				(float) Mth.atan2(vec3.z, vec3.x), warmup, user, (float) CMCommonConfig.Scylla.SnakeDamage, target, lateral < 0));
+		Storm_Serpent_Entity serpent = new Storm_Serpent_Entity(user.level(), d0, d1, d2,
+				(float) Mth.atan2(vec3.z, vec3.x), warmup, user, (float) CMCommonConfig.Scylla.SnakeDamage, target, lateral < 0);
+		// 风暴胸甲把落点伤害半径放大到 4 格（本体写死 ±1.5，由 StormSerpentAreaMixin 接管）。
+		if (areaScale != 1.0 && serpent instanceof StormSerpentAreaAccess acc) {
+			acc.cataclysm_mux$setAreaScale(areaScale);
+		}
+		user.level().addFreshEntity(serpent);
 
 	}
 
@@ -1425,6 +1444,10 @@ public class CataInterfaceImpl_0327 implements CataInterface {
 	}
 
 	public void shootSpark(LivingEntity user, float areaRadius) {
+		shootSparkAt(user, user.getX(), user.getY(), user.getZ(), areaRadius);
+	}
+
+	public void shootSparkAt(LivingEntity user, double x, double y, double z, float areaRadius) {
 		Level level = user.level();
 		Spark_Entity spark = new Spark_Entity(level, user);
 		spark.setDamage((float) CMCommonConfig.Scylla.LightningStormDamage);
@@ -1435,15 +1458,19 @@ public class CataInterfaceImpl_0327 implements CataInterface {
 		double d1 = user.getRandom().nextFloat() * 0.4 + 0.01;
 		double d2 = (user.getRandom().nextFloat() - 0.5) * 0.5;
 		spark.shoot(d0, d1, d2, 1.0F, 1.0F);
-		spark.setPos(user.getX(), user.getY() + 0.03, user.getZ());
+		spark.setPos(x, y + 0.03, z);
 		level.addFreshEntity(spark);
 	}
 
 	public void spawnLightningArea(LivingEntity user, double x, double y, double z) {
+		spawnLightningArea(user, x, y, z, 1.0F);
+	}
+
+	public void spawnLightningArea(LivingEntity user, double x, double y, double z, float radiusScale) {
 		if (user.level().isClientSide()) return;
 		Level level = user.level();
 		Lightning_Area_Effect_Entity cloud = new Lightning_Area_Effect_Entity(level, x, y, z);
-		cloud.setRadius(3.5F);
+		cloud.setRadius(3.5F * radiusScale);
 		cloud.setOwner(user);
 		cloud.setRadiusOnUse(-1.5F);
 		cloud.setDamage((float) CMCommonConfig.Scylla.LightningAreaDamage);
@@ -1459,6 +1486,11 @@ public class CataInterfaceImpl_0327 implements CataInterface {
 
 	public void scyllaSummonWave(LivingEntity user, Vec3 center, float yaw) {
 		if (user.level().isClientSide()) return;
+		// 本体 state 8 tick 35：召第一道浪的同时播 EXPLOSION(2.0f)，pitch 带 ±0.1 随机。
+		// tick 41 的第二道浪本体不播音效，所以这里也不播。
+		user.level().playSound(null, user.getX(), user.getY(), user.getZ(),
+				ModSounds.EXPLOSION.get(), SoundSource.HOSTILE, 2.0F,
+				0.95F + user.getRandom().nextFloat() * 0.1F);
 		double vecX = Math.cos(yaw * (Math.PI / 180) + Math.PI / 2);
 		// Z 也要 +π/2，否则生成点会被旋到侧面（本体 SummonWave 两轴都带 +π/2）
 		double vecZ = Math.sin(yaw * (Math.PI / 180) + Math.PI / 2);
@@ -1581,12 +1613,17 @@ public class CataInterfaceImpl_0327 implements CataInterface {
 	}
 
 	public void scyllaFallingBurstAt(LivingEntity user, double x, double y, double z, int sparkAmount) {
+		scyllaFallingBurstAt(user, x, y, z, sparkAmount, 1.0F);
+	}
+
+	public void scyllaFallingBurstAt(LivingEntity user, double x, double y, double z, int sparkAmount, float rangeScale) {
 		if (user.level().isClientSide()) return;
 		Level level = user.level();
 		level.playSound(null, x, y, z, ModSounds.EXPLOSION.get(), SoundSource.HOSTILE, 2.0F, 0.75F + level.random.nextFloat() * 0.1F);
 		double atk = user.getAttributeValue(Attributes.ATTACK_DAMAGE);
 		double floorY = y;
-		AABB hitBox = new AABB(x - 0.5, floorY, z - 0.5, x + 0.5, floorY + 2, z + 0.5);
+		double half = 0.5 * rangeScale;
+		AABB hitBox = new AABB(x - half, floorY, z - half, x + half, floorY + 2, z + half);
 		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, hitBox)) {
 			if (e == user || e.isAlliedTo(user)) continue;
 			e.hurt(CMDamageTypes.causeLightningMobDamage(user), (float) (atk + Math.min(atk, e.getMaxHealth() * (float) CMCommonConfig.Scylla.HpDamage)));
@@ -1604,14 +1641,14 @@ public class CataInterfaceImpl_0327 implements CataInterface {
 						z + Mth.sin(throwAngle) * 1.25 * d,
 						throwAngle, delay,
 						(float) CMCommonConfig.Scylla.LightningStormDamage,
-						(float) CMCommonConfig.Scylla.StormHpDamage, user, 2.0F));
+						(float) CMCommonConfig.Scylla.StormHpDamage, user, 2.0F * rangeScale));
 			}
 		}
 		for (int i = 0; i < sparkAmount; i++) {
 			Spark_Entity peq = new Spark_Entity(level, user);
 			peq.setDamage((float) CMCommonConfig.Scylla.LightningStormDamage);
 			peq.setAreaDamage((float) CMCommonConfig.Scylla.LightningAreaDamage);
-			peq.setAreaRadius(1.0F);
+			peq.setAreaRadius(1.0F * rangeScale);
 			peq.setHpDamage((float) CMCommonConfig.Scylla.StormHpDamage);
 			peq.shoot((user.getRandom().nextFloat() - 0.5) * 0.5, user.getRandom().nextFloat() * 0.4F + 0.01F, (user.getRandom().nextFloat() - 0.5) * 0.5, 1.0F, 1.0F);
 			peq.setPos(x, floorY + 0.03, z);
@@ -1620,13 +1657,18 @@ public class CataInterfaceImpl_0327 implements CataInterface {
 	}
 
 	public void scyllaLightningExplosion(LivingEntity user, double x, double y, double z) {
+		scyllaLightningExplosion(user, x, y, z, 1.0F);
+	}
+
+	public void scyllaLightningExplosion(LivingEntity user, double x, double y, double z, float rangeScale) {
 		if (user.level().isClientSide()) return;
 		Level level = user.level();
 		double atk = user.getAttributeValue(Attributes.ATTACK_DAMAGE);
 		float rotation = (float) Mth.atan2(user.getLookAngle().z, user.getLookAngle().x);
+		double r = 4.0 * rangeScale;
 		level.addFreshEntity(new Lightning_Storm_Entity(level, x, y + 1.0, z, rotation, -9,
-				(float) CMCommonConfig.Scylla.LightningStormDamage, (float) CMCommonConfig.Scylla.StormHpDamage, user, 4.0F));
-		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(x - 4, y - 4, z - 4, x + 4, y + 4, z + 4))) {
+				(float) CMCommonConfig.Scylla.LightningStormDamage, (float) CMCommonConfig.Scylla.StormHpDamage, user, 4.0F * rangeScale));
+		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(x - r, y - r, z - r, x + r, y + r, z + r))) {
 			if (e == user || e.isAlliedTo(user)) continue;
 			e.hurt(CMDamageTypes.causeLightningMobDamage(user), (float) (atk + Math.min(atk, e.getMaxHealth() * (float) CMCommonConfig.Scylla.HpDamage)));
 		}
@@ -1735,6 +1777,125 @@ public class CataInterfaceImpl_0327 implements CataInterface {
 		sl.sendParticles(new RingParticleOptions(0f, (float) Math.PI / 2f, 30, 143, 241, 215, 1.0f, 65f, false, 0),
 				user.getX(), user.getY() + 0.02, user.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
 		sl.sendParticles(ModParticle.LIGHTNING_EXPLODE.get(), user.getX(), user.getY() + 0.1, user.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
+	}
+
+	/**
+	 * 一字闪电落地打击（本体 attackState 18 tick 25/53）：沿**目标自身朝向**排一排闪电。
+	 * 本体：{@code k = -4..4}，间距 1.25 格，size 3.0，落点 = 目标位置 + (cos(yaw), sin(yaw)) * 1.25k。
+	 * 用的是 {@code target.getYRot()} 而不是施法者朝向——这一排是横在目标身上的，不是垂直于连线的。
+	 */
+	public void scyllaLineLightningRow(LivingEntity user, double x, double z, float yaw) {
+		if (user.level().isClientSide()) return;
+		float rad = yaw * (float) Math.PI / 180F;
+		for (int k = -4; k <= 4; ++k) {
+			double d2 = 1.25D * (double) k;
+			spawnLightningToGround(user, x + Mth.cos(rad) * d2, z + Mth.sin(rad) * d2, user.getY() - 2, user.getY() + 5, rad, 0, 3.0F);
+		}
+	}
+
+	/** 风暴旋冲起手（本体 attackState 7 tick 12~39）：本体身上叠三层青色雷暴粒子。 */
+	public void scyllaStormAura(LivingEntity user) {
+		scyllaStormParticles(user);
+	}
+
+	/** 风暴旋冲横扫（本体 attackState 7 tick 29/40/51）：本体腰高处一道巨型横扫刀光。 */
+	public void scyllaSwingParticle(LivingEntity user, float scale) {
+		if (!(user.level() instanceof ServerLevel sl)) return;
+		double d0 = user.getX();
+		double d1 = user.getY() + user.getBbHeight() / 2 + 0.5;
+		double d2 = user.getZ();
+		float yaw = (float) Math.toRadians(-user.yBodyRot);
+		double lookX = -Math.cos(yaw);
+		double lookZ = -Math.sin(yaw);
+		float pitch = (float) Math.atan2(-5, Math.sqrt(lookX * lookX + lookZ * lookZ));
+		sl.sendParticles(new ScyllaSwingParticleOptions(scale, yaw, pitch), d0, d1, d2, 1, 0.0, 0.0, 0.0, 0.0);
+	}
+
+
+	/**
+	 * 召唤幻影水蛇起手（本体 attackState 26 tick 1~20）：水粒子向本体汇聚。
+	 * <p>
+	 * 本体用 {@code GatheringWaterParticleOptions}（青色拖尾，围绕中心环绕）。它把
+	 * {@code addParticle} 的「速度」参数当环绕中心，所以必须 <b>count = 0</b> 才能原样传过去。
+	 * <p>
+	 * 但这条拖尾在傀儡身上不够醒目（傀儡体型大、拖尾细），所以再叠一层本体在咆哮阶段用的
+	 * {@code StormParticleOptions} 与蓝色 {@code RingParticleOptions}，保证肉眼一定看得到「水流汇聚」。
+	 */
+	public void scyllaSummonGather(LivingEntity user, int tick) {
+		if (!(user.level() instanceof ServerLevel sl)) return;
+		if (tick < 1 || tick >= 20) return;
+		var rand = user.getRandom();
+		// 本体把汇聚中心钉在脚底（getY() + 0.1），粒子在 ±6 的方框里随机取点后向中心环绕飞行。
+		// 中心不能抬到身体中部：傀儡的躯干是实心模型，拖尾一进去就被挡住看不见了。
+		double p0 = user.getX();
+		double p1 = user.getY() + 0.1;
+		double p2 = user.getZ();
+		for (int i = 0; i < 3; i++) {
+			double sx = p0 + (rand.nextDouble() - 0.5) * 12.0;
+			double sy = p1 + (rand.nextDouble() - 0.5) * 2.0;
+			double sz = p2 + (rand.nextDouble() - 0.5) * 12.0;
+			// 本体那条青色环绕拖尾（count=0 才会把最后三个 double 当环绕中心）
+			sl.sendParticles(new GatheringWaterParticleOptions(94 / 255F, 150 / 255F, 226 / 255F),
+					sx, sy, sz, 0, p0, p1, p2, 1.0);
+		}
+		// 再加一层同色雷暴光球：傀儡体型比本体小，只靠细拖尾不够醒目。
+		sl.sendParticles(new StormParticleOptions(94 / 255F, 150 / 255F, 226 / 255F,
+				3.0F, 1.0F, user.getId()), p0, p1 + user.getBbHeight() * 0.5, p2, 0,
+				0.0, 0.0, 0.0, 1.0);
+	}
+
+	/** 召唤幻影水蛇咆哮（本体 attackState 26 tick 30）：本体脚下蓝色冲击环。 */
+	public void scyllaSummonRing(LivingEntity user) {
+		if (!(user.level() instanceof ServerLevel sl)) return;
+		sl.sendParticles(new RingParticleOptions(0f, (float) Math.PI / 2f, 30, 94, 150, 226, 1.0f, 65f, false, 0),
+				user.getX(), user.getY() + 0.02, user.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
+	}
+
+	/**
+	 * 召唤幻影水蛇咆哮（本体 attackState 26）：tick 30 播 {@code SCYLLA_ROAR}，并在 30/33/36/39
+	 * 各放一次白色声波粒子（本体 {@code Roarparticle}，颜色 99/194/224，从 0.4 长到 2.5）。
+	 */
+	public void scyllaSummonRoar(LivingEntity user) {
+		if (!(user.level() instanceof ServerLevel sl)) return;
+		// 本体 tick 30：playSound(SCYLLA_ROAR, 0.6F, 1.0F)；同样放大到 16 格传播半径。
+		user.level().playSound(null, user.getX(), user.getY(), user.getZ(),
+				ModSounds.SCYLLA_ROAR.get(), SoundSource.HOSTILE, 1.0F, 1.0F);
+		float f = Mth.cos(user.yBodyRot * (float) Math.PI / 180F);
+		float f1 = Mth.sin(user.yBodyRot * (float) Math.PI / 180F);
+		double theta = user.yBodyRot * (Math.PI / 180);
+		theta += Math.PI / 2;
+		double vecX = Math.cos(theta);
+		double vecZ = Math.sin(theta);
+		// 本体参数：vec=-0.4, math=0, y=2.4, duration=20, r/g/b=99/194/224, a=0.4, start=0.4, inc=0.5, end=2.5
+		sl.sendParticles(new RoarParticleOptions(20, 99, 194, 224, 0.4F, 0.4F, 0.5F, 2.5F),
+				user.getX() + -0.4F * vecX + f * 0, user.getY() + 2.4, user.getZ() + -0.4F * vecZ + f1 * 0,
+				1, 0.0, 0.0, 0.0, 0.0);
+	}
+
+	/**
+	 * 一字闪电落地音效（本体 attackState 18 tick 25/53）：
+	 * {@code HEAVY_SMASH}(0.5F) + {@code SUPER_LIGHTNING}(0.2F)，pitch 都带 ±0.1 随机。
+	 */
+	public void scyllaLineLightningSound(LivingEntity user) {
+		if (user.level().isClientSide()) return;
+		float pitch = 1.0F + user.getRandom().nextFloat() * 0.1F;
+		user.level().playSound(null, user.getX(), user.getY(), user.getZ(),
+				ModSounds.HEAVY_SMASH.get(), SoundSource.HOSTILE, 0.5F, pitch);
+		user.level().playSound(null, user.getX(), user.getY(), user.getZ(),
+				ModSounds.SUPER_LIGHTNING.get(), SoundSource.HOSTILE, 0.2F, pitch);
+	}
+
+	/** 风暴之怒雷云爆发（本体 attackState 9 tick 114）：{@code SUPER_LIGHTNING} 音效 + 雷云位置闪电爆裂。 */
+	public void scyllaThunderCloudBurst(LivingEntity user) {
+		if (!(user.level() instanceof ServerLevel sl)) return;
+		// 本体 2.25宽 x 3.5高：嘴边 y+3.1、前方 1.5 格。按体型等比换算，避免小傀儡粒子飘在半空。
+		// 傀儡在 30 格外施法时玩家根本听不到。这里提到 1.0（16 格）并把声源放到雷云高度。
+		user.level().playSound(null, user.getX(), user.getY() + 9, user.getZ(),
+				ModSounds.SUPER_LIGHTNING.get(), SoundSource.HOSTILE, 1.0F, 1.0F + user.getRandom().nextFloat() * 0.1F);
+		double d0 = user.getX() + user.getBbHeight() * 0.2;
+		double d1 = user.getY() + 9;
+		double d2 = user.getZ() + user.getBbHeight() * 0.2;
+		sl.sendParticles(ModParticle.LIGHTNING_EXPLODE.get(), d0, d1, d2, 1, 0.0, 0.0, 0.0, 0.0);
 	}
 
 	public void scyllaThunderCloud(LivingEntity user, LivingEntity target) {
