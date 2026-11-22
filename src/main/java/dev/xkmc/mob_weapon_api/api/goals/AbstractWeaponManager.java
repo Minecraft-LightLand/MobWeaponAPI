@@ -56,7 +56,8 @@ public class AbstractWeaponManager<T extends Mob & IWeaponHolder> {
 				currentGoal = ans.holder();
 				user.goalSelector.addGoal(2, currentGoal.goal());
 
-				if (!ans.status().isMelee()) {
+				boolean rangedUsable = ans.isRanged() && ans.isAvailable();
+				if (!ans.status().isMelee() && rangedUsable) {
 					if (meleeActive) {
 						user.goalSelector.removeGoal(meleeGoal.asGoal());
 						meleeActive = false;
@@ -90,10 +91,9 @@ public class AbstractWeaponManager<T extends Mob & IWeaponHolder> {
 		var mainGoal = getGoalForWeapon(main, null);
 		var offGoal = getGoalForWeapon(off, null);
 		if (mainGoal != null && mainGoal.isRanged()) {
-			if (target == null || off.isEmpty() || off.getItem() instanceof ArrowItem) {
-				return false;
-			}
-			if (!mainGoal.mayActivate()) {
+			if (target == null) return false;
+			if (off.isEmpty() || off.getItem() instanceof ArrowItem) return !mainGoal.isAvailable();
+			if (!mainGoal.isAvailable()) {
 				if (!mainGoal.isMelee(off))
 					return true;
 			}
@@ -109,7 +109,7 @@ public class AbstractWeaponManager<T extends Mob & IWeaponHolder> {
 			return !mainGoal.isMelee(off) && meleeGoal.canReachTarget(target);
 		}
 		if (offGoal != null && offGoal.isRanged()) {
-			if (!offGoal.mayActivate()) return false;
+			if (!offGoal.isAvailable()) return false;
 			if (target == null) return true;
 			if (mainGoal != null) {
 				if (!mainGoal.isWithinRange(target, 4)) {
@@ -119,6 +119,7 @@ public class AbstractWeaponManager<T extends Mob & IWeaponHolder> {
 					return false;
 				}
 			}
+			if (mainGoal == null) return true;
 			return !meleeGoal.canReachTarget(target) || offGoal.isMelee(main);
 		}
 		return main.isEmpty() && !off.isEmpty();
