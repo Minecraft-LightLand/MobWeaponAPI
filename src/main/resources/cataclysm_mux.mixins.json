@@ -1,14 +1,15 @@
 {
-  "required": true,
+  "required": false,
   "priority": 1000,
   "package": "dev.xkmc.cataclysm_mux.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "StormSerpentAreaMixin"
   ],
   "client": [
   ],
   "injectors": {
-    "defaultRequire": 1
+    "defaultRequire": 0
   },
   "minVersion": "0.8"
 }
