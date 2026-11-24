@@ -1,14 +1,31 @@
 package dev.xkmc.cataclysm_mux_0316;
 
+import java.util.function.Predicate;
+import com.github.L_Ender.cataclysm.client.particle.RoarParticle;
+import com.github.L_Ender.cataclysm.client.particle.CircleLightningParticle;
+import com.github.L_Ender.cataclysm.client.particle.RingParticle;
+import com.github.L_Ender.cataclysm.client.particle.Gathering_Water_Particle;
+import com.github.L_Ender.cataclysm.client.particle.Scylla_Swing_Particle;
+import com.github.L_Ender.cataclysm.client.particle.StormParticle;
 import com.github.L_Ender.cataclysm.config.CMConfig;
+import com.github.L_Ender.cataclysm.entity.AnimationMonster.BossMonsters.The_Leviathan.Abyss_Blast_Entity;
 import com.github.L_Ender.cataclysm.entity.AnimationMonster.BossMonsters.The_Leviathan.Abyss_Blast_Portal_Entity;
+import com.github.L_Ender.cataclysm.entity.AnimationMonster.BossMonsters.The_Leviathan.Abyss_Mine_Entity;
+import com.github.L_Ender.cataclysm.entity.AnimationMonster.BossMonsters.The_Leviathan.Abyss_Orb_Entity;
+import com.github.L_Ender.cataclysm.entity.AnimationMonster.BossMonsters.The_Leviathan.Abyss_Portal_Entity;
+import com.github.L_Ender.cataclysm.entity.AnimationMonster.BossMonsters.The_Leviathan.Dimensional_Rift_Entity;
 import com.github.L_Ender.cataclysm.entity.AnimationMonster.BossMonsters.The_Leviathan.Portal_Abyss_Blast_Entity;
+import com.github.L_Ender.cataclysm.entity.InternalAnimationMonster.IABossMonsters.Scylla.Scylla_Entity;
 import com.github.L_Ender.cataclysm.entity.effect.*;
 import com.github.L_Ender.cataclysm.entity.projectile.*;
 import com.github.L_Ender.cataclysm.init.ModEffect;
 import com.github.L_Ender.cataclysm.init.ModEntities;
 import com.github.L_Ender.cataclysm.init.ModParticle;
+import com.github.L_Ender.cataclysm.client.particle.Options.*;
 import com.github.L_Ender.cataclysm.init.ModSounds;
+import com.github.L_Ender.cataclysm.init.ModTag;
+import com.github.L_Ender.cataclysm.util.CMDamageTypes;
+import dev.xkmc.cataclysm_mux.StormSerpentAreaAccess;
 import dev.xkmc.cataclysm_mux.CataInterface;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -24,16 +41,24 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.neoforged.neoforge.event.EventHooks;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class CataInterfaceImpl_0316 implements CataInterface {
@@ -45,6 +70,14 @@ public class CataInterfaceImpl_0316 implements CataInterface {
 
 	public boolean isMissile(DamageSource source) {
 		return source.getDirectEntity() instanceof Wither_Homing_Missile_Entity;
+	}
+
+	public boolean isWitherMissile(DamageSource source) {
+		return source.getDirectEntity() instanceof Wither_Missile_Entity;
+	}
+
+	public boolean isHowitzer(DamageSource source) {
+		return source.getDirectEntity() instanceof Wither_Howitzer_Entity;
 	}
 
 	public boolean isSandstorm(DamageSource source) {
@@ -108,6 +141,10 @@ public class CataInterfaceImpl_0316 implements CataInterface {
 			beam.setYaw((float) ((golem.yHeadRot + 90.0F) * Math.PI / 180.0F));
 			beam.setPitch((float) ((-golem.getXRot()) * Math.PI / 180.0F));
 		}
+		if (e instanceof Abyss_Blast_Entity beam) {
+			beam.setYaw((float) ((golem.yHeadRot + 90.0F) * Math.PI / 180.0F));
+			beam.setPitch((float) ((-golem.getXRot()) * Math.PI / 180.0F));
+		}
 
 	}
 
@@ -155,6 +192,9 @@ public class CataInterfaceImpl_0316 implements CataInterface {
 		if (entity instanceof Death_Laser_Beam_Entity e) {
 			return e.caster;
 		}
+		if (entity instanceof Abyss_Blast_Entity e) {
+			return e.caster;
+		}
 
 		return null;
 	}
@@ -187,7 +227,6 @@ public class CataInterfaceImpl_0316 implements CataInterface {
 		double d2 = shotAt.z;
 		float f = Mth.sqrt((float) (d0 * d0 + d2 * d2)) * 0.35F;
 		shot.shoot(d0, d1 + f, d2, 0.25F, 3.0F);
-		user.level().playSound(null, user.getX(), user.getY(), user.getZ(), ModSounds.FLAME_BURST.get(), SoundSource.HOSTILE, 1.0F, 1.0F);
 		user.level().addFreshEntity(shot);
 
 	}
@@ -201,6 +240,373 @@ public class CataInterfaceImpl_0316 implements CataInterface {
 						dmg, 6f, soul, user));
 
 
+	}
+
+// 攻击 - 焰魔
+
+	public void ignisEarthquakeFX(LivingEntity user, float shakeRadius) {
+		if (user.level().isClientSide()) return;
+		user.level().playSound(null, user.getX(), user.getY(), user.getZ(), SoundEvents.TOTEM_USE, user.getSoundSource(), 1.5F, 0.8F + user.getRandom().nextFloat() * 0.1F);
+		ScreenShake_Entity.ScreenShake(user.level(), user.position(), shakeRadius, 0.3F, 0, 20);
+	}
+
+	public void ignisAreaPunch(LivingEntity user, float radius, float arcDegrees) {
+		if (user.level().isClientSide()) return;
+		Level level = user.level();
+		DamageSource source = user.damageSources().mobAttack(user);
+		float base = (float) (user.getAttributeValue(Attributes.ATTACK_DAMAGE) * 1.5F);
+		double bodyRot = user.yBodyRot % 360;
+		if (bodyRot < 0) bodyRot += 360;
+		float half = arcDegrees / 2f;
+		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, user.getBoundingBox().inflate(radius, 2.5F, radius))) {
+			if (e == user || user.isAlliedTo(e)) continue;
+			float dist = (float) Math.sqrt((e.getZ() - user.getZ()) * (e.getZ() - user.getZ()) + (e.getX() - user.getX()) * (e.getX() - user.getX()));
+			if (dist > radius) continue;
+			float angle = (float) ((Math.atan2(e.getZ() - user.getZ(), e.getX() - user.getX()) * (180 / Math.PI) - 90) % 360);
+			if (angle < 0) angle += 360;
+			double rel = angle - bodyRot;
+			if (half >= 180f || (rel <= half && rel >= -half) || (rel >= 360 - half || rel <= -360 + half)) {
+				if (e.hurt(source, base + e.getMaxHealth() * 0.15F)) {
+					if (e.isDamageSourceBlocked(source) && e instanceof Player player) {
+						player.disableShield();
+					}
+				}
+			}
+		}
+	}
+	public void ignisAreaPunch(LivingEntity user, float radius) {
+		if (user.level().isClientSide()) return;
+		Level level = user.level();
+		DamageSource source = user.damageSources().mobAttack(user);
+		float base = (float) (user.getAttributeValue(Attributes.ATTACK_DAMAGE) * 1.5F);
+		double bodyRot = user.yBodyRot % 360;
+		if (bodyRot < 0) bodyRot += 360;
+		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, user.getBoundingBox().inflate(radius, 2.5F, radius))) {
+			if (e == user || user.isAlliedTo(e)) continue;
+			float dist = (float) Math.sqrt((e.getZ() - user.getZ()) * (e.getZ() - user.getZ()) + (e.getX() - user.getX()) * (e.getX() - user.getX()));
+			if (dist > radius) continue;
+			float angle = (float) ((Math.atan2(e.getZ() - user.getZ(), e.getX() - user.getX()) * (180 / Math.PI) - 90) % 360);
+			if (angle < 0) angle += 360;
+			double rel = angle - bodyRot;
+			if ((rel <= 22.5F && rel >= -22.5F) || (rel >= 360 - 22.5F || rel <= -360 + 22.5F)) {
+				e.hurt(source, base + e.getMaxHealth() * 0.15F);
+			}
+		}
+	}
+
+						public void ignisCounterStrike(LivingEntity user, boolean blue) {
+		if (user.level().isClientSide()) return;
+		Level level = user.level();
+		level.playSound(null, user.getX(), user.getY(), user.getZ(), ModSounds.STRONGSWING.get(), SoundSource.PLAYERS, 1.0F, 0.8F);
+		DamageSource source = user.damageSources().mobAttack(user);
+		float base = (float) (user.getAttributeValue(Attributes.ATTACK_DAMAGE) * 1.25F);
+		double bodyRot = user.yBodyRot % 360;
+		if (bodyRot < 0) bodyRot += 360;
+		float half = 60F;
+		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, user.getBoundingBox().inflate(5.25F, 6F, 5.25F))) {
+			if (e == user || user.isAlliedTo(e)) continue;
+			double dx = e.getX() - user.getX(), dz = e.getZ() - user.getZ();
+			if (dx * dx + dz * dz > 5.25D * 5.25D) continue;
+			float angle = (float) ((Math.atan2(dz, dx) * (180 / Math.PI) - 90) % 360);
+			if (angle < 0) angle += 360;
+			double rel = angle - bodyRot;
+			if ((rel <= half && rel >= -half) || (rel >= 360 - half || rel <= -360 + half)) {
+				if (e.hurt(source, base + e.getMaxHealth() * 0.1F)) {
+					e.igniteForSeconds(5);
+					if (e.isDamageSourceBlocked(source) && e instanceof Player player) {
+						player.disableShield();
+					}
+				}
+			}
+		}
+		strikeParticle(user, 0.75F, 5, 0F, blue);
+	}
+
+		public void ignisCounterWave(LivingEntity user, Vec3 center, float yaw, int distance, boolean blue) {
+		ignisCounterWave(user, center, yaw, distance, blue, false);
+	}
+
+	public void ignisCounterWave(LivingEntity user, Vec3 center, float yaw, int distance, boolean blue, boolean outward) {
+		if (user.level().isClientSide()) return;
+		ignisFanWaveAt(user, center, yaw, distance, 0.75F, 2.5F, true, 1.1F, 0.12F, 0.1F, blue, outward);
+		ignisFanWaveAt(user, center, yaw, distance + 1, 0.75F, 2.5F, true, 1.1F, 0.12F, 0.1F, blue, outward);
+		double theta = yaw * (Math.PI / 180.0) + Math.PI / 2.0;
+		user.level().playSound(null, center.x + distance * Math.cos(theta), center.y, center.z + distance * Math.sin(theta),
+				SoundEvents.TOTEM_USE, SoundSource.PLAYERS, 1.5F, 0.8F + user.getRandom().nextFloat() * 0.1F);
+	}
+
+	public void ignisRoarPulse(LivingEntity user, boolean blue) {
+		if (user.level().isClientSide()) return;
+		Level level = user.level();
+		level.playSound(null, user.getX(), user.getY(), user.getZ(), ModSounds.FLAME_BURST.get(), SoundSource.HOSTILE, 1.0F, 0.8F);
+		ScreenShake_Entity.ScreenShake(level, user.position(), 30, 0.15F, 0, 50);
+		if (!(level instanceof ServerLevel sl)) return;
+		int r = blue ? 2 : 255;
+		int g = blue ? 199 : 215;
+		int b = blue ? 203 : 63;
+		// 本体 2.25宽 x 3.5高：嘴边 y+3.1、前方 1.5 格。按体型等比换算，避免小傀儡粒子飘在半空。
+		double mouthY = user.getY() + user.getBbHeight() * 0.89D;
+		double forward = user.getBbWidth() * 2.0D / 3.0D;
+		double theta = user.yBodyRot * (Math.PI / 180) + Math.PI / 2;
+		double vecX = Math.cos(theta);
+		double vecZ = Math.sin(theta);
+		sl.sendParticles(new RoarParticleOptions(10, r, g, b, 0.4F, 1.0F, 0.8F, 5.0F),
+				user.getX() + forward * vecX, mouthY, user.getZ() + forward * vecZ, 1, 0.0, 0.0, 0.0, 0.0);
+	}
+
+	private void strikeParticle(LivingEntity user, float spreadarc, int distance, float vec, boolean blue) {
+		Level level = user.level();
+		if (!(level instanceof ServerLevel sl)) return;
+		double perpFacing = user.yBodyRot * (Math.PI / 180);
+		double facingAngle = perpFacing + Math.PI / 2;
+		double spread = Math.PI * spreadarc;
+		int arcLen = Math.max(2, Mth.ceil((double) distance * spread));
+		var type = blue ? ParticleTypes.SOUL_FIRE_FLAME : ParticleTypes.FLAME;
+		// 起始点贴近傀儡（参考霆浪锚格挡特效的偏移：max(0.4, bbWidth*0.5)），再向外移动
+		double r0 = Math.max(0.4, user.getBbWidth() * 0.5);
+		// 本体 3.5 高时瞄 1.3；按体型换算，避免小傀儡的火焰飘在头顶
+		double ry = user.getY() + user.getBbHeight() * 0.5;
+		for (int i = 0; i < arcLen; i++) {
+			double theta = ((double) i / (arcLen - 1.0) - 0.5) * spread + facingAngle;
+			double vx = Math.cos(theta);
+			double vz = Math.sin(theta);
+			double vy = Math.sqrt(vx * distance * vx * distance + vz * distance * vz * distance);
+			double px = user.getX() + vx * r0;
+			double pz = user.getZ() + vz * r0;
+			int n = 80 + user.getRandom().nextInt(12);
+			for (int i1 = 0; i1 < n; i1++) {
+				double motionX = 0.2D * (vx * distance);
+				double motionY = 0.2D * (vy * 0.1D);
+				double motionZ = 0.2D * (vz * distance);
+				double spreads = 10 + user.getRandom().nextDouble() * 2.5D;
+				double velocity = 0.5D + user.getRandom().nextDouble() * 0.15D;
+				motionX += user.getRandom().nextGaussian() * 0.0075D * spreads;
+				motionZ += user.getRandom().nextGaussian() * 0.0075D * spreads;
+				motionX *= velocity;
+				motionZ *= velocity;
+				// count=0 时客户端速度 = maxSpeed * (xDist,yDist,zDist)，所以 maxSpeed 必须为 1
+				sl.sendParticles(type, px, ry, pz, 0, motionX, motionY, motionZ, 1.0);
+			}
+		}
+	}
+
+	private void ignisFanWaveAt(LivingEntity user, Vec3 center, float yaw, int distance, float spreadArc, float mxy,
+			boolean grab, float damage, float hpdamage, float airborne, boolean blue, boolean outward) {
+		Level level = user.level();
+		double bodyRotRad = yaw * (Math.PI / 180.0);
+		double facingAngle = bodyRotRad + Math.PI / 2.0;
+		int hitY = Mth.floor(center.y - 0.5);
+		double spread = Math.PI * spreadArc;
+		int arcLen = Math.max(2, Mth.ceil(distance * spread));
+		double minY = center.y - 1;
+		double maxY = center.y + mxy;
+		float factor = 1.0F - (float) distance / 12.0F;
+		DamageSource source = user.damageSources().mobAttack(user);
+		float baseDamage = (float) (user.getAttributeValue(Attributes.ATTACK_DAMAGE) * damage);
+		for (int i = 0; i < arcLen; i++) {
+			double theta = ((double) i / (arcLen - 1) - 0.5) * spread + facingAngle;
+			double vx = Math.cos(theta);
+			double vz = Math.sin(theta);
+			double px = center.x + vx * distance;
+			double pz = center.z + vz * distance;
+			int hitX = Mth.floor(px);
+			int hitZ = Mth.floor(pz);
+			BlockPos pos = new BlockPos(hitX, hitY, hitZ);
+			BlockState block = level.getBlockState(pos);
+			for (int depth = 0; depth < 256; depth++) {
+				if (block.getRenderShape() == RenderShape.MODEL) break;
+				pos = pos.below();
+				block = level.getBlockState(pos);
+			}
+			if (block.getRenderShape() == RenderShape.MODEL) {
+				Cm_Falling_Block_Entity falling = new Cm_Falling_Block_Entity(level, hitX + 0.5D, pos.getY() + 1.0D, hitZ + 0.5D, block, 10);
+				falling.push(0, 0.2D + user.getRandom().nextGaussian() * 0.15D, 0);
+				level.addFreshEntity(falling);
+			}
+			AABB selection = new AABB(px - 0.5, minY, pz - 0.5, px + 0.5, maxY, pz + 0.5);
+			for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, selection)) {
+				if (entity != user && !user.isAlliedTo(entity)) {
+					float finalDamage = baseDamage + entity.getMaxHealth() * hpdamage;
+					if (entity.hurt(source, finalDamage)) {
+						double x = vx * (1 - factor) * (outward ? 4 : -4);
+						double y = entity.onGround() ? 0.15 : 0.0;
+						double z = vz * (1 - factor) * (outward ? 4 : -4);
+						entity.setDeltaMovement(entity.getDeltaMovement().add(x, y, z));
+					}
+				}
+			}
+		}
+	}
+	public void ignisSmashBlocks(LivingEntity user, float spreadArc, int distance, float mxy) {
+		if (user.level().isClientSide()) return;
+		Level level = user.level();
+		double perpFacing = user.yBodyRot * (Math.PI / 180);
+		double facingAngle = perpFacing + Math.PI / 2;
+		int hitY = Mth.floor(user.getBoundingBox().minY - 0.5);
+		double spread = Math.PI * spreadArc;
+		int arcLen = Mth.ceil(distance * spread);
+		for (int i = 0; i < arcLen; i++) {
+			double theta = (i / (arcLen - 1.0) - 0.5) * spread + facingAngle;
+			double vx = Math.cos(theta);
+			double vz = Math.sin(theta);
+			double px = user.getX() + vx * distance;
+			double pz = user.getZ() + vz * distance;
+			int hitX = Mth.floor(px);
+			int hitZ = Mth.floor(pz);
+			BlockPos pos = new BlockPos(hitX, hitY, hitZ);
+			BlockState block = level.getBlockState(pos);
+			for (int depth = 0; depth < 256; depth++) {
+				if (block.getRenderShape() == RenderShape.MODEL) break;
+				pos = pos.below();
+				block = level.getBlockState(pos);
+			}
+			if (block.getRenderShape() != RenderShape.MODEL) {
+				block = Blocks.AIR.defaultBlockState();
+			}
+			Cm_Falling_Block_Entity falling = new Cm_Falling_Block_Entity(level, hitX + 0.5D, hitY + 1.0D, hitZ + 0.5D, block, 10);
+			falling.push(0, 0.2D + user.getRandom().nextGaussian() * 0.15D, 0);
+			level.addFreshEntity(falling);
+		}
+		if (level instanceof ServerLevel sl) {
+			sl.sendParticles(new RingParticleOptions(0f, (float) Math.PI / 2f, 25, 1, 1, 1, 1f, 25f, false, 1),
+					user.getX(), user.getY() + 0.3f, user.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
+		}
+	}
+	public void ignisQuakeWave(LivingEntity user, int distance, float mxy, float vec, boolean grab, float damage, float hpdamage, float airborne, boolean blue) {
+		ignisQuakeWaveAt(user, user.position(), distance, mxy, vec, grab, damage, hpdamage, airborne, blue);
+	}
+
+	public void ignisQuakeWaveAt(LivingEntity user, Vec3 center, int distance, float mxy, float vec, boolean grab, float damage, float hpdamage, float airborne, boolean blue) {
+		if (user.level().isClientSide()) return;
+		Level level = user.level();
+		double bodyRotRad = user.yBodyRot * (Math.PI / 180.0);
+		double sinBodyRot = Math.sin(bodyRotRad);
+		double cosBodyRot = Math.cos(bodyRotRad);
+		double facingAngle = bodyRotRad + Math.PI / 2.0;
+		double baseX = center.x + vec * -sinBodyRot;
+		double baseZ = center.z + vec * cosBodyRot;
+		int hitY = Mth.floor(center.y - 0.5);
+		double spread = Math.PI * 2.0;
+		int arcLen = Mth.ceil(distance * spread);
+		double minY = center.y - 1;
+		double maxY = center.y + mxy;
+		float factor = 1.0F - (float) distance / 12.0F;
+		DamageSource source = user.damageSources().mobAttack(user);
+		float baseDamage = (float) (user.getAttributeValue(Attributes.ATTACK_DAMAGE) * damage);
+		var particle = blue ? ParticleTypes.SOUL_FIRE_FLAME : ParticleTypes.FLAME;
+		for (int i = 0; i < arcLen; i++) {
+			double theta = (arcLen > 1 ? (double) i / (arcLen - 1) : 0.5);
+			theta = (theta - 0.5) * spread + facingAngle;
+			double vx = Math.cos(theta);
+			double vz = Math.sin(theta);
+			double px = baseX + vx * distance;
+			double pz = baseZ + vz * distance;
+			int hitX = Mth.floor(px);
+			int hitZ = Mth.floor(pz);
+			BlockPos pos = new BlockPos(hitX, hitY, hitZ);
+			BlockState block = level.getBlockState(pos);
+			for (int depth = 0; depth < 256; depth++) {
+				if (block.getRenderShape() == RenderShape.MODEL) break;
+				pos = pos.below();
+				block = level.getBlockState(pos);
+			}
+			if (block.getRenderShape() == RenderShape.MODEL) {
+				Cm_Falling_Block_Entity falling = new Cm_Falling_Block_Entity(level, hitX + 0.5D, pos.getY() + 1.0D, hitZ + 0.5D, block, 10);
+				falling.push(0, 0.2D + user.getRandom().nextGaussian() * 0.15D, 0);
+				level.addFreshEntity(falling);
+			}
+			level.addParticle(particle, px, maxY, pz, 0, 0.05, 0);
+			AABB selection = new AABB(px - 0.5, minY, pz - 0.5, px + 0.5, maxY, pz + 0.5);
+			for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, selection)) {
+				if (entity != user && !user.isAlliedTo(entity)) {
+					float finalDamage = baseDamage + entity.getMaxHealth() * hpdamage;
+					if (entity.hurt(source, finalDamage)) {
+						if (grab) {
+							double magnitude = -4;
+							double x = vx * (1 - factor) * magnitude;
+							double y = entity.onGround() ? 0.15 : 0.0;
+							double z = vz * (1 - factor) * magnitude;
+							entity.setDeltaMovement(entity.getDeltaMovement().add(x, y, z));
+						} else {
+							entity.setDeltaMovement(entity.getDeltaMovement().add(0.0D, airborne * distance + level.random.nextDouble() * 0.15, 0.0D));
+						}
+					}
+				}
+			}
+		}
+	}
+
+	public void ignisQuakePush(LivingEntity user, int distance, float mxy, float vec, float damage, float hpdamage, float airborne, boolean blue) {
+		if (user.level().isClientSide()) return;
+		Level level = user.level();
+		double bodyRotRad = user.yBodyRot * (Math.PI / 180.0);
+		double sinBodyRot = Math.sin(bodyRotRad);
+		double cosBodyRot = Math.cos(bodyRotRad);
+		double facingAngle = bodyRotRad + Math.PI / 2.0;
+		double baseX = user.getX() + vec * -sinBodyRot;
+		double baseZ = user.getZ() + vec * cosBodyRot;
+		int hitY = Mth.floor(user.getBoundingBox().minY - 0.5);
+		double spread = Math.PI * 2.0;
+		int arcLen = Mth.ceil(distance * spread);
+		double minY = user.getY() - 1;
+		double maxY = user.getY() + mxy;
+		float factor = 1.0F - (float) distance / 12.0F;
+		DamageSource source = user.damageSources().mobAttack(user);
+		float baseDamage = (float) (user.getAttributeValue(Attributes.ATTACK_DAMAGE) * damage);
+		var particle = blue ? ParticleTypes.SOUL_FIRE_FLAME : ParticleTypes.FLAME;
+		for (int i = 0; i < arcLen; i++) {
+			double theta = (arcLen > 1 ? (double) i / (arcLen - 1) : 0.5);
+			theta = (theta - 0.5) * spread + facingAngle;
+			double vx = Math.cos(theta);
+			double vz = Math.sin(theta);
+			double px = baseX + vx * distance;
+			double pz = baseZ + vz * distance;
+			int hitX = Mth.floor(px);
+			int hitZ = Mth.floor(pz);
+			BlockPos pos = new BlockPos(hitX, hitY, hitZ);
+			BlockState block = level.getBlockState(pos);
+			for (int depth = 0; depth < 256; depth++) {
+				if (block.getRenderShape() == RenderShape.MODEL) break;
+				pos = pos.below();
+				block = level.getBlockState(pos);
+			}
+			if (block.getRenderShape() == RenderShape.MODEL) {
+				Cm_Falling_Block_Entity falling = new Cm_Falling_Block_Entity(level, hitX + 0.5D, pos.getY() + 1.0D, hitZ + 0.5D, block, 10);
+				falling.push(0, 0.2D + user.getRandom().nextGaussian() * 0.15D, 0);
+				level.addFreshEntity(falling);
+			}
+			level.addParticle(particle, px, maxY, pz, 0, 0.05, 0);
+			AABB selection = new AABB(px - 0.5, minY, pz - 0.5, px + 0.5, maxY, pz + 0.5);
+			for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, selection)) {
+				if (entity != user && !user.isAlliedTo(entity)) {
+					float finalDamage = baseDamage + entity.getMaxHealth() * hpdamage;
+					if (entity.hurt(source, finalDamage)) {
+						double magnitude = 4;
+						double x = vx * (1 - factor) * magnitude;
+						double y = airborne * 0.7 + (entity.onGround() ? 0.2 : 0.0);
+						double z = vz * (1 - factor) * magnitude;
+						entity.setDeltaMovement(entity.getDeltaMovement().add(x, y, z));
+					}
+				}
+			}
+		}
+	}
+
+	// 焰魔 - 骨风暴
+
+	public void ignisBoneStorm(LivingEntity user, float radius) {
+		if (user.level().isClientSide()) return;
+		user.playSound(SoundEvents.TRIDENT_THROW.value(), 1.0F, 0.75F);
+		for (int i = 0; i < 8; ++i) {
+			float angle = (float) Math.toRadians(user.getYRot() + 90.0F) + (float) i * (float) Math.PI / 4.0F;
+			double x = user.getX() + (double) Mth.cos(angle) * radius;
+			double y = user.getY() + (double) user.getBbHeight() * 0.62D;
+			double z = user.getZ() + (double) Mth.sin(angle) * radius;
+			Blazing_Bone_Entity bone = new Blazing_Bone_Entity(user.level(), (float) CMConfig.BlazingBonedamage, user);
+			bone.moveTo(x, y, z, (float) i * 45.0F, user.getXRot());
+			bone.shoot(Mth.cos(angle), 0.0D, Mth.sin(angle), 0.5F, 1.0F);
+			user.level().addFreshEntity(bone);
+		}
 	}
 
 // 攻击 - 先驱者
@@ -304,9 +710,25 @@ public class CataInterfaceImpl_0316 implements CataInterface {
 
 		player.level().playSound(null, pos.x, pos.y, pos.z, ModSounds.PHANTOM_SPEAR.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
 		if (player.level() instanceof ServerLevel sl) {
-			strikeWindmillHalberd(sl, pos, player, 7, 5, 1.0F, 1.0F, 0.2, delay);
+			strikeWindmillHalberd(sl, pos, player, 7, 5, 2.0F, 2.0F, 0.2, delay);
 		}
 		return CMConfig.SoulRenderCooldown;
+
+	}
+
+	public void spawnHalberdCircle(LivingEntity user, Vec3 pos, int count, float radius, int delay) {
+
+		if (user.level() instanceof ServerLevel sl) {
+			strikeWindmillHalberd(sl, pos, user, count, 1, radius, 0.0F, 0.0F, delay);
+		}
+
+	}
+
+	public void spawnWindmillHalberd(LivingEntity user, Vec3 pos, int branches, int perBranch, float initRadius, float radiusIncr, float curve, int delay) {
+
+		if (user.level() instanceof ServerLevel sl) {
+			strikeWindmillHalberd(sl, pos, user, branches, perBranch, initRadius, radiusIncr, curve, delay);
+		}
 
 	}
 
@@ -318,7 +740,7 @@ public class CataInterfaceImpl_0316 implements CataInterface {
 		Phantom_Arrow_Entity hommingArrowEntity;
 		hommingArrowEntity = new Phantom_Arrow_Entity(level, player, target);
 		hommingArrowEntity.setBaseDamage(CMConfig.PlayerPhantomArrowbasedamage);
-		level.playSound(null, player.getX(), player.getY(), player.getZ(), ModSounds.PHANTOM_SPEAR.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
+		level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.CROSSBOW_SHOOT, SoundSource.PLAYERS, 1.0F, 1.0F / (player.getRandom().nextFloat() * 0.4F + 0.8F));
 		return hommingArrowEntity;
 
 
@@ -339,7 +761,7 @@ public class CataInterfaceImpl_0316 implements CataInterface {
 	public void shootLaserGatling(LivingEntity user, Vec3 vec3) {
 
 		Level level = user.level();
-		Laser_Beam_Entity laser = new Laser_Beam_Entity(user, new Vec3(vec3.x, vec3.y, vec3.z), level, (float) CMConfig.Laserdamage);
+		Laser_Beam_Entity laser = new Laser_Beam_Entity(user, vec3, level, (float) CMConfig.Laserdamage);
 		float yRot = (float) (Mth.atan2(vec3.z, vec3.x) * Mth.RAD_TO_DEG) + 90;
 		float xRot = (float) (-(Mth.atan2(vec3.y, Math.sqrt(vec3.x * vec3.x + vec3.z * vec3.z)) * Mth.RAD_TO_DEG));
 		laser.setYRot(yRot);
@@ -367,8 +789,7 @@ public class CataInterfaceImpl_0316 implements CataInterface {
 		Vec3 offset = dir.multiply(1, 0, 1).normalize();
 		double x = player.getX() + offset.x;
 		double z = player.getZ() + offset.y;
-		Wither_Missile_Entity rocket = new Wither_Missile_Entity(ModEntities.WITHER_MISSILE.get(),
-				player, x, player.getEyeY(), z, new Vec3(dir.x, dir.y, dir.z), (float) CMConfig.WASWMissileDamage, level);
+		Wither_Missile_Entity rocket = new Wither_Missile_Entity(ModEntities.WITHER_MISSILE.get(), player, x, player.getEyeY(), z, dir, (float) CMConfig.WASWMissileDamage, level);
 		level.playSound(null, player.getX(), player.getY(), player.getZ(), ModSounds.ROCKET_LAUNCH.get(), SoundSource.PLAYERS, 1.0F, 0.7F);
 		level.addFreshEntity(rocket);
 		return CMConfig.WASWMissileCooldown;
@@ -443,6 +864,33 @@ public class CataInterfaceImpl_0316 implements CataInterface {
 		return CMConfig.AstrapeCooldown;
 	}
 
+	public int astrape(Level level, LivingEntity user, LivingEntity target, float lateral) {
+
+		level.playSound(null, user.getX(), user.getY(), user.getZ(), ModSounds.EMP_ACTIVATED.get(), SoundSource.PLAYERS, 1.0F, 0.8F);
+		double dx = target.getX() - user.getX();
+		double dz = target.getZ() - user.getZ();
+		double len = Math.sqrt(dx * dx + dz * dz);
+		double rx = len < 1e-6 ? 0 : -dz / len;
+		double rz = len < 1e-6 ? 0 : dx / len;
+		Vec3 look = target.getEyePosition().subtract(user.getEyePosition()).normalize();
+		// 发射点横向错开 0.5 格后，朝向必须从错开后的点重算，否则多发会平行飞出、打不中目标
+		double x = user.getX() + look.x + rx * lateral;
+		double y = user.getEyeY();
+		double z = user.getZ() + look.z + rz * lateral;
+		Vec3 vec3 = target.getEyePosition().subtract(x, y, z).normalize();
+		float yRot = (float) (Mth.atan2(vec3.z, vec3.x) * (180D / Math.PI)) + 90.0F;
+		float xRot = (float) (-(Mth.atan2(vec3.y, Math.sqrt(vec3.x * vec3.x + vec3.z * vec3.z)) * (180D / Math.PI)));
+		Lightning_Spear_Entity lightning = new Lightning_Spear_Entity(user, vec3.normalize(), level, (float) CMConfig.AstrapeDamage);
+		lightning.accelerationPower = 0.15;
+		lightning.setYRot(yRot);
+		lightning.setXRot(xRot);
+		lightning.setPosRaw(x, y, z);
+		lightning.setAreaDamage((float) CMConfig.AstrapeAreaDamage);
+		lightning.setAreaRadius(1.0F);
+		level.addFreshEntity(lightning);
+		return CMConfig.AstrapeCooldown;
+	}
+
 	@Nullable
 	public Projectile coralSpear(LivingEntity user, Level level, ItemStack stack) {
 
@@ -453,7 +901,1424 @@ public class CataInterfaceImpl_0316 implements CataInterface {
 		return throwntrident;
 	}
 
+// 攻击 - 远古遗魂
+
+	public void spawnDesertStele(LivingEntity user, double x, double y, double z, int delay) {
+
+		double d0 = 0.0;
+		BlockPos blockpos = BlockPos.containing(x, y, z);
+		if (!user.level().isEmptyBlock(blockpos)) {
+			BlockState blockstate1 = user.level().getBlockState(blockpos);
+			VoxelShape voxelshape = blockstate1.getCollisionShape(user.level(), blockpos);
+			if (!voxelshape.isEmpty()) {
+				d0 = voxelshape.max(Direction.Axis.Y);
+			}
+		}
+		float rotation = (float) Mth.atan2(user.getLookAngle().z, user.getLookAngle().x);
+		user.level().addFreshEntity(new Ancient_Desert_Stele_Entity(user.level(), x, y + d0 - 3.0, z, rotation, delay,
+				(float) CMConfig.AncientDesertSteledamage, user));
+
+	}
+
+	public void spawnEarthQuake(LivingEntity user) {
+
+		Vec3 floor = findFloor(user.level(), user.position(), 32);
+		if (floor == null) return;
+		float vec = 0.0f, math = 0.8f;
+		double theta = user.getYRot() * (Math.PI / 180) + Math.PI / 2;
+		double vecX = Math.cos(theta);
+		double vecZ = Math.sin(theta);
+		float f = (float) Math.cos(user.getYRot() * (Math.PI / 180));
+		float f1 = (float) Math.sin(user.getYRot() * (Math.PI / 180));
+		EarthQuake_Entity peq = new EarthQuake_Entity(user.level(), user);
+		peq.setDamage((float) CMConfig.AncientRemnantEarthQuakeDamage);
+		peq.setPos(floor.x + vec * vecX + f * math, floor.y + 0.4, floor.z + vec * vecZ + f1 * math);
+		peq.setDeltaMovement(vecX * 0.45, 0, vecZ * 0.45);
+		user.level().addFreshEntity(peq);
+
+	}
+
+	public void spawnEarthQuakeTracking(LivingEntity user, Vec3 dir, @Nullable LivingEntity target) {
+
+		Vec3 floor = findFloor(user.level(), user.position(), 32);
+		if (floor == null) return;
+		Vec3 flat = new Vec3(dir.x, 0.0D, dir.z);
+		if (flat.lengthSqr() < 1.0E-6D) return;
+		flat = flat.normalize();
+		TrackingEarthQuakeEntity_0316 peq = new TrackingEarthQuakeEntity_0316(user.level(), user, flat);
+		peq.setDamage((float) CMConfig.AncientRemnantEarthQuakeDamage);
+		peq.setPos(floor.x + flat.x * 0.8, floor.y + 0.4, floor.z + flat.z * 0.8);
+		peq.setTrackedTarget(target);
+		user.level().addFreshEntity(peq);
+
+	}
+
+	public boolean isEarthQuake(DamageSource source) {
+		return source.getDirectEntity() instanceof EarthQuake_Entity;
+	}
+
+	public void remnantRoarParticle(LivingEntity golem, float vec, float math, float y) {
+		if (!(golem.level() instanceof ServerLevel sl)) return;
+		float f = Mth.cos(golem.yBodyRot * (float) Math.PI / 180F);
+		float f1 = Mth.sin(golem.yBodyRot * (float) Math.PI / 180F);
+		double theta = golem.yBodyRot * (Math.PI / 180);
+		double vecX = Math.cos(theta += 1.5707963267948966);
+		double vecZ = Math.sin(theta);
+		sl.sendParticles(new RoarParticleOptions(10, 255, 255, 255, 0.4F, 1.0F, 0.8F, 3.5F),
+				golem.getX() + vec * vecX + f * math, golem.getY() + y, golem.getZ() + vec * vecZ + f1 * math, 1, 0.0, 0.0, 0.0, 0.0);
+	}
+
+	@Nullable
+	private static Vec3 findFloor(Level level, Vec3 p, int diff) {
+		double x = p.x, maxY = p.y, z = p.z, minY = maxY - diff;
+		BlockPos pos = BlockPos.containing(x, maxY, z);
+		double dy = 0.0F;
+
+		do {
+			BlockPos low = pos.below();
+			BlockState lowState = level.getBlockState(low);
+			if (lowState.isFaceSturdy(level, low, Direction.UP)) {
+				if (!level.isEmptyBlock(pos)) {
+					BlockState state = level.getBlockState(pos);
+					VoxelShape shape = state.getCollisionShape(level, pos);
+					if (!shape.isEmpty()) {
+						dy = shape.max(Direction.Axis.Y);
+					}
+				}
+				return new Vec3(x, pos.getY() + dy, z);
+			}
+			pos = pos.below();
+		} while (pos.getY() >= minY);
+		return null;
+	}
+
+// 攻击 - 魔训兽
+
+	public void spawnFlameJet(LivingEntity user, double x, double y, double z, int delay) {
+
+		float rotation = (float) Mth.atan2(user.getLookAngle().z, user.getLookAngle().x);
+		user.level().addFreshEntity(new Flame_Jet_Entity(user.level(), x, y, z, rotation, delay,
+				(float) CMConfig.FlameJetDamage, user));
+
+	}
+
+// 攻击 - 利维坦
+
+	@Nullable
+	public Entity addAbyssBlast(LivingEntity user, int dur) {
+
+		Abyss_Blast_Entity beam = new Abyss_Blast_Entity(ModEntities.ABYSS_BLAST.get(), user.level(), user,
+				user.getX(), user.getEyeY(), user.getZ(),
+				(user.yHeadRot + 90.0F) * Mth.DEG_TO_RAD,
+				-user.getXRot() * Mth.DEG_TO_RAD, dur, 0, (float) CMConfig.AbyssBlastdamage,
+				(float) CMConfig.AbyssBlastHpdamage);
+		user.level().playSound(null, user.getX(), user.getY(), user.getZ(), ModSounds.PORTAL_ABYSS_BLAST.get(), SoundSource.HOSTILE, 1.0F, 1.0F);
+		user.level().addFreshEntity(beam);
+		return beam;
+
+	}
+
+	public void spawnAbyssOrb(LivingEntity user, Vec3 dir, LivingEntity target) {
+
+		Abyss_Orb_Entity orb = new Abyss_Orb_Entity(user, dir.x, dir.y, dir.z, user.level(),
+				(float) CMConfig.AbyssOrbdamage, target);
+		orb.setUp(40);
+		user.level().addFreshEntity(orb);
+
+	}
+
+	public void spawnAbyssMine(LivingEntity user, double x, double y, double z, int delay) {
+
+		user.level().addFreshEntity(new Abyss_Mine_Entity(user.level(), x, y, z, 0, delay, user));
+
+	}
+
+	public void spawnDimensionalRift(LivingEntity user, double x, double y, double z) {
+
+		user.level().addFreshEntity(new Dimensional_Rift_Entity(user.level(), x, y, z, user));
+
+	}
+
+// 攻击 - 斯库拉
+
+	public void lightningStorm(LivingEntity user, double x, double y, double z, float size) {
+
+		float rotation = (float) Mth.atan2(user.getLookAngle().z, user.getLookAngle().x);
+		user.level().addFreshEntity(new Lightning_Storm_Entity(user.level(), x, y, z, rotation, 0,
+				(float) CMConfig.ScyllaLightningStormDamage, (float) CMConfig.ScyllaLightningStormHpDamage, user, size));
+
+	}
+
+	public void summonStormSerpent(LivingEntity user, LivingEntity target) {
+
+		Vec3 diff = target.getEyePosition().subtract(user.getEyePosition()).normalize();
+		float rotation = (float) Mth.atan2(diff.z, diff.x);
+		user.level().addFreshEntity(new Storm_Serpent_Entity(user.level(), user.getX(), user.getY(), user.getZ(),
+				rotation, 0, user, (float) CMConfig.ScyllaSnakeDamage, target, true));
+
+	}
+
+	/**
+	 * One serpent, fanned out perpendicular to the user's facing and pinned to the ground below it.
+	 * Mirrors Scylla's own SummonSnake: the boss spawns each pair offset from the body axis and at the
+	 * boss' feet Y, so a jumping golem still puts its serpents on the ground instead of in the air.
+	 */
+	public void summonStormSerpent(LivingEntity user, LivingEntity target, float lateral, int warmup) {
+		summonStormSerpent(user, target, lateral, warmup, 1.0);
+	}
+
+	/**
+	 * {@code areaScale} multiplies the slam's damage radius. The serpent always lands a fixed 8 blocks
+	 * ahead of itself; what the storm chestpiece widens is the splash around that landing point
+	 * (本体 1.5 格半宽 → 2 格半径，翻倍即 4 格)。
+	 */
+	public void summonStormSerpent(LivingEntity user, LivingEntity target, float lateral, int warmup, double areaScale) {
+
+		if (target == null) return;
+		float f = Mth.cos(user.yBodyRot * ((float) Math.PI / 180F));
+		float f1 = Mth.sin(user.yBodyRot * ((float) Math.PI / 180F));
+		double d0 = user.getX() + f * lateral;
+		double d2 = user.getZ() + f1 * lateral;
+		double d1 = findFloorY(user.level(), d0, user.getY(), d2);
+		double d3 = target.getX() - d0;
+		double d4 = target.getY(0.35) - d1;
+		double d5 = target.getZ() - d2;
+		Vec3 vec3 = new Vec3(d3, d4, d5).normalize();
+		Storm_Serpent_Entity serpent = new Storm_Serpent_Entity(user.level(), d0, d1, d2,
+				(float) Mth.atan2(vec3.z, vec3.x), warmup, user, (float) CMConfig.ScyllaSnakeDamage, target, lateral < 0);
+		// 风暴胸甲把落点伤害半径放大到 4 格（本体写死 ±1.5，由 StormSerpentAreaMixin 接管）。
+		if (areaScale != 1.0 && serpent instanceof StormSerpentAreaAccess acc) {
+			acc.cataclysm_mux$setAreaScale(areaScale);
+		}
+		user.level().addFreshEntity(serpent);
+
+	}
+
+// 攻击 - 先驱者
+
+	public void shootHowitzer(LivingEntity user, Vec3 dir) {
+
+		Wither_Howitzer_Entity howitzer = new Wither_Howitzer_Entity(ModEntities.WITHER_HOWITZER.get(), user.level(), user);
+		howitzer.setPos(user.getX(), user.getEyeY(), user.getZ());
+		howitzer.setRadius(3.0f);
+		howitzer.shoot(dir.x, dir.y, dir.z, 0.6F, 60.0F);
+		user.level().playSound(null, user.getX(), user.getY(), user.getZ(), ModSounds.ROCKET_LAUNCH.get(), SoundSource.HOSTILE, 1.0F, 1.0F);
+		user.level().addFreshEntity(howitzer);
+
+	}
+
+// 攻击 - 新代理
+
+	public void fallingBlocks(LivingEntity user, double inflate) {
+		if (user.level().isClientSide()) return;
+		Level level = user.level();
+		AABB aabb = user.getBoundingBox().inflate(inflate, 0.2, inflate);
+		boolean flag = false;
+		for (BlockPos pos : BlockPos.betweenClosed(Mth.floor(aabb.minX), Mth.floor(aabb.minY), Mth.floor(aabb.minZ), Mth.floor(aabb.maxX), Mth.floor(aabb.maxY), Mth.floor(aabb.maxZ))) {
+			BlockState state = level.getBlockState(pos);
+			if (state.isAir() || !state.canEntityDestroy(level, pos, user)
+					|| state.is(ModTag.NETHERITE_MONSTROSITY_IMMUNE) || state.is(ModTag.HARBINGER_IMMUNE)
+					|| !EventHooks.onEntityDestroyBlock(user, pos, state)) {
+				continue;
+			}
+			if (user.getRandom().nextInt(3) == 0 && !state.hasBlockEntity()) {
+				Cm_Falling_Block_Entity falling = new Cm_Falling_Block_Entity(level, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, state, 20);
+				flag = level.destroyBlock(pos, false, user) || flag;
+				falling.setDeltaMovement(falling.getDeltaMovement().add(user.position().subtract(falling.position())
+						.multiply((user.getRandom().nextFloat() - 1.2F) / 3.0F, 0.0, (user.getRandom().nextFloat() - 1.2F) / 3.0F)));
+				level.addFreshEntity(falling);
+			} else {
+				flag = level.destroyBlock(pos, false, user) || flag;
+			}
+		}
+		if (flag) {
+			level.levelEvent(null, 1022, user.blockPosition(), 0);
+		}
+	}
+
+	public void shootEnderBullet(LivingEntity user, LivingEntity target) {
+		if (target == null) return;
+		Level level = user.level();
+		BlockPos tgt = target.blockPosition();
+		double tx = tgt.getX();
+		double tz = tgt.getZ();
+		double ty = target.getY() + 0.1;
+		BlockPos pos = user.blockPosition();
+		double sx = pos.getX();
+		double sz = pos.getZ();
+		Direction dir = Direction.getNearest(tx - sx, 0, tz - sz);
+		double cx = dir.getStepX();
+		double cz = dir.getStepZ();
+		for (int i = -4; i <= 4; i++) {
+			double angle = (double) (i - 2) * Math.toRadians(6.0);
+			double x = cx * Math.cos(angle) + cz * Math.sin(angle);
+			double z = -cx * Math.sin(angle) + cz * Math.cos(angle);
+			Ender_Guardian_Bullet_Entity bullet = new Ender_Guardian_Bullet_Entity(level, user, new Vec3(cx, 0, cz));
+			bullet.setOwner(user);
+			bullet.setPos(user.getX(), user.getY() - 2.0 + user.getRandom().nextFloat() * 4.0, user.getZ());
+			bullet.setUp(30, cx, 0, cz, tx - 7.0 * cx + (double) i * cz, ty, tz - 7.0 * cz + (double) i * cx);
+			level.addFreshEntity(bullet);
+		}
+		level.playSound(null, user.getX(), user.getY(), user.getZ(), ModSounds.ENDER_GUARDIAN_FIST.get(), SoundSource.HOSTILE, 0.5F, 1.0F);
+	}
+
+	public void gravityPull(LivingEntity user) {
+		gravityPull(user, 12.0D, 0.085D);
+	}
+
+	public void gravityPull(LivingEntity user, double radius, double strength) {
+		if (user.level().isClientSide()) return;
+		float angle = (float) Math.PI / 180 * user.yBodyRot;
+		double extraX = Mth.sin((float) (Math.PI + angle));
+		double extraZ = Mth.cos(angle);
+		double theta = user.yBodyRot * (Math.PI / 180);
+		double vecX = Math.cos(theta += Math.PI / 2);
+		double vecZ = Math.sin(theta);
+		Vec3 pull = user.position().add(2.0 * vecX + extraX * 0.25, 0, 2.0 * vecZ + extraZ * 0.25);
+		for (LivingEntity e : user.level().getEntitiesOfClass(LivingEntity.class, user.getBoundingBox().inflate(radius, 12, radius))) {
+			if (e == user || e.isAlliedTo(user)) continue;
+			Vec3 diff = pull.subtract(e.position()).normalize().scale(strength);
+			e.setDeltaMovement(e.getDeltaMovement().add(diff));
+		}
+	}
+
+	public void massDestruction(LivingEntity user) {
+		// 对齐原版 MassDestruction(3.0F, 1.5F, 200)：范围 3，伤害 atk*1.5，击飞公式保持原版一致
+		if (user.level().isClientSide()) return;
+		double atk = user.getAttributeValue(Attributes.ATTACK_DAMAGE);
+		for (LivingEntity e : user.level().getEntitiesOfClass(LivingEntity.class, user.getBoundingBox().inflate(3.0))) {
+			if (e == user || e.isAlliedTo(user)) continue;
+			e.hurt(user.level().damageSources().mobAttack(user), (float) (atk * 1.5));
+			launch(user, e);
+		}
+	}
+
+	public void burst(LivingEntity user) {
+		guardianAreaAttack(user, 7.5F, 6.0F, 1.0F, (float) CMConfig.EnderguardianKnockbackHpdamage, 0, 0, true);
+	}
+
+	public void rocketPunch(LivingEntity user, LivingEntity target) {
+		guardianAreaAttack(user, 7.0F, 7.0F, 1.25F, (float) CMConfig.EnderguardianRocketPunchHpdamage, 0, 0, true);
+	}
+
+	public void hugMe(LivingEntity user, LivingEntity target) {
+		guardianAreaAttack(user, 6.0F, 6.0F, 1.0F, (float) CMConfig.EnderguardianTeleportAttackHpdamage, 60, 0.6F, false);
+	}
+
+	@Override
+	public void guardianStompFangs(LivingEntity user, LivingEntity target) {
+		if (user.level().isClientSide()) return;
+		guardianStompFangsRing(user);
+		if (target == null) return;
+		switch (user.getRandom().nextInt(3)) {
+			case 0 -> {
+				guardianStompFangsRow(user, target, -0.4f);
+				guardianStompFangsRow(user, target, 0.0f);
+				guardianStompFangsRow(user, target, 0.4f);
+			}
+			case 1 -> {
+				guardianStompFangsRow(user, target, -0.1f);
+				guardianStompFangsRow(user, target, 0.1f);
+			}
+			default -> guardianStompFangsRow(user, target, 0.0f);
+		}
+	}
+
+	/**
+	 * Only the ring of runes around the golem.
+	 */
+	@Override
+	public void guardianStompFangsRing(LivingEntity user) {
+		if (user.level().isClientSide()) return;
+		user.level().playSound(null, user.getX(), user.getY(), user.getZ(),
+				ModSounds.ENDER_GUARDIAN_FIST.get(), SoundSource.HOSTILE, 0.3F, 1.0F + user.getRandom().nextFloat() * 0.1F);
+		ScreenShake_Entity.ScreenShake(user.level(), user.position(), 10, 0.1F, 0, 5);
+		double d0 = user.getY() - 2.0D;
+		double d1 = user.getY() + 1.0D;
+		float angle2 = 0.01745329251F * user.yBodyRot;
+		for (int k = 0; k < 6; ++k) {
+			float f2 = angle2 + (float) k * (float) Math.PI * 2.0F / 6.0F + ((float) Math.PI * 2F / 5F);
+			spawnGuardianFangs(user, user.getX() + (double) Mth.cos(f2) * 2.5D, user.getZ() + (double) Mth.sin(f2) * 2.5D, d0, d1, f2, 3);
+		}
+		for (int k = 0; k < 11; ++k) {
+			float f3 = angle2 + (float) k * (float) Math.PI * 2.0F / 11.0F + ((float) Math.PI * 2F / 10F);
+			spawnGuardianFangs(user, user.getX() + (double) Mth.cos(f3) * 3.5D, user.getZ() + (double) Mth.sin(f3) * 3.5D, d0, d1, f3, 10);
+		}
+		for (int k = 0; k < 14; ++k) {
+			float f4 = angle2 + (float) k * (float) Math.PI * 2.0F / 14.0F + ((float) Math.PI * 2F / 20F);
+			spawnGuardianFangs(user, user.getX() + (double) Mth.cos(f4) * 4.5D, user.getZ() + (double) Mth.sin(f4) * 4.5D, d0, d1, f4, 15);
+		}
+	}
+
+	/**
+	 * One row of void runes from the golem toward {@code target}, rotated by {@code angleOffset}.
+	 * Skills that want several rows call this once per row so each row can aim at its own target;
+	 * because nothing is delayed, all the rows appear in the same tick.
+	 */
+	@Override
+	public void guardianStompFangsRow(LivingEntity user, LivingEntity target, float angleOffset) {
+		if (user.level().isClientSide()) return;
+		if (target == null) return;
+		double d0 = Math.min(target.getY(), user.getY());
+		double d1 = Math.max(target.getY(), user.getY()) + 1.0D;
+		float f = (float) Mth.atan2(target.getZ() - user.getZ(), target.getX() - user.getX()) + angleOffset;
+		for (int l = 0; l < 13; ++l) {
+			double d2 = 1.25D * (double) (l + 1);
+			spawnGuardianFangs(user, user.getX() + (double) Mth.cos(f) * d2, user.getZ() + (double) Mth.sin(f) * d2, d0, d1, f, 0);
+		}
+	}
+
+	private void spawnGuardianFangs(LivingEntity user, double x, double z, double minY, double maxY, float rotation, int delay) {
+		Level level = user.level();
+		BlockPos blockpos = BlockPos.containing(x, maxY, z);
+		boolean flag = false;
+		double d0 = 0.0D;
+		do {
+			BlockPos below = blockpos.below();
+			BlockState state = level.getBlockState(below);
+			if (state.isFaceSturdy(level, below, Direction.UP)) {
+				if (!level.isEmptyBlock(blockpos)) {
+					BlockState state1 = level.getBlockState(blockpos);
+					VoxelShape shape = state1.getCollisionShape(level, blockpos);
+					if (!shape.isEmpty()) d0 = shape.max(Direction.Axis.Y);
+				}
+				flag = true;
+				break;
+			}
+			blockpos = blockpos.below();
+		} while (blockpos.getY() >= Mth.floor(minY) - 1);
+		if (flag) {
+			level.addFreshEntity(new Void_Rune_Entity(level, x, (double) blockpos.getY() + d0, z, rotation, delay, (float) CMConfig.Voidrunedamage, user));
+		}
+	}
+
+	@Override
+	public void guardianUppercut(LivingEntity user, LivingEntity target) {
+		if (user.level().isClientSide()) return;
+		user.level().playSound(null, user.getX(), user.getY(), user.getZ(),
+				SoundEvents.GENERIC_EXPLODE, SoundSource.HOSTILE, 1.5F, 1.0F + user.getRandom().nextFloat() * 0.1F);
+		ScreenShake_Entity.ScreenShake(user.level(), user.position(), 15, 0.3F, 0, 10);
+		if (target == null) return;
+		double atk = user.getAttributeValue(Attributes.ATTACK_DAMAGE);
+		float arc = 60;
+		for (LivingEntity e : user.level().getEntitiesOfClass(LivingEntity.class, user.getBoundingBox().inflate(6.25D, 7.0D, 6.25D))) {
+			if (e == user || e.isAlliedTo(user)) continue;
+			float hitAngle = (float) ((Mth.atan2(e.getZ() - user.getZ(), e.getX() - user.getX()) * (180 / Math.PI) - 90) % 360);
+			float attackAngle = user.yBodyRot % 360;
+			if (hitAngle < 0) hitAngle += 360;
+			if (attackAngle < 0) attackAngle += 360;
+			float rel = hitAngle - attackAngle;
+			float dist = (float) Math.sqrt((e.getZ() - user.getZ()) * (e.getZ() - user.getZ()) + (e.getX() - user.getX()) * (e.getX() - user.getX()));
+			if (dist <= 6.25F && ((rel <= arc / 2 && rel >= -arc / 2) || (rel >= 360 - arc / 2 || rel <= -360 + arc / 2))) {
+				DamageSource damagesource = user.level().damageSources().mobAttack(user);
+				boolean flag = e.hurt(damagesource, (float) (atk * 1.4F + Math.min(atk * 1.4F, e.getMaxHealth() * (float) CMConfig.EnderguardianUppercutHpdamage)));
+				if (e.isDamageSourceBlocked(damagesource) && e instanceof Player player)
+					player.getCooldowns().addCooldown(Items.SHIELD, 150);
+				e.setDeltaMovement(e.getDeltaMovement().add(0.0D, 0.5D, 0.0D));
+				if (flag) e.addEffect(new MobEffectInstance(ModEffect.EFFECTSTUN, 60));
+			}
+		}
+	}
+
+	@Override
+	public void guardianHugFX(LivingEntity user) {
+		if (user.level().isClientSide()) return;
+		user.level().playSound(null, user.getX(), user.getY(), user.getZ(),
+				SoundEvents.GENERIC_EXPLODE, SoundSource.HOSTILE, 1.5F, 1.0F + user.getRandom().nextFloat() * 0.1F);
+		ScreenShake_Entity.ScreenShake(user.level(), user.position(), 15, 0.2F, 0, 10);
+	}
+
+	@Override
+	public void guardianGravityPunch(LivingEntity user, LivingEntity target) {
+		if (user.level().isClientSide()) return;
+		user.level().playSound(null, user.getX(), user.getY(), user.getZ(),
+				ModSounds.ENDER_GUARDIAN_FIST.get(), SoundSource.HOSTILE, 0.5F, 1.0F + user.getRandom().nextFloat() * 0.1F);
+		ScreenShake_Entity.ScreenShake(user.level(), user.position(), 20, 0.2F, 0, 10);
+		if (target == null) return;
+		double atk = user.getAttributeValue(Attributes.ATTACK_DAMAGE);
+		float arc = 70;
+		for (LivingEntity e : user.level().getEntitiesOfClass(LivingEntity.class, user.getBoundingBox().inflate(5.15D, 5.0D, 5.15D))) {
+			if (e == user || e.isAlliedTo(user)) continue;
+			float hitAngle = (float) ((Mth.atan2(e.getZ() - user.getZ(), e.getX() - user.getX()) * (180 / Math.PI) - 90) % 360);
+			float attackAngle = user.yBodyRot % 360;
+			if (hitAngle < 0) hitAngle += 360;
+			if (attackAngle < 0) attackAngle += 360;
+			float rel = hitAngle - attackAngle;
+			float dist = (float) Math.sqrt((e.getZ() - user.getZ()) * (e.getZ() - user.getZ()) + (e.getX() - user.getX()) * (e.getX() - user.getX()));
+			if (dist <= 5.15F && ((rel <= arc / 2 && rel >= -arc / 2) || (rel >= 360 - arc / 2 || rel <= -360 + arc / 2))) {
+				DamageSource damagesource = user.level().damageSources().mobAttack(user);
+				e.hurt(damagesource, (float) (atk + Math.min(atk, e.getMaxHealth() * (float) CMConfig.EnderguardianGravityPunchHpdamage)));
+				if (e.isDamageSourceBlocked(damagesource) && e instanceof Player player)
+					player.getCooldowns().addCooldown(Items.SHIELD, 100);
+			}
+		}
+	}
+
+	@Override
+	public void guardianSlamLanding(LivingEntity user) {
+		if (user.level().isClientSide()) return;
+		user.level().playSound(null, user.getX(), user.getY(), user.getZ(),
+				ModSounds.ENDER_GUARDIAN_FIST.get(), SoundSource.HOSTILE, 0.5F, 1.0F + user.getRandom().nextFloat() * 0.1F);
+		ScreenShake_Entity.ScreenShake(user.level(), user.position(), 20, 0.3F, 0, 20);
+		switch (user.getRandom().nextInt(3)) {
+			case 0 -> strikeGuardianRune(user, 8, 0.5);
+			case 1 -> strikeGuardianRune(user, 10, 0.75);
+			default -> strikeGuardianRune(user, 12, 1);
+		}
+	}
+
+	private void strikeGuardianRune(LivingEntity user, int rune, double time) {
+		for (int i = 0; i < rune; i++) {
+			float throwAngle = i * Mth.PI / (rune / 2);
+			for (int k = 0; k < 8; ++k) {
+				double d2 = 1.15D * (double) (k + 1);
+				int d3 = (int) (time * (k + 1));
+				spawnGuardianFangs(user, user.getX() + (double) Mth.cos(throwAngle) * 1.25D * d2,
+						user.getZ() + (double) Mth.sin(throwAngle) * 1.25D * d2,
+						user.getY(), user.getY() + 2, throwAngle, d3);
+			}
+		}
+	}
+
+	@Override
+	public void guardianExplosionSound(LivingEntity user) {
+		if (user.level().isClientSide()) return;
+		user.level().playSound(null, user.getX(), user.getY(), user.getZ(),
+				SoundEvents.GENERIC_EXPLODE, SoundSource.HOSTILE, 1.5F, 1.0F + user.getRandom().nextFloat() * 0.1F);
+	}
+	public void throwLavaBomb(LivingEntity user, LivingEntity target) {
+		if (target == null) return;
+		Level level = user.level();
+		Lava_Bomb_Entity bomb = new Lava_Bomb_Entity(ModEntities.LAVA_BOMB.get(), level, user);
+		double d0 = target.getX() - user.getX();
+		double d1 = target.getBoundingBox().minY + target.getBbHeight() / 3.0 - bomb.getY();
+		double d2 = target.getZ() - user.getZ();
+		double d3 = Math.sqrt(d0 * d0 + d2 * d2);
+		bomb.setMaxLavaTime(CMConfig.LavabombDuration + user.getRandom().nextInt(CMConfig.LavabombDurationRand));
+		bomb.shoot(d0, d1 + d3 * 0.2, d2, 1.0F, 24 - level.getDifficulty().getId() * 4);
+		level.playSound(null, user.getX(), user.getY(), user.getZ(), ModSounds.MONSTROSITYSHOOT.get(), SoundSource.HOSTILE, 2.0F, 1.0F);
+		level.addFreshEntity(bomb);
+	}
+
+	public void throwFlareBomb(LivingEntity user, LivingEntity target) {
+		if (target == null) return;
+		Level level = user.level();
+		float f = Mth.cos(user.yBodyRot * ((float) Math.PI / 180));
+		float f1 = Mth.sin(user.yBodyRot * ((float) Math.PI / 180));
+		for (int i = 0; i < 5; i++) {
+			Flare_Bomb_Entity bomb = new Flare_Bomb_Entity(ModEntities.FLARE_BOMB.get(), level, user);
+			bomb.setPos(user.getX() + (double) f * 3.4, user.getEyeY(), user.getZ() + (double) f1 * 3.4);
+			double d0 = target.getX() - bomb.getX();
+			double d1 = target.getBoundingBox().minY + target.getBbHeight() / 3.0 - bomb.getY();
+			double d2 = target.getZ() - bomb.getZ();
+			double d3 = Math.sqrt(d0 * d0 + d2 * d2);
+			bomb.shoot(d0, d1 + d3 * 0.2, d2, 1.0F, 1 + i * 8);
+			level.addFreshEntity(bomb);
+		}
+		level.playSound(null, user.getX(), user.getY(), user.getZ(), ModSounds.MONSTROSITYSHOOT.get(), SoundSource.HOSTILE, 2.0F, 1.0F);
+	}
+
+	public void shoulderCheck(LivingEntity user, LivingEntity target) {
+		if (target == null) return;
+		Vec3 dir = target.position().subtract(user.position()).normalize();
+		user.setDeltaMovement(user.getDeltaMovement().add(dir.scale(1.5)));
+		double atk = user.getAttributeValue(Attributes.ATTACK_DAMAGE);
+		for (LivingEntity e : user.level().getEntitiesOfClass(LivingEntity.class, user.getBoundingBox().inflate(2.5, 0.5, 2.5).move(dir.scale(1.25)))) {
+			if (e == user || e.isAlliedTo(user)) continue;
+			if (e.hurt(user.level().damageSources().mobAttack(user), (float) (atk * 0.4))) {
+				e.addEffect(new MobEffectInstance(ModEffect.EFFECTBONE_FRACTURE, 100));
+				e.setDeltaMovement(e.getDeltaMovement().add(dir.scale(2.0)));
+			}
+		}
+	}
+
+	public void shootSpark(LivingEntity user, float areaRadius) {
+		shootSparkAt(user, user.getX(), user.getY(), user.getZ(), areaRadius);
+	}
+
+	public void shootSparkAt(LivingEntity user, double x, double y, double z, float areaRadius) {
+		Level level = user.level();
+		Spark_Entity spark = new Spark_Entity(level, user);
+		spark.setDamage((float) CMConfig.ScyllaLightningStormDamage);
+		spark.setAreaDamage((float) CMConfig.ScyllaLightningAreaDamage);
+		spark.setAreaRadius(areaRadius);
+		spark.setHpDamage((float) CMConfig.ScyllaLightningStormHpDamage);
+		double d0 = (user.getRandom().nextFloat() - 0.5) * 0.5;
+		double d1 = user.getRandom().nextFloat() * 0.4 + 0.01;
+		double d2 = (user.getRandom().nextFloat() - 0.5) * 0.5;
+		spark.shoot(d0, d1, d2, 1.0F, 1.0F);
+		spark.setPos(x, y + 0.03, z);
+		level.addFreshEntity(spark);
+	}
+
+	public void spawnLightningArea(LivingEntity user, double x, double y, double z) {
+		spawnLightningArea(user, x, y, z, 1.0F);
+	}
+
+	public void spawnLightningArea(LivingEntity user, double x, double y, double z, float radiusScale) {
+		if (user.level().isClientSide()) return;
+		Level level = user.level();
+		Lightning_Area_Effect_Entity cloud = new Lightning_Area_Effect_Entity(level, x, y, z);
+		cloud.setRadius(3.5F * radiusScale);
+		cloud.setOwner(user);
+		cloud.setRadiusOnUse(-1.5F);
+		cloud.setDamage((float) CMConfig.ScyllaLightningAreaDamage);
+		cloud.setWaitTime(20);
+		cloud.setDuration(cloud.getDuration() / 2);
+		cloud.setRadiusPerTick(-cloud.getRadius() / cloud.getDuration());
+		level.addFreshEntity(cloud);
+	}
+
+	public void scyllaSummonWave(LivingEntity user, LivingEntity target) {
+		scyllaSummonWave(user, user.position(), user.yBodyRot);
+	}
+
+	public void scyllaSummonWave(LivingEntity user, Vec3 center, float yaw) {
+		if (user.level().isClientSide()) return;
+		// 本体 state 8 tick 35：召第一道浪的同时播 HEAVY_SMASH(0.8f)，pitch 带 ±0.1 随机。
+		// tick 41 的第二道浪本体不播音效，所以这里也不播。
+		user.level().playSound(null, user.getX(), user.getY(), user.getZ(),
+				ModSounds.HEAVY_SMASH.get(), SoundSource.HOSTILE, 0.8F,
+				0.95F + user.getRandom().nextFloat() * 0.1F);
+		double vecX = Math.cos(yaw * (Math.PI / 180) + Math.PI / 2);
+		// Z 也要 +π/2，否则生成点会被旋到侧面（本体 SummonWave 两轴都带 +π/2）
+		double vecZ = Math.sin(yaw * (Math.PI / 180) + Math.PI / 2);
+		for (int i = 0; i < 5; i++) {
+			double angle = yaw - 50.0 + i * 25.0;
+			double rad = Math.toRadians(angle);
+			double dx = -Math.sin(rad);
+			double dz = Math.cos(rad);
+			Wave_Entity wave = new Wave_Entity(user.level(), user, 80, 9.0F);
+			wave.setPos(center.x + vecX * 2.4, center.y, center.z + vecZ * 2.4);
+			wave.setState(1);
+			wave.setYRot(-((float) (Mth.atan2(dx, dz) * 57.29577951308232)));
+			user.level().addFreshEntity(wave);
+		}
+	}
+
+	public void scyllaSummonWave2(LivingEntity user, LivingEntity target) {
+		scyllaSummonWave2(user, user.position(), user.yBodyRot);
+	}
+
+	public void scyllaSummonWave2(LivingEntity user, Vec3 center, float yaw) {
+		if (user.level().isClientSide()) return;
+		double vecX = Math.cos(yaw * (Math.PI / 180) + Math.PI / 2);
+		// Z 也要 +π/2，否则生成点会被旋到侧面（本体 SummonWave 两轴都带 +π/2）
+		double vecZ = Math.sin(yaw * (Math.PI / 180) + Math.PI / 2);
+		for (int i = 0; i < 4; i++) {
+			double angle = yaw - 37.5 + i * 25.0;
+			double rad = Math.toRadians(angle);
+			double dx = -Math.sin(rad);
+			double dz = Math.cos(rad);
+			Wave_Entity wave = new Wave_Entity(user.level(), user, 80, 9.0F);
+			wave.setPos(center.x + vecX * 2.4, center.y, center.z + vecZ * 2.4);
+			wave.setState(1);
+			wave.setYRot(-((float) (Mth.atan2(dx, dz) * 57.29577951308232)));
+			user.level().addFreshEntity(wave);
+		}
+	}
+
+	public void scyllaSpearThrow(LivingEntity user, LivingEntity target, boolean lightning) {
+		if (target == null) return;
+		Level level = user.level();
+		float f = Mth.cos(user.yBodyRot * ((float) Math.PI / 180));
+		float f1 = Mth.sin(user.yBodyRot * ((float) Math.PI / 180));
+		double d0 = user.getX() + f * -0.5;
+		double d1 = user.getY() + user.getBbHeight() * 0.8;
+		double d2 = user.getZ() + f1 * -0.5;
+		double d3 = target.getX() - d0;
+		double d4 = target.getY(0.35) - d1;
+		double d5 = target.getZ() - d2;
+		Vec3 vec3 = new Vec3(d3, d4, d5).normalize();
+		float yRot = (float) (Mth.atan2(vec3.z, vec3.x) * 57.29577951308232) + 90.0F;
+		float xRot = (float) (-(Mth.atan2(vec3.y, Math.sqrt(vec3.x * vec3.x + vec3.z * vec3.z)) * 57.29577951308232));
+		if (lightning) {
+			Lightning_Spear_Entity spear = new Lightning_Spear_Entity(user, vec3, level, (float) CMConfig.ScyllaSpearDamage);
+			spear.setYRot(yRot);
+			spear.setXRot(xRot);
+			spear.moveTo(d0, d1, d2);
+			spear.setAreaDamage((float) CMConfig.ScyllaLightningAreaDamage);
+			spear.setHpDamage((float) CMConfig.ScyllaLightningStormHpDamage);
+			spear.setAreaRadius(2.0F);
+			level.addFreshEntity(spear);
+		} else {
+			Water_Spear_Entity spear = new Water_Spear_Entity(user, vec3, level, (float) CMConfig.ScyllaSpearDamage);
+			spear.setYRot(yRot);
+			spear.setXRot(xRot);
+			spear.moveTo(d0, d1, d2);
+			spear.setTotalBounces(8);
+			level.addFreshEntity(spear);
+		}
+	}
+
+	public void scyllaSpearThrow(LivingEntity user, LivingEntity target, boolean lightning, float lateral) {
+		if (target == null) return;
+		Level level = user.level();
+		float f = Mth.cos(user.yBodyRot * ((float) Math.PI / 180));
+		float f1 = Mth.sin(user.yBodyRot * ((float) Math.PI / 180));
+		double dx = target.getX() - user.getX();
+		double dz = target.getZ() - user.getZ();
+		double len = Math.sqrt(dx * dx + dz * dz);
+		double rx = len < 1e-6 ? 0 : -dz / len;
+		double rz = len < 1e-6 ? 0 : dx / len;
+		double d0 = user.getX() + f * -0.5 + rx * lateral;
+		double d1 = user.getY() + user.getBbHeight() * 0.8;
+		double d2 = user.getZ() + f1 * -0.5 + rz * lateral;
+		double d3 = target.getX() - d0;
+		double d4 = target.getY(0.35) - d1;
+		double d5 = target.getZ() - d2;
+		Vec3 vec3 = new Vec3(d3, d4, d5).normalize();
+		float yRot = (float) (Mth.atan2(vec3.z, vec3.x) * 57.29577951308232) + 90.0F;
+		float xRot = (float) (-(Mth.atan2(vec3.y, Math.sqrt(vec3.x * vec3.x + vec3.z * vec3.z)) * 57.29577951308232));
+		if (lightning) {
+			Lightning_Spear_Entity spear = new Lightning_Spear_Entity(user, vec3, level, (float) CMConfig.ScyllaSpearDamage);
+			spear.setYRot(yRot);
+			spear.setXRot(xRot);
+			spear.moveTo(d0, d1, d2);
+			spear.setAreaDamage((float) CMConfig.ScyllaLightningAreaDamage);
+			spear.setHpDamage((float) CMConfig.ScyllaLightningStormHpDamage);
+			spear.setAreaRadius(2.0F);
+			level.addFreshEntity(spear);
+		} else {
+			Water_Spear_Entity spear = new Water_Spear_Entity(user, vec3, level, (float) CMConfig.ScyllaSpearDamage);
+			spear.setYRot(yRot);
+			spear.setXRot(xRot);
+			spear.moveTo(d0, d1, d2);
+			spear.setTotalBounces(8);
+			level.addFreshEntity(spear);
+		}
+	}
+
+	public void scyllaFallingBurst(LivingEntity user, int sparkAmount) {
+		double cx = user.getX(), cy = user.getY(), cz = user.getZ();
+		if (user instanceof net.minecraft.world.entity.Mob mob && mob.getTarget() != null) {
+			LivingEntity target = mob.getTarget();
+			cx = target.getX();
+			cy = target.getY();
+			cz = target.getZ();
+		}
+		double floorY = findFloorY(user.level(), cx, cy, cz);
+		scyllaFallingBurstAt(user, cx, floorY, cz, sparkAmount);
+	}
+
+	public void scyllaFallingBurstAt(LivingEntity user, double x, double y, double z, int sparkAmount) {
+		scyllaFallingBurstAt(user, x, y, z, sparkAmount, 1.0F);
+	}
+
+	public void scyllaFallingBurstAt(LivingEntity user, double x, double y, double z, int sparkAmount, float rangeScale) {
+		if (user.level().isClientSide()) return;
+		Level level = user.level();
+		level.playSound(null, x, y, z, SoundEvents.GENERIC_EXPLODE, SoundSource.HOSTILE, 2.0F, 0.75F + level.random.nextFloat() * 0.1F);
+		double atk = user.getAttributeValue(Attributes.ATTACK_DAMAGE);
+		double floorY = y;
+		double half = 0.5 * rangeScale;
+		AABB hitBox = new AABB(x - half, floorY, z - half, x + half, floorY + 2, z + half);
+		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, hitBox)) {
+			if (e == user || e.isAlliedTo(user)) continue;
+			e.hurt(CMDamageTypes.causeLightningMobDamage(user), (float) (atk + Math.min(atk, e.getMaxHealth() * (float) CMConfig.ScyllaHpDamage)));
+		}
+		int rune = 7;
+		int time = 4;
+		for (int i = 0; i < rune; i++) {
+			float throwAngle = (float) i * (float) Math.PI / ((float) rune / 2.0F);
+			for (int k = 0; k < 5; k++) {
+				double d = 1.75 * (k + 1);
+				int delay = time * (k + 1) - 9;
+				level.addFreshEntity(new Lightning_Storm_Entity(level,
+						x + Mth.cos(throwAngle) * 1.25 * d,
+						floorY,
+						z + Mth.sin(throwAngle) * 1.25 * d,
+						throwAngle, delay,
+						(float) CMConfig.ScyllaLightningStormDamage,
+						(float) CMConfig.ScyllaLightningStormHpDamage, user, 2.0F * rangeScale));
+			}
+		}
+		for (int i = 0; i < sparkAmount; i++) {
+			Spark_Entity peq = new Spark_Entity(level, user);
+			peq.setDamage((float) CMConfig.ScyllaLightningStormDamage);
+			peq.setAreaDamage((float) CMConfig.ScyllaLightningAreaDamage);
+			peq.setAreaRadius(1.0F * rangeScale);
+			peq.setHpDamage((float) CMConfig.ScyllaLightningStormHpDamage);
+			peq.shoot((user.getRandom().nextFloat() - 0.5) * 0.5, user.getRandom().nextFloat() * 0.4F + 0.01F, (user.getRandom().nextFloat() - 0.5) * 0.5, 1.0F, 1.0F);
+			peq.setPos(x, floorY + 0.03, z);
+			level.addFreshEntity(peq);
+		}
+	}
+
+	public void scyllaLightningExplosion(LivingEntity user, double x, double y, double z) {
+		scyllaLightningExplosion(user, x, y, z, 1.0F);
+	}
+
+	public void scyllaLightningExplosion(LivingEntity user, double x, double y, double z, float rangeScale) {
+		if (user.level().isClientSide()) return;
+		Level level = user.level();
+		double atk = user.getAttributeValue(Attributes.ATTACK_DAMAGE);
+		float rotation = (float) Mth.atan2(user.getLookAngle().z, user.getLookAngle().x);
+		double r = 4.0 * rangeScale;
+		level.addFreshEntity(new Lightning_Storm_Entity(level, x, y + 1.0, z, rotation, -9,
+				(float) CMConfig.ScyllaLightningStormDamage, (float) CMConfig.ScyllaLightningStormHpDamage, user, 4.0F * rangeScale));
+		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(x - r, y - r, z - r, x + r, y + r, z + r))) {
+			if (e == user || e.isAlliedTo(user)) continue;
+			e.hurt(CMDamageTypes.causeLightningMobDamage(user), (float) (atk + Math.min(atk, e.getMaxHealth() * (float) CMConfig.ScyllaHpDamage)));
+		}
+	}
+
+	public void scyllaBurstLightning(LivingEntity user) {
+		if (user.level().isClientSide()) return;
+		Level level = user.level();
+		float rotation = (float) Mth.atan2(user.getLookAngle().z, user.getLookAngle().x);
+		double vecX = Math.cos(user.yBodyRot * (Math.PI / 180) + Math.PI / 2);
+		double vecZ = Math.sin(user.yBodyRot * (Math.PI / 180));
+		double f = Math.cos(user.yBodyRot * (Math.PI / 180));
+		double f1 = Math.sin(user.yBodyRot * (Math.PI / 180));
+		level.addFreshEntity(new Lightning_Storm_Entity(level, user.getX() + vecX * 1.2 + f * 0.65, user.getY() + 0.03, user.getZ() + vecZ * 1.2 + f1 * 0.65, rotation, -9,
+				(float) CMConfig.ScyllaLightningStormDamage, (float) CMConfig.ScyllaLightningStormHpDamage, user, 3.0F));
+		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, user.getBoundingBox().inflate(4.0))) {
+			if (e == user || e.isAlliedTo(user)) continue;
+			double d0 = e.getX() - user.getX();
+			double d1 = e.getZ() - user.getZ();
+			double d2 = Math.max(d0 * d0 + d1 * d1, 0.001);
+			e.push(d0 / d2 * 2.5, 0.3, d1 / d2 * 2.5);
+		}
+		int rune = 7;
+		int time = 4;
+		for (int i = 0; i < rune; i++) {
+			float throwAngle = (float) i * (float) Math.PI / ((float) rune / 2);
+			for (int k = 0; k < 5; k++) {
+				double d = 1.75 * (k + 1);
+				int delay = time * (k + 1) - 9;
+				spawnLightningToGround(user, user.getX() + Mth.cos(throwAngle) * 1.25 * d, user.getZ() + Mth.sin(throwAngle) * 1.25 * d, user.getY(), user.getY() + 2.0, throwAngle, delay, 2.0F);
+			}
+		}
+	}
+
+	public void scyllaWhip(LivingEntity user, LivingEntity target) {
+		if (user.level().isClientSide()) return;
+		Level level = user.level();
+		double vecX = Math.cos(user.yBodyRot * (Math.PI / 180) + Math.PI / 2);
+		double vecZ = Math.sin(user.yBodyRot * (Math.PI / 180));
+		double px = user.getX() + vecX * 6.0;
+		double pz = user.getZ() + vecZ * 6.0;
+		double atk = user.getAttributeValue(Attributes.ATTACK_DAMAGE);
+		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, user.getBoundingBox().inflate(6.75, 6.75, 6.75))) {
+			if (e == user || e.isAlliedTo(user)) continue;
+			float entityHitAngle = (float) ((Math.atan2(e.getZ() - user.getZ(), e.getX() - user.getX()) * 57.29577951308232 - 90.0) % 360.0);
+			float entityAttackingAngle = user.yBodyRot % 360.0F;
+			if (entityHitAngle < 0) entityHitAngle += 360.0F;
+			if (entityAttackingAngle < 0) entityAttackingAngle += 360.0F;
+			float rel = entityHitAngle - entityAttackingAngle;
+			float dist = (float) e.distanceTo(user);
+			if (!(dist <= 6.75 && rel <= 20.0F && rel >= -20.0F || rel >= 340.0F || rel <= -340.0F)) continue;
+			e.hurt(level.damageSources().mobAttack(user), (float) (atk * 1.2 + Math.min(atk * 1.2, e.getMaxHealth() * (float) CMConfig.ScyllaHpDamage)));
+		}
+		for (int i = 0; i < 16; i++) {
+			Spark_Entity peq = new Spark_Entity(level, user);
+			peq.setDamage((float) CMConfig.ScyllaLightningStormDamage);
+			peq.setAreaDamage((float) CMConfig.ScyllaLightningAreaDamage);
+			peq.setAreaRadius(2.0F);
+			peq.setHpDamage((float) CMConfig.ScyllaLightningStormHpDamage);
+			peq.shoot((user.getRandom().nextFloat() - 0.5) * 0.5, user.getRandom().nextFloat() * 0.4F + 0.01F, (user.getRandom().nextFloat() - 0.5) * 0.5, 1.0F, 1.0F);
+			peq.setPos(px, user.getY() + 0.1, pz);
+			level.addFreshEntity(peq);
+		}
+	}
+
+	public void scyllaSpin(LivingEntity user) {
+		if (user.level().isClientSide()) return;
+		Level level = user.level();
+		double atk = user.getAttributeValue(Attributes.ATTACK_DAMAGE);
+		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, user.getBoundingBox().inflate(5.5, 3.0, 5.5))) {
+			if (e == user || e.isAlliedTo(user)) continue;
+			if (e.hurt(level.damageSources().mobAttack(user), (float) (atk + Math.min(atk, e.getMaxHealth() * (float) CMConfig.ScyllaSpinHpDamage)))) {
+				double d0 = e.getX() - user.getX();
+				double d1 = e.getZ() - user.getZ();
+				double d2 = Math.max(d0 * d0 + d1 * d1, 0.001);
+				e.push(d0 / d2 * 0.6, 0.0, d1 / d2 * 0.6);
+			}
+		}
+	}
+
+	@Override
+	public void scyllaSpinSound(LivingEntity user) {
+		if (user.level().isClientSide()) return;
+		user.level().playSound(null, user.getX(), user.getY(), user.getZ(),
+				ModSounds.STRONGSWING.get(), SoundSource.HOSTILE, 2.0F, 1.1F);
+	}
+
+	@Override
+	public void scyllaStormParticles(LivingEntity user) {
+		if (!(user.level() instanceof ServerLevel sl)) return;
+		var rand = user.getRandom();
+		sl.sendParticles(new StormParticleOptions(99 / 255F, 194 / 255F, 224 / 255F,
+						6f + rand.nextFloat() * 0.25f, 1.5F + rand.nextFloat() * 0.45f, user.getId()),
+				user.getX(), user.getY(), user.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
+		sl.sendParticles(new StormParticleOptions(143 / 255F, 241 / 255F, 215 / 255F,
+						4f + rand.nextFloat() * 1.2f, 1.0F + rand.nextFloat() * 0.45f, user.getId()),
+				user.getX(), user.getY(), user.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
+		sl.sendParticles(new StormParticleOptions(143 / 255F, 241 / 255F, 215 / 255F,
+						2f + rand.nextFloat() * 0.7f, 0.35F + rand.nextFloat() * 0.45f, user.getId()),
+				user.getX(), user.getY(), user.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
+	}
+
+	/** 一字闪电起手：本体 attackState 18 在 tick 25/53 于脚下放一圈青色冲击环 + 闪电爆裂粒子。 */
+	public void scyllaLightningSelfRing(LivingEntity user) {
+		if (!(user.level() instanceof ServerLevel sl)) return;
+		sl.sendParticles(new RingParticleOptions(0f, (float) Math.PI / 2f, 30, 143, 241, 215, 1.0f, 65f, false, 0),
+				user.getX(), user.getY() + 0.02, user.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
+		sl.sendParticles(ModParticle.LIGHTNING_EXPLODE.get(), user.getX(), user.getY() + 0.1, user.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
+	}
+
+	/**
+	 * 一字闪电落地打击（本体 attackState 18 tick 25/53）：沿**目标自身朝向**排一排闪电。
+	 * 本体：{@code k = -4..4}，间距 1.25 格，size 3.0，落点 = 目标位置 + (cos(yaw), sin(yaw)) * 1.25k。
+	 * 用的是 {@code target.getYRot()} 而不是施法者朝向——这一排是横在目标身上的，不是垂直于连线的。
+	 */
+	public void scyllaLineLightningRow(LivingEntity user, double x, double z, float yaw) {
+		if (user.level().isClientSide()) return;
+		float rad = yaw * (float) Math.PI / 180F;
+		for (int k = -4; k <= 4; ++k) {
+			double d2 = 1.25D * (double) k;
+			spawnLightningToGround(user, x + Mth.cos(rad) * d2, z + Mth.sin(rad) * d2, user.getY() - 2, user.getY() + 5, rad, 0, 3.0F);
+		}
+	}
+
+	/** 风暴旋冲起手（本体 attackState 7 tick 12~39）：本体身上叠三层青色雷暴粒子。 */
+	public void scyllaStormAura(LivingEntity user) {
+		scyllaStormParticles(user);
+	}
+
+	/** 风暴旋冲横扫（本体 attackState 7 tick 29/40/51）：本体腰高处一道巨型横扫刀光。 */
+	public void scyllaSwingParticle(LivingEntity user, float scale) {
+		if (!(user.level() instanceof ServerLevel sl)) return;
+		double d0 = user.getX();
+		double d1 = user.getY() + user.getBbHeight() / 2 + 0.5;
+		double d2 = user.getZ();
+		float yaw = (float) Math.toRadians(-user.yBodyRot);
+		double lookX = -Math.cos(yaw);
+		double lookZ = -Math.sin(yaw);
+		float pitch = (float) Math.atan2(-5, Math.sqrt(lookX * lookX + lookZ * lookZ));
+		sl.sendParticles(new ScyllaSwingParticleOptions(scale, yaw, pitch), d0, d1, d2, 1, 0.0, 0.0, 0.0, 0.0);
+	}
+
+	/**
+	 * 召唤幻影水蛇起手（本体 attackState 26 tick 1~20）：水粒子向本体汇聚。
+	 * <p>
+	 * count 必须为 0（否则汇聚中心会被乘上随机数变成散布范围）；汇聚中心抬到身体中部
+	 * （本体传脚底，但傀儡体型大得多，脚底那一圈会被自己挡住看不见）。
+	 */
+	public void scyllaSummonGather(LivingEntity user, int tick) {
+		if (!(user.level() instanceof ServerLevel sl)) return;
+		if (tick < 1 || tick >= 20) return;
+		var rand = user.getRandom();
+		// 本体把汇聚中心钉在脚底（getY() + 0.1），粒子在 ±6 的方框里随机取点后向中心环绕飞行。
+		// 中心不能抬到身体中部：傀儡的躯干是实心模型，拖尾一进去就被挡住看不见了。
+		double p0 = user.getX();
+		double p1 = user.getY() + 0.1;
+		double p2 = user.getZ();
+		for (int i = 0; i < 3; i++) {
+			double sx = p0 + (rand.nextDouble() - 0.5) * 12.0;
+			double sy = p1 + (rand.nextDouble() - 0.5) * 2.0;
+			double sz = p2 + (rand.nextDouble() - 0.5) * 12.0;
+			sl.sendParticles(new GatheringWaterParticleOptions(94 / 255F, 150 / 255F, 226 / 255F),
+					sx, sy, sz, 0, p0, p1, p2, 1.0);
+		}
+		sl.sendParticles(new StormParticleOptions(94 / 255F, 150 / 255F, 226 / 255F,
+				3.0F, 1.0F, user.getId()), p0, p1 + user.getBbHeight() * 0.5, p2, 0,
+				0.0, 0.0, 0.0, 1.0);
+	}
+
+	/** 召唤幻影水蛇咆哮（本体 attackState 26 tick 30）：本体脚下蓝色冲击环。 */
+	public void scyllaSummonRing(LivingEntity user) {
+		if (!(user.level() instanceof ServerLevel sl)) return;
+		sl.sendParticles(new RingParticleOptions(0f, (float) Math.PI / 2f, 30, 94, 150, 226, 1.0f, 65f, false, 1),
+				user.getX(), user.getY() + 0.02, user.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
+	}
+
+	/** 召唤幻影水蛇咆哮：本体 tick 30 播 SCYLLA_ROAR + 白色声波粒子。 */
+	public void scyllaSummonRoar(LivingEntity user) {
+		if (!(user.level() instanceof ServerLevel sl)) return;
+		// 本体 tick 30：playSound(SCYLLA_ROAR, 0.6F, 1.0F)；传播半径按音量算，放大到 16 格。
+		user.level().playSound(null, user.getX(), user.getY(), user.getZ(),
+				ModSounds.SCYLLA_ROAR.get(), SoundSource.HOSTILE, 1.0F, 1.0F);
+		float f = Mth.cos(user.yBodyRot * (float) Math.PI / 180F);
+		float f1 = Mth.sin(user.yBodyRot * (float) Math.PI / 180F);
+		double theta = user.yBodyRot * (Math.PI / 180);
+		theta += Math.PI / 2;
+		double vecX = Math.cos(theta);
+		double vecZ = Math.sin(theta);
+		sl.sendParticles(new RoarParticleOptions(20, 99, 194, 224, 0.4F, 0.4F, 0.5F, 2.5F),
+				user.getX() + -0.4F * vecX, user.getY() + 2.4, user.getZ() + -0.4F * vecZ,
+				1, 0.0, 0.0, 0.0, 0.0);
+	}
+
+	/** 一字闪电落地音效：HEAVY_SMASH(0.5) + SUPER_LIGHTNING(0.2)。 */
+	public void scyllaLineLightningSound(LivingEntity user) {
+		if (user.level().isClientSide()) return;
+		float pitch = 1.0F + user.getRandom().nextFloat() * 0.1F;
+		user.level().playSound(null, user.getX(), user.getY(), user.getZ(),
+				ModSounds.HEAVY_SMASH.get(), SoundSource.HOSTILE, 0.5F, pitch);
+		user.level().playSound(null, user.getX(), user.getY(), user.getZ(),
+				ModSounds.SUPER_LIGHTNING.get(), SoundSource.HOSTILE, 0.2F, pitch);
+	}
+
+	/** 风暴之怒雷云爆发：SUPER_LIGHTNING 音效 + 雷云位置闪电爆裂。 */
+	public void scyllaThunderCloudBurst(LivingEntity user) {
+		if (!(user.level() instanceof ServerLevel sl)) return;
+		// 本体 2.25宽 x 3.5高：嘴边 y+3.1、前方 1.5 格。按体型等比换算，避免小傀儡粒子飘在半空。
+		// 施法时玩家听不到，所以提到 1.0（16 格）并把声源放到雷云高度。
+		user.level().playSound(null, user.getX(), user.getY() + 9, user.getZ(),
+				ModSounds.SUPER_LIGHTNING.get(), SoundSource.HOSTILE, 1.0F, 1.0F + user.getRandom().nextFloat() * 0.1F);
+		sl.sendParticles(ModParticle.LIGHTNING_EXPLODE.get(),
+				user.getX() + user.getBbHeight() * 0.2, user.getY() + 9, user.getZ() + user.getBbHeight() * 0.2,
+				1, 0.0, 0.0, 0.0, 0.0);
+	}
+
+	public void scyllaThunderCloud(LivingEntity user, LivingEntity target) {
+		if (user.level().isClientSide()) return;
+		if (target == null) return;
+		for (int i = 0; i < 30; i++) {
+			scyllaThunderCloudSpear(user, target, user.getX(), user.getY() + user.getBbHeight() * 2.8f, user.getZ());
+		}
+	}
+	/** 风暴之怒：雷云位置的圈状闪电粒子（本体 CircleLighning，attackState 9 tick56-114 每 tick）。 */
+	public void scyllaThunderCloudLightning(LivingEntity user, double x, double y, double z) {
+		if (!(user.level() instanceof ServerLevel sl)) return;
+		var rand = user.getRandom();
+		double radius = (rand.nextFloat() - 0.5F) * 12;
+		int amount = 3 + rand.nextInt(2);
+		for (int i = 0; i < amount; i++) {
+			double theta2 = rand.nextDouble() * 2 * Math.PI;
+			double phi = rand.nextDouble() * Math.PI;
+			double px = radius * Math.sin(phi) * Math.cos(theta2);
+			double py = radius * Math.cos(phi);
+			double pz = radius * Math.sin(phi) * Math.sin(theta2);
+			sl.sendParticles(new CircleLightningParticleOptions(143, 241, 215),
+					x + px, y + py, z + pz, 0, x, y, z, 1.0);
+		}
+	}
+	public void scyllaThunderCloudStorm(LivingEntity user, double x, double y, double z) {
+		if (user.level().isClientSide()) return;
+		if (!(user.level() instanceof ServerLevel serverLevel)) return;
+		for (int j = 0; j < 5; j++) {
+			float f2 = user.getRandom().nextFloat() * (float) Math.PI * 2;
+			float f3 = Mth.sqrt(user.getRandom().nextFloat()) * 3.5f;
+			double d0 = x + Math.cos(f2) * f3;
+			double d2 = z + Math.sin(f2) * f3;
+			serverLevel.sendParticles(ModParticle.RAIN_CLOUD.get(), d0, y, d2, 1, 0.05, 0.01, 0.05, 0.0);
+		}
+	}
+
+	public void scyllaThunderCloudSpear(LivingEntity user, LivingEntity target, double cx, double cy, double cz) {
+		if (user.level().isClientSide()) return;
+		if (target == null) return;
+		Level level = user.level();
+		float f2 = user.getRandom().nextFloat() * ((float) Math.PI * 2);
+		float f3 = Mth.sqrt(user.getRandom().nextFloat()) * 5.0f;
+		double d0 = cx + (double) (Mth.cos(f2) * f3);
+		double d1 = cy;
+		double d2 = cz + (double) (Mth.sin(f2) * f3);
+		double d3 = target.getX() - (user.getRandom().nextFloat() - 0.5) * 6.0 - d0;
+		double d4 = target.getY(0.35) - user.getRandom().nextFloat() - d1;
+		double d5 = target.getZ() - (user.getRandom().nextFloat() - 0.5) * 6.0 - d2;
+		Vec3 vec3 = new Vec3(d3, d4, d5).normalize();
+		float yRot = (float) (Mth.atan2(vec3.z, vec3.x) * 57.29577951308232) + 90.0F;
+		float xRot = (float) (-(Mth.atan2(vec3.y, Math.sqrt(vec3.x * vec3.x + vec3.z * vec3.z)) * 57.29577951308232));
+		Water_Spear_Entity water = new Water_Spear_Entity(user, vec3, level, (float) CMConfig.ScyllaSpearDamage);
+		water.setYRot(yRot);
+		water.setXRot(xRot);
+		water.moveTo(d0, d1, d2);
+		water.setTotalBounces(3);
+		level.addFreshEntity(water);
+		Lightning_Spear_Entity lightning = new Lightning_Spear_Entity(user, vec3, level, (float) CMConfig.ScyllaSnakeDamage);
+		lightning.setYRot(yRot);
+		lightning.setXRot(xRot);
+		lightning.moveTo(d0, d1, d2);
+		lightning.setAreaDamage((float) CMConfig.ScyllaLightningAreaDamage);
+		lightning.setHpDamage((float) CMConfig.ScyllaLightningStormHpDamage);
+		lightning.setAreaRadius(2.0F);
+		level.addFreshEntity(lightning);
+	}
+
+	// 备用 - 8 Boss补全（傀儡可能用到）
+
+	public void spawnMiniAbyssBlast(LivingEntity user, Vec3 dir) {
+		if (user.level().isClientSide()) return;
+		float yaw = (user.yHeadRot + 90.0F) * Mth.DEG_TO_RAD;
+		float pitch = -user.getXRot() * Mth.DEG_TO_RAD;
+		var beam = new Mini_Abyss_Blast_Entity(ModEntities.MINI_ABYSS_BLAST.get(), user.level(), user,
+				user.getX(), user.getEyeY(), user.getZ(), yaw, pitch, 40, 0.0F);
+		user.level().playSound(null, user.getX(), user.getY(), user.getZ(), ModSounds.PORTAL_ABYSS_BLAST.get(), SoundSource.HOSTILE, 1.0F, 1.0F);
+		user.level().addFreshEntity(beam);
+	}
+
+	public void spawnPortalAbyssBlast(LivingEntity user, Vec3 dir) {
+		if (user.level().isClientSide()) return;
+		float yaw = (user.yHeadRot + 90.0F) * Mth.DEG_TO_RAD;
+		float pitch = -user.getXRot() * Mth.DEG_TO_RAD;
+		float dmg = (float) user.getAttributeValue(Attributes.ATTACK_DAMAGE);
+		var beam = new Portal_Abyss_Blast_Entity(ModEntities.PORTAL_ABYSS_BLAST.get(), user.level(), user,
+				user.getX(), user.getEyeY(), user.getZ(), yaw, pitch, 40, 0.0F, dmg, 0.0F);
+		user.level().playSound(null, user.getX(), user.getY(), user.getZ(), ModSounds.PORTAL_ABYSS_BLAST.get(), SoundSource.HOSTILE, 1.0F, 1.0F);
+		user.level().addFreshEntity(beam);
+	}
+
+	public void spawnAbyssPortal(LivingEntity user, double x, double y, double z) {
+		if (user.level().isClientSide()) return;
+		var portal = new Abyss_Portal_Entity(ModEntities.ABYSS_PORTAL.get(), user.level());
+		portal.setPos(x, y, z);
+		portal.setLifespan(200);
+		portal.setEntrance(true);
+		user.level().addFreshEntity(portal);
+	}
+
+	public void spawnAbyssMark(LivingEntity user, LivingEntity target) {
+		if (user.level().isClientSide()) return;
+		if (target == null) return;
+		user.level().addFreshEntity(new Abyss_Mark_Entity(user.level(),
+				target.getX(), target.getY(), target.getZ(), 60, 3.0F, 3.0F, user.getUUID(), user));
+	}
+
+	public void spawnTidalTentacle(LivingEntity user, double x, double y, double z) {
+		if (user.level().isClientSide()) return;
+		var e = new Tidal_Tentacle_Entity(ModEntities.TIDAL_TENTACLE.get(), user.level());
+		e.setPos(x, y, z);
+		user.level().addFreshEntity(e);
+	}
+
+	public void spawnTidalHook(LivingEntity user, Vec3 dir) {
+		if (user.level().isClientSide()) return;
+		Level level = user.level();
+		var e = new Tidal_Hook_Entity(ModEntities.TIDAL_HOOK.get(), level);
+		e.setOwner(user);
+		e.setPos(user.getX(), user.getEyeY(), user.getZ());
+		e.shoot(dir.x, dir.y, dir.z, 2.0F, 1.0F);
+		level.addFreshEntity(e);
+	}
+
+	public void spawnAshenBreath(LivingEntity user, Vec3 dir) {
+		if (user.level().isClientSide()) return;
+		Level level = user.level();
+		float dmg = (float) user.getAttributeValue(Attributes.ATTACK_DAMAGE);
+		var e = new Ashen_Breath_Entity(ModEntities.ASHEN_BREATH.get(), level, dmg, user);
+		e.setPos(user.getX() + dir.x * 1.5D, user.getEyeY(), user.getZ() + dir.z * 1.5D);
+		e.setYRot((float) (Mth.atan2(dir.z, dir.x) * Mth.RAD_TO_DEG) - 90.0F);
+		e.setXRot((float) (-(Mth.atan2(dir.y, Math.sqrt(dir.x * dir.x + dir.z * dir.z)) * Mth.RAD_TO_DEG)));
+		level.addFreshEntity(e);
+	}
+
+	public void spawnBoltStrike(LivingEntity user, double x, double y, double z) {
+		if (user.level().isClientSide()) return;
+		float dmg = (float) user.getAttributeValue(Attributes.ATTACK_DAMAGE);
+		user.level().addFreshEntity(new Bolt_strike_Entity(user.level(), x, y, z, 0.0F, 20, dmg, user));
+	}
+
+	public void spawnVoidShard(LivingEntity user, Vec3 dir) {
+		if (user.level().isClientSide()) return;
+		Level level = user.level();
+		var e = new Void_Shard_Entity(ModEntities.VOID_SHARD.get(), level, user);
+		e.setPos(user.getX(), user.getEyeY(), user.getZ());
+		e.shoot(dir.x, dir.y, dir.z, 2.0F, 1.0F);
+		level.addFreshEntity(e);
+	}
+
+	public void spawnVoidScatter(LivingEntity user, Vec3 dir) {
+		if (user.level().isClientSide()) return;
+		Level level = user.level();
+		var e = new Void_Scatter_Arrow_Entity(level, user, ItemStack.EMPTY, null);
+		e.setPos(user.getX(), user.getEyeY(), user.getZ());
+		e.shoot(dir.x, dir.y, dir.z, 2.5F, 1.0F);
+		level.addFreshEntity(e);
+	}
+
+	public void spawnAxeBlade(LivingEntity user, Vec3 dir) {
+		if (user.level().isClientSide()) return;
+		Level level = user.level();
+		float dmg = (float) user.getAttributeValue(Attributes.ATTACK_DAMAGE);
+		float angle = user.getYRot();
+		var e = new Axe_Blade_Entity(user, dir.x, dir.y, dir.z, level, dmg, angle);
+		e.setPos(user.getX(), user.getY() + user.getBbHeight() * 0.5D, user.getZ());
+		level.addFreshEntity(e);
+	}
+
+	public void spawnSandstormProjectile(LivingEntity user, Vec3 dir) {
+		if (user.level().isClientSide()) return;
+		Level level = user.level();
+		float dmg = (float) user.getAttributeValue(Attributes.ATTACK_DAMAGE);
+		var e = new Sandstorm_Projectile(user, dir.x, dir.y, dir.z, level, dmg);
+		e.setPos(user.getX(), user.getEyeY() - 0.5D, user.getZ());
+		level.addFreshEntity(e);
+	}
+
+	public void spawnSandstormOrbit(LivingEntity user, int life) {
+		spawnSandstormOrbit(user, life, 4.0F, 0.08F, 0.0F);
+	}
+
+	public void spawnSandstormOrbit(LivingEntity user, int life, float radius, float speed, float baseOffset) {
+		if (user.level().isClientSide()) return;
+		Level level = user.level();
+		for (int i = 0; i < 3; i++) {
+			float offset = baseOffset + (float) i * (float) Math.PI * 2f / 3f;
+			SandstormOrbitEntity_0316 orbit = new SandstormOrbitEntity_0316(level, user.getX(), user.getY(), user.getZ(),
+					life, offset, user, radius, speed);
+			level.addFreshEntity(orbit);
+		}
+		level.playSound(null, user.getX(), user.getY(), user.getZ(), ModSounds.SANDSTORM.get(), SoundSource.HOSTILE,
+				0.8F, 1.0F);
+	}
+
+	public List<Entity> spawnSandstormGroup(LivingEntity user, int count, int life, float baseRadius, float speed) {
+		if (user.level().isClientSide()) return List.of();
+		Level level = user.level();
+		List<Entity> ans = new ArrayList<>();
+		for (int i = 0; i < count; i++) {
+			// 复刻原本近战模式：每环三个，环基准相位差 1/3PI，环内差 2/3PI
+			float ringBase = (float) (i / 3) * (float) Math.PI / 3f;
+			float inRing = (float) (i % 3) * (float) Math.PI * 2f / 3f;
+			float offset = ringBase + inRing;
+			// 直接生在环上，否则一帧后就派目标的话看起来像从傀儡身上喷出去
+			float radius = baseRadius + (i / 3) * 4.0F;
+			double sx = user.getX() + Math.cos(offset) * radius;
+			double sy = user.getY();
+			double sz = user.getZ() + Math.sin(offset) * radius;
+			SandstormOrbitEntity_0316 storm = new SandstormOrbitEntity_0316(level, sx, sy, sz,
+					life, offset, user, baseRadius, speed);
+			storm.setSlot(i);
+			level.addFreshEntity(storm);
+			ans.add(storm);
+		}
+		level.playSound(null, user.getX(), user.getY(), user.getZ(), ModSounds.SANDSTORM.get(), SoundSource.HOSTILE,
+				0.8F, 1.0F);
+		return ans;
+	}
+
+	public List<Entity> getSandstorms(LivingEntity user) {
+		Level level = user.level();
+		if (level.isClientSide()) return List.of();
+		List<Entity> ans = new ArrayList<>();
+		var box = user.getBoundingBox().inflate(32.0D);
+		for (var e : level.getEntitiesOfClass(SandstormOrbitEntity_0316.class, box)) {
+			if (e.getCaster() == user) ans.add(e);
+		}
+		ans.sort(Comparator.comparingInt(e -> ((SandstormOrbitEntity_0316) e).getSlot()));
+		return ans;
+	}
+
+	public void setSandstormOrder(Entity storm, int slot, @Nullable LivingEntity target) {
+		if (!(storm instanceof SandstormOrbitEntity_0316 orbit)) return;
+		orbit.setSlot(slot);
+		orbit.setTarget(target);
+	}
+
+	public void spawnPlayerCeraunus(LivingEntity user, Vec3 dir) {
+		if (user.level().isClientSide()) return;
+		Level level = user.level();
+		var e = new Player_Ceraunus_Entity(level, user);
+		e.setPos(user.getX(), user.getEyeY(), user.getZ());
+		e.shoot(dir.x, dir.y, dir.z, 2.5F, 1.0F);
+		level.addFreshEntity(e);
+	}
+
+	public void spawnAccretion(LivingEntity user, Vec3 dir) {
+		if (user.level().isClientSide()) return;
+		Level level = user.level();
+		var e = new Accretion_Entity(ModEntities.ACCRETION.get(), level, user);
+		e.setPos(user.getX(), user.getEyeY(), user.getZ());
+		e.shoot(dir.x, dir.y, dir.z, 1.6F, 1.0F);
+		level.addFreshEntity(e);
+	}
+
+	public void spawnWitherSmoke(LivingEntity user) {
+		if (user.level().isClientSide()) return;
+		user.level().addFreshEntity(new Wither_Smoke_Effect_Entity(user.level(),
+				user.getX(), user.getY() + 0.5D, user.getZ()));
+	}
+
+	public void screenShake(LivingEntity user, float radius) {
+		if (user.level().isClientSide()) return;
+		ScreenShake_Entity.ScreenShake(user.level(), user.position(), radius, 0.1F, 0, 20);
+	}
+
+	@Override
+	public void summonSoulRing(LivingEntity golem) {
+		if (golem.level().isClientSide()) return;
+		if (golem.level() instanceof ServerLevel sl) {
+			double x = golem.getX();
+			double y = golem.getY() + golem.getBbHeight() * 0.5;
+			double z = golem.getZ();
+			float yaw = (float) Math.toRadians(-golem.getYRot());
+			float pitch = (float) Math.toRadians(-golem.getXRot());
+			// 两个环以相反方向各倾斜一定角度，形成 X 型交叉
+			float tilt = (float) Math.toRadians(20);
+			float scale = 10.0f * golem.getBbHeight();
+			var a = new RingParticleOptions(yaw, pitch + tilt, 40, 86, 236, 204, 1.0f, scale, false, 3);
+			var b = new RingParticleOptions(yaw, pitch - tilt, 40, 86, 236, 204, 1.0f, scale, false, 3);
+			sl.sendParticles(a, x, y, z, 1, 0, 0, 0, 0);
+			sl.sendParticles(b, x, y, z, 1, 0, 0, 0, 0);
+		}
+	}
+
+	@Override
+	public void maledictusChargeSound(LivingEntity user) {
+		if (user.level().isClientSide()) return;
+		user.level().playSound(null, user.getX(), user.getY(), user.getZ(),
+				ModSounds.PHANTOM_SPEAR.get(), SoundSource.PLAYERS, 1.0F, 1.0F + user.getRandom().nextFloat() * 0.1F);
+	}
+
+	@Override
+	public void maledictusShortRoar(LivingEntity user) {
+		if (user.level().isClientSide()) return;
+		user.level().playSound(null, user.getX(), user.getY(), user.getZ(),
+				ModSounds.MALEDICTUS_SHORT_ROAR.get(), SoundSource.HOSTILE, 1.0F, 1.0F + user.getRandom().nextFloat() * 0.1F);
+	}
+
+	@Override
+	public void harbingerChargePrepare(LivingEntity user) {
+		if (user.level().isClientSide()) return;
+		user.level().playSound(null, user.getX(), user.getY(), user.getZ(),
+				ModSounds.HARBINGER_CHARGE_PREPARE.get(), SoundSource.HOSTILE, 4.0F, 1.0F);
+	}
+
+	@Override
+	public void harbingerChargeSound(LivingEntity user) {
+		if (user.level().isClientSide()) return;
+		user.level().playSound(null, user.getX(), user.getY(), user.getZ(),
+				ModSounds.HARBINGER_CHARGE.get(), SoundSource.HOSTILE, 4.0F, 0.65F);
+	}
+
+	@Override
+	public void maledictusAfterImage(LivingEntity user) {
+		// 3.16 原版冲刺没有残影粒子（AfterImage 是高版本才加入的），保持与原版一致，不做任何事
+	}
+
+	@Override
+	public void monstrosityEarthquakeFX(LivingEntity user) {
+		if (user.level().isClientSide()) return;
+		user.level().playSound(null, user.getX(), user.getY(), user.getZ(),
+				SoundEvents.GENERIC_EXPLODE, SoundSource.HOSTILE, 1.5F, 1.0F + user.getRandom().nextFloat() * 0.1F);
+		ScreenShake_Entity.ScreenShake(user.level(), user.position(), 20, 0.3F, 0, 20);
+		if (!(user.level() instanceof ServerLevel sl)) return;
+		Vec3 floor = findFloor(user.level(), user.position(), 8);
+		double floorY = floor == null ? user.getY() : floor.y;
+		sl.sendParticles(new RingParticleOptions(0f, (float) Math.PI / 2f, 35, 1, 1, 1, 1f, 30f, false, 1),
+				user.getX(), floorY + 0.2, user.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
+	}
+
+	@Override
+	public void scyllaAnchorSlamFX(LivingEntity user) {
+		if (user.level().isClientSide()) return;
+		user.level().playSound(null, user.getX(), user.getY(), user.getZ(),
+				SoundEvents.GENERIC_EXPLODE, SoundSource.HOSTILE, 2.0F, 0.75F + user.getRandom().nextFloat() * 0.1F);
+		ScreenShake_Entity.ScreenShake(user.level(), user.position(), 35, 0.1F, 0, 50);
+	}
+
+	@Override
+	public void remnantChargeSound(LivingEntity user) {
+		if (user.level().isClientSide()) return;
+		user.level().playSound(null, user.getX(), user.getY(), user.getZ(),
+				ModSounds.REMNANT_CHARGE_ROAR.get(), SoundSource.HOSTILE, 3.0F, 1.0F);
+	}
+
+	@Override
+	public void remnantChargeStep(LivingEntity user) {
+		if (user.level().isClientSide()) return;
+		user.level().playSound(null, user.getX(), user.getY(), user.getZ(),
+				ModSounds.REMNANT_CHARGE_STEP.get(), SoundSource.HOSTILE, 1.0F, 1.0F);
+		ScreenShake_Entity.ScreenShake(user.level(), user.position(), 30.0F, 0.1F, 0, 10);
+	}
+
+	@Override
+	public void remnantTailSlamSound(LivingEntity user) {
+		if (user.level().isClientSide()) return;
+		// TAIL_SLAM_1 自带延迟感，落地砸地只用 2 和 3
+		if (user.getRandom().nextBoolean()) {
+			user.level().playSound(null, user.getX(), user.getY(), user.getZ(),
+					ModSounds.REMNANT_TAIL_SLAM_2.get(), SoundSource.HOSTILE, 1.0F, 1.0F);
+		} else {
+			user.level().playSound(null, user.getX(), user.getY(), user.getZ(),
+					ModSounds.REMNANT_TAIL_SLAM_3.get(), SoundSource.HOSTILE, 1.0F, 1.0F);
+		}
+	}
+
+	private void spawnLightningToGround(LivingEntity user, double x, double z, double minY, double maxY, float rotation, int delay, float size) {
+		Level world = user.level();
+		BlockPos blockpos = BlockPos.containing(x, maxY, z);
+		boolean flag = false;
+		double d0 = 0.0;
+		do {
+			BlockPos below = blockpos.below();
+			BlockState bs = world.getBlockState(below);
+			if (!bs.isFaceSturdy(world, below, Direction.UP)) continue;
+			if (!world.isEmptyBlock(blockpos)) {
+				VoxelShape shape = world.getBlockState(blockpos).getCollisionShape(world, blockpos);
+				if (!shape.isEmpty()) d0 = shape.max(Direction.Axis.Y);
+			}
+			flag = true;
+			break;
+		} while ((blockpos = blockpos.below()).getY() >= Mth.floor(minY) - 1);
+		if (flag) {
+			world.addFreshEntity(new Lightning_Storm_Entity(world, x, blockpos.getY() + d0, z, rotation, delay,
+					(float) CMConfig.ScyllaLightningStormDamage, (float) CMConfig.ScyllaLightningStormHpDamage, user, size));
+		}
+	}
+
+	private double findFloorY(Level world, double x, double y, double z) {
+		BlockPos pos = BlockPos.containing(x, y, z);
+		double minY = y - 32;
+		do {
+			BlockPos low = pos.below();
+			BlockState lowState = world.getBlockState(low);
+			if (lowState.isFaceSturdy(world, low, Direction.UP)) {
+				double dy = 0.0;
+				if (!world.isEmptyBlock(pos)) {
+					VoxelShape shape = world.getBlockState(pos).getCollisionShape(world, pos);
+					if (!shape.isEmpty()) dy = shape.max(Direction.Axis.Y);
+				}
+				return pos.getY() + dy;
+			}
+			pos = pos.below();
+		} while (pos.getY() >= minY);
+		return y;
+	}
+
 // 工具方法
+
+	private void guardianAreaAttack(LivingEntity user, float range, float height, float damage, float hpdamage, int stunticks, float airborne, boolean knockback) {
+		if (user.level().isClientSide()) return;
+		double atk = user.getAttributeValue(Attributes.ATTACK_DAMAGE);
+		for (LivingEntity e : user.level().getEntitiesOfClass(LivingEntity.class, user.getBoundingBox().inflate(range, height, range))) {
+			if (e == user || e.isAlliedTo(user)) continue;
+			boolean flag = e.hurt(user.level().damageSources().mobAttack(user), (float) (atk * damage + Math.min(atk * damage, e.getMaxHealth() * hpdamage)));
+			if (airborne > 0) e.setDeltaMovement(e.getDeltaMovement().add(0, airborne, 0));
+			if (flag && stunticks > 0) e.addEffect(new MobEffectInstance(ModEffect.EFFECTSTUN, stunticks));
+			if (knockback) launch(user, e);
+		}
+	}
+
+	private void launch(LivingEntity user, LivingEntity target) {
+		double d0 = target.getX() - user.getX();
+		double d1 = target.getZ() - user.getZ();
+		double d2 = Math.max(d0 * d0 + d1 * d1, 0.001);
+		target.push(d0 / d2 * 4.0, 0.2, d1 / d2 * 4.0);
+	}
+
+	public void spawnHalberdFan(LivingEntity user, Vec3 pos, float yaw, int distance, float spreadArc, int delay) {
+		if (!(user.level() instanceof ServerLevel sl)) return;
+		// Mirrors cataclysm's Maledictus_Entity#radagonskill: an arc fan of halberds at the given radius,
+		// spaced one block apart along the arc, each snapped to the block centre like the original.
+		double facingAngle = yaw * (Math.PI / 180.0) + Math.PI / 2.0;
+		double spread = Math.PI * spreadArc;
+		int arcLen = Mth.ceil(distance * spread);
+		for (int i = 0; i < arcLen; i++) {
+			double theta = ((double) i / (arcLen - 1.0) - 0.5) * spread + facingAngle;
+			double px = pos.x() + Math.cos(theta) * distance;
+			double pz = pos.z() + Math.sin(theta) * distance;
+			int hitX = Mth.floor(px);
+			int hitZ = Mth.floor(pz);
+			sl.sendParticles(ModParticle.PHANTOM_WING_FLAME.get(), hitX + 0.5D, pos.y() + 0.3D, hitZ + 0.5D,
+					1, 0.0, 0.0, 0.0, 0.007);
+			spawnHalberd(hitX + 0.5D, hitZ + 0.5D, pos.y() - 5.0D, pos.y() + 3.0D, (float) theta, delay, sl, user);
+		}
+	}
 
 	private void strikeWindmillHalberd(ServerLevel level, Vec3 pos, LivingEntity user, int numberOfBranches, int particlesPerBranch, double initialRadius, double radiusIncrement, double curveFactor, int delay) {
 		float angleIncrement = (float) ((Math.PI * 2D) / (double) numberOfBranches);
@@ -582,4 +2447,172 @@ public class CataInterfaceImpl_0316 implements CataInterface {
 		}
 	}
 
+	public void scyllaParryParticle(LivingEntity user) {
+		if (!(user.level() instanceof ServerLevel sl)) return;
+		double d0 = user.getX();
+		double d1 = user.getY() + user.getBbHeight() * 0.6;
+		double d2 = user.getZ();
+		double theta = user.yBodyRot * (Math.PI / 180);
+		double vecX = Math.cos(theta);
+		double vecZ = Math.sin(theta);
+		double theta2 = theta + Math.PI / 2;
+		double X = Math.cos(theta2);
+		double Z = Math.sin(theta2);
+		for (int i = 0; i < 12; i++) {
+			float throwAngle = i * Mth.PI / 6F;
+			double y = 2 * Math.sin(throwAngle);
+			double xz = 2 * Math.cos(throwAngle);
+			double d3 = xz * vecX + (user.getRandom().nextDouble() - user.getRandom().nextDouble()) * 0.5D;
+			double d4 = y + (user.getRandom().nextDouble() - user.getRandom().nextDouble()) * 0.5D;
+			double d5 = xz * vecZ + (user.getRandom().nextDouble() - user.getRandom().nextDouble()) * 0.5D;
+			double speed = 0.35;
+			double off = Math.max(0.4, user.getBbWidth() * 0.5);
+			sl.sendParticles(ModParticle.SPARK.get(), d0 + off * X, d1, d2 + off * Z, 0, d3 * speed, d4 * speed, d5 * speed, 1.0);
+		}
+	}
+
+
+	// ===== 远古遗魂「裂地重踏」 复刻 Ancient_Remnant_Entity 的 StompDamage / StompParticle / Stompsound =====
+
+	private static final float STOMP_SPREAD_ARC = 0.4F;
+	private static final int STOMP_HEIGHT = 6;
+	private static final float STOMP_MXY = 0.9F;
+	private static final int STOMP_SHIELDBREAK = 80;
+	private static final float STOMP_DAMAGE = 0.9F;
+	private static final float STOMP_HPDAMAGE = 0.03F;
+
+	public void ancientRemnantStompStart(LivingEntity user, Vec3 center, float yaw) {
+		if (!(user.level() instanceof ServerLevel level)) return;
+		stompParticle(level, center, yaw);
+		level.playSound(null, center.x, center.y, center.z, ModSounds.REMNANT_STOMP.get(),
+				SoundSource.HOSTILE, 1.0F, 1.0F);
+		ScreenShake_Entity.ScreenShake(level, center, 30, 0.1F, 0, 10);
+	}
+
+	public void ancientRemnantStomp(LivingEntity user, Vec3 center, float yaw, int distance, Predicate<LivingEntity> filter) {
+		ancientRemnantStomp(user, center, yaw, distance, filter, false);
+	}
+
+	public void ancientRemnantStomp(LivingEntity user, Vec3 center, float yaw, int distance, Predicate<LivingEntity> filter, boolean outward) {
+		if (!(user.level() instanceof ServerLevel level)) return;
+		stompDamage(level, user, center, yaw, distance, filter, outward);
+		stompDamage(level, user, center, yaw, distance + 1, filter, outward);
+		stompSound(level, center, yaw, distance + 0.5F);
+	}
+
+	private void stompDamage(ServerLevel level, LivingEntity user, Vec3 center, float yaw, int distance,
+							 Predicate<LivingEntity> filter, boolean outward) {
+		double bodyRotRad = yaw * (Math.PI / 180.0);
+		double facingAngle = bodyRotRad + Math.PI / 2.0;
+		double baseX = center.x;
+		double baseZ = center.z;
+		int hitY = Mth.floor(center.y - 0.5);
+		double spread = Math.PI * STOMP_SPREAD_ARC;
+		int arcLen = Mth.ceil(distance * spread);
+		float factor = 1.0F - (float) distance / 12.0F;
+		for (int i = 0; i < arcLen; i++) {
+			double thetaRatio = arcLen > 1 ? (double) i / (double) (arcLen - 1) : 0.5;
+			double theta = (thetaRatio - 0.5) * spread + facingAngle;
+			double vx = Math.cos(theta);
+			double vz = Math.sin(theta);
+			double px = baseX + vx * distance;
+			double pz = baseZ + vz * distance;
+			int hitX = Mth.floor(px);
+			int hitZ = Mth.floor(pz);
+			BlockPos pos = new BlockPos(hitX, hitY + STOMP_HEIGHT, hitZ);
+			BlockState block = level.getBlockState(pos);
+			for (int depth = 0; depth < 30; depth++) {
+				if (block.getRenderShape() == RenderShape.MODEL) break;
+				pos = pos.below();
+				block = level.getBlockState(pos);
+			}
+			if (block.getRenderShape() != RenderShape.MODEL) block = Blocks.AIR.defaultBlockState();
+			stompBlocks(level, user, hitX, hitY + STOMP_HEIGHT, hitZ, center.y - STOMP_HEIGHT,
+					block, px, pz, vx, vz, factor, filter, outward);
+		}
+	}
+
+	private void stompBlocks(ServerLevel level, LivingEntity user, int hitX, int hitY, int hitZ, double lowestY,
+							 BlockState blockState, double px, double pz, double vx, double vz, float factor,
+							 Predicate<LivingEntity> filter, boolean outward) {
+		BlockPos pos = new BlockPos(hitX, hitY, hitZ);
+		double d0 = 0.0D;
+		do {
+			BlockPos below = pos.below();
+			BlockState bs = level.getBlockState(below);
+			if (bs.isFaceSturdy(level, below, Direction.UP)) {
+				if (!level.isEmptyBlock(pos)) {
+					VoxelShape shape = level.getBlockState(pos).getCollisionShape(level, pos);
+					if (!shape.isEmpty()) d0 = shape.max(Direction.Axis.Y);
+				}
+				break;
+			}
+			pos = pos.below();
+		} while (pos.getY() >= Mth.floor(lowestY) - 1);
+
+		Cm_Falling_Block_Entity falling = new Cm_Falling_Block_Entity(level,
+				hitX + 0.5D, (double) pos.getY() + d0 + 0.5D, hitZ + 0.5D, blockState, 10);
+		falling.push(0, 0.2D + level.random.nextGaussian() * 0.04D, 0);
+		level.addFreshEntity(falling);
+
+		AABB selection = new AABB(px - 0.5, (double) pos.getY() + d0 - 1, pz - 0.5,
+				px + 0.5, (double) pos.getY() + d0 + STOMP_MXY, pz + 0.5);
+		float baseDamage = (float) (user.getAttributeValue(Attributes.ATTACK_DAMAGE) * STOMP_DAMAGE);
+		DamageSource source = user.damageSources().mobAttack(user);
+		for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, selection)) {
+			if (e == user || !filter.test(e)) continue;
+			float finalDamage = baseDamage + e.getMaxHealth() * STOMP_HPDAMAGE;
+			boolean flag = e.hurt(source, finalDamage);
+			if (e.isDamageSourceBlocked(source) && e instanceof Player player) {
+				player.disableShield();
+			}
+			if (flag) {
+				double magnitude = outward ? 4 : -4;
+				double x = vx * (1 - factor) * magnitude;
+				double y = e.onGround() ? 0.15 : 0.0;
+				double z = vz * (1 - factor) * magnitude;
+				e.setDeltaMovement(e.getDeltaMovement().add(x, y, z));
+			}
+		}
+	}
+
+	private void stompSound(ServerLevel level, Vec3 center, float yaw, float distance) {
+		double theta = yaw * (Math.PI / 180) + Math.PI / 2;
+		double vecX = Math.cos(theta);
+		double vecZ = Math.sin(theta);
+		level.playLocalSound(center.x + distance * vecX, center.y,
+				center.z + distance * vecZ, ModSounds.REMNANT_SHOCKWAVE.get(),
+				SoundSource.HOSTILE, 1.5F, 0.8F + level.random.nextFloat() * 0.1F, false);
+	}
+
+	private void stompParticle(ServerLevel level, Vec3 center, float yaw) {
+		float vec = 0.9F;
+		double theta = yaw * (Math.PI / 180) + Math.PI / 2;
+		double vecX = Math.cos(theta);
+		double vecZ = Math.sin(theta);
+		int count = 80 + level.random.nextInt(12);
+		for (int i = 0; i < count; i++) {
+			double dx = level.random.nextGaussian() * 0.07D;
+			double dy = level.random.nextGaussian() * 0.07D;
+			double dz = level.random.nextGaussian() * 0.07D;
+			float angle = (0.01745329251F * yaw) + i;
+			double extraX = 0.5 * Mth.sin((float) (Math.PI + angle));
+			double extraY = 0.1F;
+			double extraZ = 0.5 * Mth.cos(angle);
+			int hitX = Mth.floor(center.x + vec * vecX + extraX);
+			int hitY = Mth.floor(center.y);
+			int hitZ = Mth.floor(center.z + vec * vecZ + extraZ);
+			BlockState block = level.getBlockState(new BlockPos(hitX, hitY, hitZ).below());
+			if (block.getRenderShape() != RenderShape.INVISIBLE) {
+				level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, block),
+						center.x + vec * vecX + extraX,
+						center.y + extraY,
+						center.z + vec * vecZ + extraZ,
+						0, dx, dy, dz, 1.0D);
+			}
+		}
+		level.sendParticles(new RingParticleOptions(0f, (float) Math.PI / 2f, 20, 1, 1, 1, 1f, 25f, false, 3),
+				center.x + vec * vecX, center.y + 0.2f,
+				center.z + vec * vecZ, 0, 0.0D, 0.0D, 0.0D, 1.0D);
+	}
 }
