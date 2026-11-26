@@ -40,6 +40,22 @@ public class SmartHoldRangedAttackGoal<E extends Mob> extends SmartRangedAttackG
 	}
 
 	/**
+	 * 放宽父类限制：{@code WeaponRegistry.HOLD} 允许登记「近战型」武器（{@code WeaponStatus.MELEE}，
+	 * 例如灾变绞肉锯）。父类 {@link SmartRangedAttackGoal#canUse()} 硬要求 {@code isRanged}，
+	 * 会把这类武器的 hold goal 永久挡掉 → 只剩近战 goal 挥砍。这里对近战型 HOLD 武器放行。
+	 */
+	@Override
+	public boolean canUse() {
+		LivingEntity target = mob.getTarget();
+		if (target == null || !target.isAlive()) return false;
+		ItemStack stack = mob.getItemInHand(holder.getWeaponHand());
+		Optional<WeaponStatus> status = getWeaponStatus(stack);
+		if (status.isEmpty()) return false;
+		if (status.get().isMelee()) return true;
+		return super.canUse();
+	}
+
+	/**
 	 * HOLD 类武器必须<b>有目标</b>才继续跑。
 	 * <p>
 	 * 父类是 {@code canUse() || !mob.getNavigation().isDone()}：目标消失后导航往往还没走完，
@@ -80,6 +96,9 @@ public class SmartHoldRangedAttackGoal<E extends Mob> extends SmartRangedAttackG
 
 	@Override
 	protected boolean keepDistance(ItemStack stack) {
+		// 近战型 HOLD 武器（WeaponStatus.MELEE，如灾变绞肉锯）不保持距离，否则进不了近战射程、
+		// 永远满足不了 withInRange → 不进入"使用中"→ onUseTick 持续伤害失效。
+		if (getWeaponStatus(stack).map(WeaponStatus::isMelee).orElse(false)) return false;
 		var weapon = get(stack);
 		return weapon.map(IHoldWeaponBehavior::keepDistance).orElse(true);
 	}
